@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { EnrollmentRepsitory } from "../repositories/enrollment.repositorie";
 import { Enrollment } from "../models/enrollment.model";
@@ -19,10 +20,7 @@ export class EnrollmentController {
         .send({ data: enrollment, message: "Enrollment fetched successfully" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch Enrollments",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch Enrollments");
     }
   }
 
@@ -49,10 +47,7 @@ export class EnrollmentController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to create Enrollment",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create Enrollment");
     }
   }
 
@@ -73,10 +68,7 @@ export class EnrollmentController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to update Enrollment",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update Enrollment");
     }
   }
 
@@ -86,16 +78,13 @@ export class EnrollmentController {
       const deleted = await enrollmentRepo.deleteEnrollment(id);
 
       if (!deleted) {
-        return reply.code(404).send({ message: "Enrollment not found" });
+        throw new NotFoundError("Enrollment not found");
       }
 
       return reply.send({ message: "Enrollment deleted" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to delete Enrollment",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete Enrollment");
     }
   }
 
@@ -113,10 +102,7 @@ export class EnrollmentController {
       return reply.status(200).send(Enrollment);
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch Enrollment",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch Enrollment");
     }
   }
 }

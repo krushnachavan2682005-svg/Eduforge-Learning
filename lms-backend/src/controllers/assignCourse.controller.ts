@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { AssiginCourseRepositorie } from "../repositories/assignCourse.repositorie";
 import { AssignedCourseModel } from "../models/assignCourse.model";
@@ -26,7 +27,7 @@ export class AssiginCourseController {
       }
       finalUserIds = [...new Set(finalUserIds)];
       if (finalUserIds.length === 0) {
-        return reply.code(400).send({ message: "No users found to assign." });
+        throw new ValidationError("No users found to assign.");
       }
 
       const existingRecords = await AssignedCourseModel.findAll({
@@ -45,9 +46,7 @@ export class AssiginCourseController {
         (u) => !course_id.some((c) => userCourseMap.get(u)?.has(c))
       );
       if (usersToAssign.length === 0) {
-        return reply.code(400).send({
-          message: "All users already have this course.",
-        });
+        throw new ValidationError("All users already have this course.");
       }
       for (const user of usersToAssign) {
         await repositorie.createAssignCourse({
@@ -64,10 +63,7 @@ export class AssiginCourseController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to Assign Courses",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to Assign Courses");
     }
   }
 
@@ -92,10 +88,7 @@ export class AssiginCourseController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch Assigned course",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch Assigned course");
     }
   }
 
@@ -120,10 +113,7 @@ export class AssiginCourseController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch course",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch course");
     }
   }
 }

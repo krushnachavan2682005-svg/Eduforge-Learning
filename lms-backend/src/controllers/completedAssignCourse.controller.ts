@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { CompletedAssignCours } from "../repositories/completedAssignCourse.repositorie";
 import { ICompletedAssignCourse } from "../interfaces/completedAssignCourse.interface";
@@ -22,11 +23,7 @@ export class CompletedAssignCourseController {
           data: { id: data?.id },
         });
       } catch (error) {
-        return reply.status(500).send({
-          success: false,
-          message: "Something went wrong",
-          error: error instanceof Error ? error.message : error,
-        });
+        throw new InternalServerError("Something went wrong");
       }
     }
   }
@@ -57,10 +54,7 @@ export class CompletedAssignCourseController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch assigned course",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch assigned course");
     }
   }
 }

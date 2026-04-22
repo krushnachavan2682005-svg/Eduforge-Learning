@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import UploadService from "../repositories/upload.repository";
 
@@ -6,7 +7,7 @@ class UploadController {
     try {
       const file = await (request as any).file();
       if (!file) {
-        return reply.code(400).send({ message: "No file uploaded" });
+        throw new ValidationError("No file uploaded");
       }
 
       const folder =
@@ -21,10 +22,7 @@ class UploadController {
       reply.code(201).send(result);
     } catch (error: any) {
       console.error("Upload Error:", error);
-      reply.code(500).send({
-        message: "File upload failed",
-        error: error.message || error,
-      });
+      throw new InternalServerError("File upload failed");
     }
   }
 
@@ -44,10 +42,7 @@ class UploadController {
       });
     } catch (error: any) {
       console.error("Upload Error:", error);
-      reply.code(500).send({
-        message: "Failed to generate presigned URL",
-        error: error.message || error,
-      });
+      throw new InternalServerError("Failed to generate presigned URL");
     }
   }
 }

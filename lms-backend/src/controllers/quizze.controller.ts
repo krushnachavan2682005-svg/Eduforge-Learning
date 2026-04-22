@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { QuizRepsitory } from "../repositories/quizze.repositorie";
 import { Quiz } from "../models/quizze.model";
@@ -19,10 +20,7 @@ export class QuizController {
         .send({ data: quiz, message: "Quiz fetched successfully" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch Quiz",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch Quiz");
     }
   }
 
@@ -40,10 +38,7 @@ export class QuizController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to create Quiz",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create Quiz");
     }
   }
 
@@ -64,10 +59,7 @@ export class QuizController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to update Quiz",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update Quiz");
     }
   }
 
@@ -77,16 +69,13 @@ export class QuizController {
       const deleted = await QuizRepo.deleteQuiz(id);
 
       if (!deleted) {
-        return reply.code(404).send({ message: "Quiz not found" });
+        throw new NotFoundError("Quiz not found");
       }
 
       return reply.send({ message: "Quiz deleted" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to delete Quiz",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete Quiz");
     }
   }
 
@@ -104,10 +93,7 @@ export class QuizController {
       return reply.status(200).send(quiz);
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch Quiz",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch Quiz");
     }
   }
 }

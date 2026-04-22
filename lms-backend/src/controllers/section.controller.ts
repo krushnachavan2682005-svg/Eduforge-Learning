@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Section } from "../models/section.models";
 import { sectionRepository } from "../repositories/section.repository";
@@ -22,10 +23,7 @@ export class sectionController {
       return reply.status(200).send(sections);
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch sections",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch sections");
     }
   }
 
@@ -35,17 +33,14 @@ export class sectionController {
       const section = await sectionRep.getSectionById(client_id, id);
 
       if (!section) {
-        return reply.code(404).send({ message: "Section not found" });
+        throw new NotFoundError("Section not found");
       }
       return reply
         .code(200)
         .send({ data: section, message: "Section fetched successfully" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch section",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch section");
     }
   }
 
@@ -61,17 +56,11 @@ export class sectionController {
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes("already exists")) {
-        return reply.status(409).send({
-          message: "Failed to create section",
-          error: error.message,
-        });
+        throw new ConflictError("Failed to create section");
       }
 
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to create section",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create section");
     }
   }
 
@@ -84,7 +73,7 @@ export class sectionController {
       const updated = await sectionRep.updateSection(id, updateData);
 
       if (!updated) {
-        return reply.code(404).send({ message: "Section not found" });
+        throw new NotFoundError("Section not found");
       }
 
       return reply.send({
@@ -93,17 +82,11 @@ export class sectionController {
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes("already exists")) {
-        return reply.status(409).send({
-          message: "Failed to update section",
-          error: error.message,
-        });
+        throw new ConflictError("Failed to update section");
       }
 
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to update section",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update section");
     }
   }
 
@@ -113,16 +96,13 @@ export class sectionController {
       const deleted = await sectionRep.delete(id);
 
       if (!deleted) {
-        return reply.code(500).send({ message: "Section not found" });
+        throw new InternalServerError("Section not found");
       }
 
       return reply.send({ message: "Section deleted" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to delete section",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete section");
     }
   }
 }

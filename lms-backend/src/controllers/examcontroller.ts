@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { v4 as uuid } from "uuid";
 import { ExamRepository } from "../repositories/exam.repository";
@@ -46,11 +47,7 @@ export class ExamController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to create exam",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create exam");
     }
   }
 
@@ -79,11 +76,7 @@ export class ExamController {
         message: "Exams fetched successfully",
       });
     } catch (error) {
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch exams",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch exams");
     }
   }
 
@@ -92,20 +85,14 @@ export class ExamController {
       const { id } = req.params as { id: string };
       const exam = await repository.getExamById(id);
       if (!exam)
-        return reply
-          .code(404)
-          .send({ success: false, message: "Exam not found" });
+        throw new NotFoundError("Exam not found");
       return reply.send({
         success: true,
         data: exam,
         message: "Exam details fetched successfully",
       });
     } catch (error) {
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch exam details",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch exam details");
     }
   }
 
@@ -132,11 +119,7 @@ export class ExamController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch exams",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch exams");
     }
   }
 
@@ -154,11 +137,7 @@ export class ExamController {
         message: "Exam updated successfully",
       });
     } catch (error) {
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to update exam",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update exam");
     }
   }
 
@@ -168,19 +147,13 @@ export class ExamController {
 
       const success = await repository.deleteExam(id);
       if (!success)
-        return reply
-          .code(404)
-          .send({ success: false, message: "Exam not found" });
+        throw new NotFoundError("Exam not found");
       return reply.send({
         success: true,
         message: "Exam deleted successfully",
       });
     } catch (error) {
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to delete exam",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete exam");
     }
   }
 
@@ -192,10 +165,7 @@ export class ExamController {
         exam_id: string;
       };
       if (!user_id || !exam_id)
-        return reply.code(400).send({
-          success: false,
-          message: "User ID and Exam ID are required in route parameters",
-        });
+        throw new ValidationError("User ID and Exam ID are required in route parameters");
 
       // Verify that the exam is assigned to the user
       const assignment = await ExamAssignment.findOne({
@@ -205,17 +175,12 @@ export class ExamController {
         },
       });
       if (!assignment)
-        return reply.code(403).send({
-          success: false,
-          message: "Access denied. This exam is not assigned to the user.",
-        });
+        throw new ForbiddenError("Access denied. This exam is not assigned to the user.");
 
       const exam = await repository.getExamById(exam_id);
       const questions = (exam as any).questions || [];
       if (questions.length === 0)
-        return reply
-          .code(400)
-          .send({ success: false, message: "Exam has no questions" });
+        throw new ValidationError("Exam has no questions");
 
       const session = await repository.startExamSession({
         exam_id,
@@ -242,11 +207,7 @@ export class ExamController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to start exam",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to start exam");
     }
   }
 
@@ -260,10 +221,7 @@ export class ExamController {
       };
 
       if (!exam_id) {
-        return reply.code(400).send({
-          success: false,
-          message: "Exam ID is required",
-        });
+        throw new ValidationError("Exam ID is required");
       }
 
       // 🔹 Fetch exam
@@ -273,10 +231,7 @@ export class ExamController {
 
       const hasNonMcq = examQuestionCheck.some((q) => q.type !== "mcq");
       if (hasNonMcq) {
-        return reply.status(400).send({
-          success: false,
-          message: "For Public Exam only MCQ is allowed",
-        });
+        throw new ValidationError("For Public Exam only MCQ is allowed");
       }
 
       //  Generate session_id correctly
@@ -306,13 +261,9 @@ export class ExamController {
     } catch (error) {
       req.log.error(error);
       if (error instanceof Error && error.message.includes("not found")) {
-        return reply.code(404).send({ success: false, message: error.message });
+        throw new NotFoundError(error.message);
       }
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch public exam",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch public exam");
     }
   }
 async savePublicExamAnswer(req: FastifyRequest, reply: FastifyReply) {
@@ -323,10 +274,7 @@ async savePublicExamAnswer(req: FastifyRequest, reply: FastifyReply) {
       };
 
       if (!exam_id || !session_id) {
-        return reply.code(400).send({
-          success: false,
-          message: "Exam ID and Session ID are required",
-        });
+        throw new ValidationError("Exam ID and Session ID are required");
       }
 
       const session = await ExamUserMappingPublic.findOne({
@@ -334,19 +282,13 @@ async savePublicExamAnswer(req: FastifyRequest, reply: FastifyReply) {
       });
 
       if (!session) {
-        return reply.status(400).send({
-          success: false,
-          message: "Exam_id or Session_id not match",
-        });
+        throw new ValidationError("Exam_id or Session_id not match");
       }
 
       const body = req.body as IPublicExamSubmitRequest;
 
       if (!body.answers || !Array.isArray(body.answers)) {
-        return reply.code(400).send({
-          success: false,
-          message: "Answers array is required",
-        });
+        throw new ValidationError("Answers array is required");
       }
 
       const existingAnswers = session.final_answers || [];
@@ -374,10 +316,7 @@ async savePublicExamAnswer(req: FastifyRequest, reply: FastifyReply) {
         data: mergedAnswers,
       });
     } catch (err) {
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to save answer",
-      });
+      throw new InternalServerError("Failed to save answer");
     }
   }
   async resumePublicExamSession(req: FastifyRequest, reply: FastifyReply) {
@@ -387,7 +326,7 @@ async savePublicExamAnswer(req: FastifyRequest, reply: FastifyReply) {
       where: { session_id },
     });
     if (!istrue) {
-      return reply.status(404).send({ message: "Session Id not found" });
+      throw new NotFoundError("Session Id not found");
     }
     return reply.status(200).send(session);
   }
@@ -401,45 +340,31 @@ async savePublicExamAnswer(req: FastifyRequest, reply: FastifyReply) {
       console.log(exam_id, session_id);
 
       if (!exam_id || !session_id) {
-        return reply.code(400).send({
-          success: false,
-          message: "Exam ID is required & Session Id Is Required",
-        });
+        throw new ValidationError("Exam ID is required & Session Id Is Required");
       }
       const istrue = await ExamUserMappingPublic.findOne({
         where: { exam_id, session_id },
       });
       if (!istrue) {
-        return reply
-          .status(400)
-          .send({ success: false, message: "Exam_id or Session_id Not Match" });
+        throw new ValidationError("Exam_id or Session_id Not Match");
       }
 
       const body = req.body as IPublicExamSubmitRequest;
 
       // 🔹 Validate answers
       if (!body.answers || !Array.isArray(body.answers)) {
-        return reply.code(400).send({
-          success: false,
-          message: "Answers array is required",
-        });
+        throw new ValidationError("Answers array is required");
       }
 
       // 🔹 Check session
       const session = await repository.getPublicExamSessionBySessionId(session_id);
 
       if (!session) {
-        return reply.code(404).send({
-          success: false,
-          message: "Session not found",
-        });
+        throw new NotFoundError("Session not found");
       }
 
       if (session.is_completed) {
-        return reply.code(400).send({
-          success: false,
-          message: "Exam already submitted",
-        });
+        throw new ValidationError("Exam already submitted");
       }
       const student = await ExamUserMappingPublic.findOne({
         where: { session_id },
@@ -450,10 +375,7 @@ async savePublicExamAnswer(req: FastifyRequest, reply: FastifyReply) {
       const exam = await repository.getExamById(exam_id);
 
       if (!exam) {
-        return reply.code(404).send({
-          success: false,
-          message: "Exam not found",
-        });
+        throw new NotFoundError("Exam not found");
       }
 
       const questions = (exam as any).questions || [];
@@ -532,17 +454,10 @@ async savePublicExamAnswer(req: FastifyRequest, reply: FastifyReply) {
     } catch (error) {
       req.log.error(error);
       if (error instanceof Error && error.message.includes("not found")) {
-        return reply.code(404).send({
-          success: false,
-          message: error.message,
-        });
+        throw new NotFoundError(error.message);
       }
 
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to submit exam",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to submit exam");
     }
   }
 async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
@@ -563,10 +478,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
     });
   } catch (error) {
      console.error("error:", error);
-    return reply.code(500).send({
-      success: false,
-      message: "Failed to fetch result",
-    });
+    throw new InternalServerError("Failed to fetch result");
   }
 }
   async saveAnswer(req: FastifyRequest, reply: FastifyReply) {
@@ -576,10 +488,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const user_id = params.user_id;
 
       if (!user_id)
-        return reply.code(400).send({
-          success: false,
-          message: "User ID is required in route parameters",
-        });
+        throw new ValidationError("User ID is required in route parameters");
 
       if (
         !body.session_id ||
@@ -589,25 +498,15 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
         body.current_question_index === undefined ||
         body.current_question_index < 0
       ) {
-        return reply.code(400).send({
-          success: false,
-          message:
-            "Session ID, Question ID, user answer, and valid current question index are required",
-        });
+        throw new ValidationError("Session ID, Question ID, user answer, and valid current question index are required");
       }
 
       const session = await repository.getExamSession(body.session_id, user_id);
       if (!session)
-        return reply.code(404).send({
-          success: false,
-          message: "Exam session not found or access denied",
-        });
+        throw new NotFoundError("Exam session not found or access denied");
 
       if (session.is_completed)
-        return reply.code(400).send({
-          success: false,
-          message: "Exam session is already completed",
-        });
+        throw new ValidationError("Exam session is already completed");
 
       const { session: updatedSession, isExamComplete } =
         await repository.saveAnswer({
@@ -637,22 +536,14 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       if (error instanceof Error) {
         const lowerCaseMessage = error.message.toLowerCase();
         if (lowerCaseMessage.includes("not found"))
-          return reply
-            .code(404)
-            .send({ success: false, message: error.message });
+          throw new NotFoundError(error.message);
         if (
           lowerCaseMessage.includes("already completed") ||
           lowerCaseMessage.includes("invalid question index")
         )
-          return reply
-            .code(400)
-            .send({ success: false, message: error.message });
+          throw new ValidationError(error.message);
       }
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to save answer",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to save answer");
     }
   }
 
@@ -663,18 +554,13 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const user_id = params.user_id;
 
       if (!body.session_id)
-        return reply
-          .code(400)
-          .send({ success: false, message: "Session ID is required" });
+        throw new ValidationError("Session ID is required");
 
       const session = await ExamSession.findOne({
         where: { id: body.session_id, user_id: user_id },
       });
       if (!session)
-        return reply.code(404).send({
-          success: false,
-          message: "Exam session not found or access denied.",
-        });
+        throw new NotFoundError("Exam session not found or access denied.");
 
       if (session.is_completed)
         return reply.code(200).send({
@@ -699,11 +585,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
         message,
       });
     } catch (error) {
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to submit exam",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to submit exam");
     }
   }
 
@@ -714,9 +596,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const user_id = params.user_id;
 
       if (!session_id)
-        return reply
-          .code(400)
-          .send({ success: false, message: "Session ID is required" });
+        throw new ValidationError("Session ID is required");
 
       const results = await repository.getExamResults(session_id, user_id);
       return reply.send({
@@ -726,11 +606,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch exam results",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch exam results");
     }
   }
 
@@ -740,10 +616,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const body = req.body as Omit<IReviewExamRequest, "session_id">;
 
       if (!session_id)
-        return reply.code(400).send({
-          success: false,
-          message: "Session ID is required in route parameters.",
-        });
+        throw new ValidationError("Session ID is required in route parameters.");
 
       const reviewData: IReviewExamRequest = {
         session_id,
@@ -764,19 +637,11 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       req.log.error(error);
       if (error instanceof Error) {
         if (error.message.includes("not found"))
-          return reply
-            .code(404)
-            .send({ success: false, message: error.message });
+          throw new NotFoundError(error.message);
         if (error.message.includes("not authorized"))
-          return reply
-            .code(403)
-            .send({ success: false, message: error.message });
+          throw new ForbiddenError(error.message);
       }
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to review exam.",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to review exam.");
     }
   }
 
@@ -796,10 +661,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
         const exam = await repository.getExamById(examId);
 
         if (!exam) {
-          return reply.code(404).send({
-            success: false,
-            message: `Exam with ID '${examId}' not found.`,
-          });
+          throw new NotFoundError(`Exam with ID '${examId}' not found.`);
         }
 
         validExamIds.push(examId);
@@ -835,10 +697,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       finalUserIds = [...new Set(finalUserIds)];
 
       if (!finalUserIds.length) {
-        return reply.code(400).send({
-          success: false,
-          message: "No users found to assign.",
-        });
+        throw new ValidationError("No users found to assign.");
       }
 
       const assignments = await repository.assignExamToUsers(
@@ -856,11 +715,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
     } catch (error) {
       req.log.error(error);
 
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to assign exam.",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to assign exam.");
     }
   }
 
@@ -886,11 +741,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch assigned exams.",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch assigned exams.");
     }
   }
 
@@ -904,16 +755,14 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       };
 
       if (!assigned_id || !assignment_id || !user_id) {
-        return reply.code(400).send({
-          message: "assigned_id, assignment_id and user_id are required",
-        });
+        throw new ValidationError("assigned_id, assignment_id and user_id are required");
       }
 
       const assignment = await ExamAssignment.findOne({
         where: { id: assigned_id, user_id },
       });
       if (!assignment) {
-        return reply.code(404).send({ message: "Assigned exam not found" });
+        throw new NotFoundError("Assigned exam not found");
       }
 
       await repository.logExamPublishEvent({
@@ -929,11 +778,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to record publish status",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to record publish status");
     }
   }
 
@@ -996,10 +841,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to fetch publish timeline",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch publish timeline");
     }
   }
 
@@ -1009,11 +851,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const exams = await repository.getReviewerDashboardExams(reviewer_id);
 
       if (!exams || exams.length === 0) {
-        return reply.code(404).send({
-          success: true,
-          data: [],
-          message: "No submitted tests found for review.",
-        });
+        throw new NotFoundError("No submitted tests found for review.");
       }
 
       return reply.code(200).send({
@@ -1023,11 +861,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch reviewer dashboard exams",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch reviewer dashboard exams");
     }
   }
 
@@ -1038,10 +872,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
         session_id: string;
       };
       if (!user_id || !session_id)
-        return reply.code(400).send({
-          success: false,
-          message: "User ID and Session ID are required.",
-        });
+        throw new ValidationError("User ID and Session ID are required.");
 
       const submission = await repository.getReviewerSubmissionDetails(
         session_id,
@@ -1070,10 +901,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       };
 
       if (!user_id || !exam_id || !client_id)
-        return reply.code(400).send({
-          success: false,
-          message: "User ID, Exam ID, and Client ID are required.",
-        });
+        throw new ValidationError("User ID, Exam ID, and Client ID are required.");
 
       const review = await repository.getStudentExamReview(
         exam_id,

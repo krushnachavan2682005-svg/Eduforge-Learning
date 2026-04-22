@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ReviewsRepository } from "../repositories/reviews.repository";
 import { ReviewsInterface } from "../interfaces/reviews.interface";
@@ -14,10 +15,7 @@ export class ReviewsController {
         .send({ data: review, message: "Review fetched successfully" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch review",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch review");
     }
   }
 
@@ -33,10 +31,7 @@ export class ReviewsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to create review",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create review");
     }
   }
 
@@ -57,10 +52,7 @@ export class ReviewsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to update review",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update review");
     }
   }
 
@@ -70,16 +62,13 @@ export class ReviewsController {
       const deleted = await reviewRepo.deleteReview(id);
 
       if (!deleted) {
-        return reply.code(404).send({ message: "Review not found" });
+        throw new NotFoundError("Review not found");
       }
 
       return reply.send({ message: "Review deleted" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to delete review",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete review");
     }
   }
 
@@ -98,10 +87,7 @@ export class ReviewsController {
       return reply.status(200).send(reviews);
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch reviews",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch reviews");
     }
   }
 }
