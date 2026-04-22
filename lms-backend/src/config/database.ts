@@ -1,0 +1,42 @@
+import { Sequelize } from "sequelize";
+import dotenv from "dotenv";
+
+dotenv.config();
+// main database
+const sequelize = new Sequelize(
+  process.env.DB_NAME ?? "baap_lms_dev",
+  process.env.DB_USER ?? "postgres",
+  process.env.DB_PASS ?? "krushna123",
+  {
+    host: process.env.DB_HOST ?? "localhost",
+    port: Number(process.env.DB_PORT) ?? 5432,
+    dialect: "postgres",
+    logging: false,
+  }
+);
+
+// external database
+const externalDB = new Sequelize(
+  process.env.EXT_DB_NAME ?? "platform_development",
+  process.env.EXT_DB_USER ?? "postgres",
+  process.env.EXT_DB_PASS ?? "krushna123",
+  {
+    host: process.env.EXT_DB_HOST ?? "localhost",
+    port: Number(process.env.EXT_DB_PORT) ?? 5432,
+    dialect: "postgres",
+    logging: false,
+  }
+);
+
+export const connectDB = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log(" Connected to main database");
+    await externalDB.authenticate();
+    console.log(" Connected to external database");
+  } catch (error: any) {
+    console.error(" Database connection failed:", error.message);
+  }
+};
+
+export { sequelize, externalDB };
