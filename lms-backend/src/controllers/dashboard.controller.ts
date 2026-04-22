@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyRequest, FastifyReply } from "fastify";
 import { DashboardRepository } from "../repositories/dashboard.repository";
 
@@ -12,9 +13,7 @@ export class DashboardController {
       };
 
       if (!client_id || !user_id) {
-        return reply
-          .code(400)
-          .send({ success: false, message: "client_id and user_id required" });
+        throw new ValidationError("client_id and user_id required");
       }
 
       const data = await dashboardRepo.getUserDashboard(client_id, user_id);
@@ -25,11 +24,7 @@ export class DashboardController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch dashboard data",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch dashboard data");
     }
   }
 
@@ -48,11 +43,7 @@ export class DashboardController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch tutor dashboard data",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch tutor dashboard data");
     }
   }
 }

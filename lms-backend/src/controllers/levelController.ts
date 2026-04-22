@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyRequest, FastifyReply } from "fastify";
 import { LevelRepository } from "../repositories/level.repositorie";
 const levelRep = new LevelRepository();
@@ -37,16 +38,10 @@ export class LevelController {
 
       // Check for duplicate level name error from repository
       if (error instanceof Error && error.message.includes("already exists")) {
-        return reply.code(409).send({
-          message: "Failed to create level",
-          error: "This level name already exists for this client",
-        });
+        throw new ConflictError("Failed to create level");
       }
 
-      return reply.code(500).send({
-        message: "Failed to create level",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create level");
     }
   }
 
@@ -68,10 +63,7 @@ export class LevelController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to fetch levels",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch levels");
     }
   }
 
@@ -80,7 +72,7 @@ export class LevelController {
       const { id, client_id } = req.params as { id: string; client_id: string };
       const item = await levelRep.getLevelById(client_id, id);
 
-      if (!item) return reply.code(404).send({ message: "Level not found" });
+      if (!item) throw new NotFoundError("Level not found");
 
       return reply.code(200).send({
         data: item,
@@ -88,10 +80,7 @@ export class LevelController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to fetch level",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch level");
     }
   }
 
@@ -102,7 +91,7 @@ export class LevelController {
 
       const updated = await levelRep.updateLevel(id, body);
 
-      if (!updated) return reply.code(404).send({ message: "Level not found" });
+      if (!updated) throw new NotFoundError("Level not found");
 
       return reply.code(200).send({
         data: updated.id,
@@ -113,15 +102,10 @@ export class LevelController {
 
       // Handle validation error for assigned levels
       if (error.statusCode === 403) {
-        return reply.code(403).send({
-          message: error.message,
-        });
+        throw new ForbiddenError(error.message);
       }
 
-      return reply.code(500).send({
-        message: "Failed to update level",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update level");
     }
   }
 
@@ -130,7 +114,7 @@ export class LevelController {
       const { id } = req.params as { id: string };
       const deleted = await levelRep.deleteLevel(id);
 
-      if (!deleted) return reply.code(404).send({ message: "Level not found" });
+      if (!deleted) throw new NotFoundError("Level not found");
 
       return reply.code(200).send({
         message: "Level deleted successfully",
@@ -139,15 +123,10 @@ export class LevelController {
       req.log.error(error);
 
       if (error.statusCode === 403) {
-        return reply.code(403).send({
-          message: error.message,
-        });
+        throw new ForbiddenError(error.message);
       }
 
-      return reply.code(500).send({
-        message: "Failed to delete level",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete level");
     }
   }
 }

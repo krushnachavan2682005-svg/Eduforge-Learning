@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { CourseRepository } from "../repositories/course.repository";
 import { Course } from "../models/course.model";
@@ -12,17 +13,14 @@ export class CourseController {
       const course = await courseRepo.getCourseById(client_id, id);
 
       if (!course || !course.length) {
-        return reply.code(500).send({ message: "Course not found" });
+        throw new InternalServerError("Course not found");
       }
       return reply
         .code(200)
         .send({ data: course?.[0], message: "Course fetched successfully" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch course",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch course");
     }
   }
 
@@ -40,17 +38,11 @@ export class CourseController {
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes("already exists")) {
-        return reply.status(409).send({
-          message: "Failed to create course",
-          error: error.message,
-        });
+        throw new ConflictError("Failed to create course");
       }
 
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to create course",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create course");
     }
   }
 
@@ -62,7 +54,7 @@ export class CourseController {
       const updated = await courseRepo.updateCourse(id, updateData);
 
       if (!updated) {
-        return reply.code(500).send({ message: "Course not found" });
+        throw new InternalServerError("Course not found");
       }
 
       return reply.send({
@@ -71,17 +63,11 @@ export class CourseController {
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes("already exists")) {
-        return reply.status(409).send({
-          message: "Failed to update course",
-          error: error.message,
-        });
+        throw new ConflictError("Failed to update course");
       }
 
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to update course",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update course");
     }
   }
 
@@ -91,16 +77,13 @@ export class CourseController {
       const deleted = await courseRepo.deleteCourse(id);
 
       if (!deleted) {
-        return reply.code(500).send({ message: "Course not found" });
+        throw new InternalServerError("Course not found");
       }
 
       return reply.send({ message: "Course deleted" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to delete course",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete course");
     }
   }
 
@@ -123,10 +106,7 @@ export class CourseController {
       return reply.status(200).send(courses);
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch courses",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch courses");
     }
   }
 
@@ -141,10 +121,7 @@ export class CourseController {
         data: courses
       });
     } catch (error) {
-      return reply.status(500).send({
-        message: "Failed to fetch courses",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch courses");
     }
   }
 }

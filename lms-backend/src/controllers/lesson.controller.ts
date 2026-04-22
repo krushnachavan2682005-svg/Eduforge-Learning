@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyRequest, FastifyReply } from "fastify";
 import { lesson } from "../models/lesson.model";
 import { lessonRepsitory } from "../repositories/lesson.repository";
@@ -23,10 +24,7 @@ export class lessonController {
       return reply.status(200).send(lessons);
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch lessons",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch lessons");
     }
   }
 
@@ -36,17 +34,14 @@ export class lessonController {
       const lesson = await lessonRepo.getlessonById(client_id, id);
 
       if (!lesson) {
-        return reply.code(500).send({ message: "Lesson not found" });
+        throw new InternalServerError("Lesson not found");
       }
       return reply
         .code(200)
         .send({ data: lesson, message: "Lesson fetched successfully" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch lesson",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch lesson");
     }
   }
 
@@ -64,17 +59,11 @@ export class lessonController {
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes("already exists")) {
-        return reply.status(409).send({
-          message: "Failed to create lesson",
-          error: error.message,
-        });
+        throw new ConflictError("Failed to create lesson");
       }
 
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to create lesson",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create lesson");
     }
   }
 
@@ -87,7 +76,7 @@ export class lessonController {
       const updated = await lessonRepo.updateLesson(id, updateData);
 
       if (!updated) {
-        return reply.code(500).send({ message: "Lesson not found" });
+        throw new InternalServerError("Lesson not found");
       }
 
       return reply.send({
@@ -96,17 +85,11 @@ export class lessonController {
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes("already exists")) {
-        return reply.status(409).send({
-          message: "Failed to update lesson",
-          error: error.message,
-        });
+        throw new ConflictError("Failed to update lesson");
       }
 
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to update lesson",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update lesson");
     }
   }
 
@@ -116,16 +99,13 @@ export class lessonController {
       const deleted = await lessonRepo.deleteLesson(id);
 
       if (!deleted) {
-        return reply.code(500).send({ message: "Lesson not found" });
+        throw new InternalServerError("Lesson not found");
       }
 
       return reply.send({ message: "Lesson deleted" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to delete lesson",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete lesson");
     }
   }
 }

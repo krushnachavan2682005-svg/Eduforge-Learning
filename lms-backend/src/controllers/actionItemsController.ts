@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyRequest, FastifyReply } from "fastify";
 import { ActionItemsInterface } from "../interfaces/actionItems.interface";
 import { ActionItems } from "../models/actionItems.model";
@@ -28,10 +29,7 @@ export class ActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to fetch action items",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch action items");
     }
   }
 
@@ -41,17 +39,14 @@ export class ActionItemsController {
       const item = await actionRep.getActionItemById(client_id, id);
 
       if (!item)
-        return reply.code(404).send({ message: "Action item not found" });
+        throw new NotFoundError("Action item not found");
 
       return reply
         .code(200)
         .send({ data: item, message: "Action item fetched successfully" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch action item",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch action item");
     }
   }
 
@@ -78,17 +73,11 @@ export class ActionItemsController {
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes("already exists")) {
-        return reply.status(409).send({
-          message: "Failed to create action item",
-          error: error.message,
-        });
+        throw new ConflictError("Failed to create action item");
       }
 
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to create action item",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create action item");
     }
   }
 
@@ -100,7 +89,7 @@ export class ActionItemsController {
       const updated = await actionRep.updateActionItem(id, body);
 
       if (!updated)
-        return reply.code(404).send({ message: "Action item not found" });
+        throw new NotFoundError("Action item not found");
 
       return reply.send({
         data: updated.id,
@@ -108,10 +97,7 @@ export class ActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to update action item",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update action item");
     }
   }
 
@@ -123,9 +109,7 @@ export class ActionItemsController {
       };
 
       if (!client_id || !reviewer_id) {
-        return reply
-          .code(400)
-          .send({ message: "client_id and reviewer_id are required" });
+        throw new ValidationError("client_id and reviewer_id are required");
       }
 
       const items = await actionRep.getReviewerActionItems(
@@ -139,7 +123,7 @@ export class ActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({ message: "Internal Server Error" });
+      throw new InternalServerError("Internal Server Error");
     }
   }
 
@@ -149,15 +133,12 @@ export class ActionItemsController {
       const deleted = await actionRep.deleteActionItem(id);
 
       if (!deleted)
-        return reply.code(404).send({ message: "Action item not found" });
+        throw new NotFoundError("Action item not found");
 
       return reply.send({ message: "Action item deleted successfully" });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to delete action item",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete action item");
     }
   }
 }

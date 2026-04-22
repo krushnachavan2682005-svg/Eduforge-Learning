@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ResumeRepository } from "../repositories/resumes.repositorie";
 import { ResumeInterface } from "..//interfaces/resumes.interface";
@@ -17,10 +18,7 @@ export class ResumeController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to create resume",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to create resume");
     }
   }
 
@@ -32,7 +30,7 @@ export class ResumeController {
 
       const record = await repository.updateResume(userId , body);
       if (!record) {
-        return reply.code(404).send({ message: "Resume not found" });
+        throw new NotFoundError("Resume not found");
       }
 
       return reply.code(200).send({
@@ -41,10 +39,7 @@ export class ResumeController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to update resume",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update resume");
     }
   }
 
@@ -55,9 +50,7 @@ export class ResumeController {
       const { userId } = req.params as { userId: string };
       const resume = await repository.getResumeByUserId(userId);
       if (!resume) {
-        return reply.code(404).send({
-          message: "Resume not found for this user",
-        });
+        throw new NotFoundError("Resume not found for this user");
       }
       return reply.code(200).send({
         data: resume,
@@ -65,10 +58,7 @@ export class ResumeController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to fetch resume",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch resume");
     }
   }
 
@@ -79,9 +69,7 @@ export class ResumeController {
       const deleted = await repository.deleteResume(id);
 
       if (!deleted) {
-        return reply.code(404).send({
-          message: "Resume not found",
-        });
+        throw new NotFoundError("Resume not found");
       }
 
       return reply.code(200).send({
@@ -89,10 +77,7 @@ export class ResumeController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to delete resume",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete resume");
     }
   }
 }

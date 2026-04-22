@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { AssignedActionItemsModel } from "../models/assignActionItems.model";
 import { AssiginActionItemsrepositorie } from "../repositories/assignActionItems.repositorie";
 import { FastifyReply, FastifyRequest } from "fastify";
@@ -17,7 +18,7 @@ export class AssiginActionItemsController {
       };
 
       if (!action_item_id?.length) {
-        return reply.code(400).send({ message: "action_item_id is required" });
+        throw new ValidationError("action_item_id is required");
       }
 
       const classIds: string[] = class_id
@@ -35,7 +36,7 @@ export class AssiginActionItemsController {
           resolvedClientId = await repositorie.getClientIdByUserId(user_id[0]);
         }
         if (!resolvedClientId)
-          return reply.code(400).send({ message: "Invalid user_id" });
+          throw new ValidationError("Invalid user_id");
 
         for (const user of user_id) {
           for (const itemId of action_item_id) {
@@ -65,9 +66,7 @@ export class AssiginActionItemsController {
           const classClientId =
             resolvedClientId || (await repositorie.getClientIdByClassId(cid));
           if (!classClientId) {
-            return reply.code(400).send({
-              message: `Invalid or unknown class_id: ${cid}`,
-            });
+            throw new ValidationError(`Invalid or unknown class_id: ${cid}`);
           }
           resolvedClientId = classClientId;
 
@@ -76,9 +75,7 @@ export class AssiginActionItemsController {
             classClientId,
           );
           if (!classUsers.length) {
-            return reply.code(400).send({
-              message: `No students found for class_id: ${cid}`,
-            });
+            throw new ValidationError(`No students found for class_id: ${cid}`);
           }
 
           for (const user of classUsers) {
@@ -109,9 +106,7 @@ export class AssiginActionItemsController {
       // Assign to all users of client if no specific user/class
       if (!user_id?.length && !classIds.length) {
         if (!client)
-          return reply.code(400).send({
-            message: "client is required for organization assignment",
-          });
+          throw new ValidationError("client is required for organization assignment");
 
         const clientUsers = await repositorie.getUsersByClientId(client);
         for (const user of clientUsers) {
@@ -143,10 +138,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to assign action items",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to assign action items");
     }
   }
 
@@ -157,7 +149,7 @@ export class AssiginActionItemsController {
       const { class_id } = req.query as { class_id?: string };
 
       if (!user_id)
-        return reply.code(400).send({ message: "user_id is required" });
+        throw new ValidationError("user_id is required");
 
       const assignedRecords = await AssignedActionItemsModel.findAll({
         where: {
@@ -186,10 +178,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch assigned action items",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch assigned action items");
     }
   }
 
@@ -214,17 +203,15 @@ export class AssiginActionItemsController {
       };
 
       if (!user_id) {
-        return reply.code(400).send({ message: "user_id is required in URL" });
+        throw new ValidationError("user_id is required in URL");
       }
 
       if (!assigned_action_item_id) {
-        return reply
-          .code(400)
-          .send({ message: "assigned_action_item_id is required" });
+        throw new ValidationError("assigned_action_item_id is required");
       }
 
       if (!status) {
-        return reply.code(400).send({ message: "status is required" });
+        throw new ValidationError("status is required");
       }
 
       // Record check (user_id + assigned_action_item_id)
@@ -236,17 +223,13 @@ export class AssiginActionItemsController {
       });
 
       if (!record) {
-        return reply.code(404).send({
-          message: "Assigned action item not found for this user",
-        });
+        throw new NotFoundError("Assigned action item not found for this user");
       }
 
       const finalAttachments = Array.isArray(attachment) ? attachment : [];
 
       if (status === "REJECTED" && (!comment || comment.trim() === "")) {
-        return reply.code(400).send({
-          message: "Comment is required when rejecting",
-        });
+        throw new ValidationError("Comment is required when rejecting");
       }
 
       const updateData: any = {
@@ -283,10 +266,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to update assigned action item",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update assigned action item");
     }
   }
 
@@ -296,9 +276,7 @@ export class AssiginActionItemsController {
       const { id } = req.params as { id: string };
 
       if (!id) {
-        return reply.code(400).send({
-          message: "id is required in URL params",
-        });
+        throw new ValidationError("id is required in URL params");
       }
 
       const existingRecord = await AssignedActionItemsModel.findOne({
@@ -309,9 +287,7 @@ export class AssiginActionItemsController {
       });
 
       if (!existingRecord) {
-        return reply.code(404).send({
-          message: "Assigned action item not found",
-        });
+        throw new NotFoundError("Assigned action item not found");
       }
 
       const attachmentKeys: string[] = existingRecord.attachment || [];
@@ -326,10 +302,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to fetch attachments",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch attachments");
     }
   }
 
@@ -343,9 +316,7 @@ export class AssiginActionItemsController {
       };
 
       if (!id) {
-        return reply.code(400).send({
-          message: "id is required in URL params",
-        });
+        throw new ValidationError("id is required in URL params");
       }
 
       if (
@@ -353,9 +324,7 @@ export class AssiginActionItemsController {
         !Array.isArray(attachment) ||
         attachment.length === 0
       ) {
-        return reply.code(400).send({
-          message: "attachment array is required and must not be empty",
-        });
+        throw new ValidationError("attachment array is required and must not be empty");
       }
 
       // First check if the record exists
@@ -366,9 +335,7 @@ export class AssiginActionItemsController {
       });
 
       if (!existingRecord) {
-        return reply.code(404).send({
-          message: "Assigned action item not found",
-        });
+        throw new NotFoundError("Assigned action item not found");
       }
 
       // Get existing attachments array or initialize empty array
@@ -401,9 +368,7 @@ export class AssiginActionItemsController {
       );
 
       if (updatedCount === 0) {
-        return reply.code(404).send({
-          message: "Assigned action item not found or could not be updated",
-        });
+        throw new NotFoundError("Assigned action item not found or could not be updated");
       }
 
       return reply.code(200).send({
@@ -418,10 +383,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to update attachments",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to update attachments");
     }
   }
 
@@ -434,9 +396,7 @@ export class AssiginActionItemsController {
       };
 
       if (!id) {
-        return reply.code(400).send({
-          message: "id is required in URL params",
-        });
+        throw new ValidationError("id is required in URL params");
       }
 
       if (
@@ -444,9 +404,7 @@ export class AssiginActionItemsController {
         !Array.isArray(delete_keys) ||
         delete_keys.length === 0
       ) {
-        return reply.code(400).send({
-          message: "delete_keys array is required and must not be empty",
-        });
+        throw new ValidationError("delete_keys array is required and must not be empty");
       }
 
       // First check if the record exists
@@ -457,18 +415,14 @@ export class AssiginActionItemsController {
       });
 
       if (!existingRecord) {
-        return reply.code(404).send({
-          message: "Assigned action item not found",
-        });
+        throw new NotFoundError("Assigned action item not found");
       }
 
       // Get existing attachments array
       const existingAttachmentKeys: string[] = existingRecord?.attachment || [];
 
       if (existingAttachmentKeys.length === 0) {
-        return reply.code(400).send({
-          message: "No attachments found to delete",
-        });
+        throw new ValidationError("No attachments found to delete");
       }
 
       // Remove specified keys from array
@@ -478,9 +432,7 @@ export class AssiginActionItemsController {
 
       // Check if any keys were actually deleted
       if (updatedAttachmentKeys.length === existingAttachmentKeys.length) {
-        return reply.code(400).send({
-          message: "None of the specified keys were found in attachments",
-        });
+        throw new ValidationError("None of the specified keys were found in attachments");
       }
 
       const [updatedCount] = await AssignedActionItemsModel.update(
@@ -495,9 +447,7 @@ export class AssiginActionItemsController {
       );
 
       if (updatedCount === 0) {
-        return reply.code(404).send({
-          message: "Assigned action item not found or could not be updated",
-        });
+        throw new NotFoundError("Assigned action item not found or could not be updated");
       }
 
       return reply.code(200).send({
@@ -512,10 +462,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to delete attachments",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to delete attachments");
     }
   }
 
@@ -529,9 +476,7 @@ export class AssiginActionItemsController {
       };
 
       if (!assigned_id || !assignment_id || !user_id) {
-        return reply.code(400).send({
-          message: "assigned_id, assignment_id and user_id are required",
-        });
+        throw new ValidationError("assigned_id, assignment_id and user_id are required");
       }
 
       const assignedRecord = await AssignedActionItemsModel.findOne({
@@ -551,9 +496,7 @@ export class AssiginActionItemsController {
           where: { id: assigned_id },
         });
         if (!examRecord) {
-          return reply.code(404).send({
-            message: "Assigned record not found",
-          });
+          throw new NotFoundError("Assigned record not found");
         }
 
         const { ExamRepository } =
@@ -573,10 +516,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to record publish status",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to record publish status");
     }
   }
 
@@ -688,10 +628,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to fetch publish timeline",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch publish timeline");
     }
   }
 
@@ -706,9 +643,7 @@ export class AssiginActionItemsController {
       };
 
       if (!user_id || !client_id) {
-        return reply
-          .code(400)
-          .send({ message: "user_id and client_id are required" });
+        throw new ValidationError("user_id and client_id are required");
       }
 
       const rawItems = await repositorie.getApprovedActionItemsByUserId(
@@ -764,10 +699,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.status(500).send({
-        message: "Failed to fetch approved action items",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch approved action items");
     }
   }
 
@@ -779,7 +711,7 @@ export class AssiginActionItemsController {
       const { client_id } = req.params as { client_id: string };
 
       if (!client_id) {
-        return reply.code(400).send({ message: "client_id is required" });
+        throw new ValidationError("client_id is required");
       }
 
       const rawItems =
@@ -847,10 +779,7 @@ export class AssiginActionItemsController {
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        message: "Failed to fetch tutor approved action items",
-        error: error instanceof Error ? error.message : String(error),
-      });
+      throw new InternalServerError("Failed to fetch tutor approved action items");
     }
   }
 }

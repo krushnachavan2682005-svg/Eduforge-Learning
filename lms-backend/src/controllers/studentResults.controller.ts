@@ -1,3 +1,4 @@
+import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { StudentResultsRepository } from "../repositories/studentResults.repository";
 
@@ -15,9 +16,7 @@ export class StudentResultsController {
             };
 
             if (!user_id || !client_id) {
-                return reply
-                    .code(400)
-                    .send({ message: "user_id and client_id are required" });
+                throw new ValidationError("user_id and client_id are required");
             }
 
             const studentName = await resultsRepo.getStudentName(user_id, client_id);
@@ -37,10 +36,7 @@ export class StudentResultsController {
             });
         } catch (error) {
             req.log.error(error);
-            return reply.status(500).send({
-                message: "Failed to fetch student results",
-                error: error instanceof Error ? error.message : String(error),
-            });
+            throw new InternalServerError("Failed to fetch student results");
         }
     }
 
@@ -54,7 +50,7 @@ export class StudentResultsController {
             };
 
             if (!client_id) {
-                return reply.code(400).send({ message: "client_id is required" });
+                throw new ValidationError("client_id is required");
             }
 
             const result = await resultsRepo.getAllResults(
@@ -82,10 +78,7 @@ export class StudentResultsController {
             });
         } catch (error) {
             req.log.error(error);
-            return reply.status(500).send({
-                message: "Failed to fetch all student results",
-                error: error instanceof Error ? error.message : String(error),
-            });
+            throw new InternalServerError("Failed to fetch all student results");
         }
     }
 }
