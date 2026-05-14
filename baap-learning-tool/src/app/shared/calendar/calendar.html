@@ -1,0 +1,106 @@
+<div class="relative w-full" #calendarBox>
+  <div
+    class="border p-2 w-full focus:outline-none rounded placeholder:text-sm placeholder:theme-text-secondary flex items-center justify-between group"
+    (click)="toggleCalendar()"
+  >
+    <span class="text-gray-500 text-sm ">
+      {{
+        selectedDate ? (selectedDate | date: "MMMM dd, yyyy") : "Select a date"
+      }}
+    </span>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+      />
+    </svg>
+  </div>
+  @if (calendarOpen) {
+    <div
+      class="absolute p-3 bg-white rounded-xl shadow-2xl border border-gray-100 w-full z-50 animate-fadeIn"
+    >
+      <div class="mb-3">
+        <div class="flex items-center justify-between mb-2">
+          <button
+            (click)="previousMonth()"
+            class="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 active:scale-95"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              viewBox="0 -960 960 960"
+              width="20px"
+              fill="#374151"
+            >
+              <path d="M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z" />
+            </svg>
+          </button>
+
+          <h3 class="font-bold text-xl text-gray-800">
+            {{ months[currentMonth] }} {{ currentYear }}
+          </h3>
+          <button
+            (click)="nextMonth()"
+            class="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 active:scale-95"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6"
+              viewBox="0 -960 960 960"
+              width="20px"
+              fill="#374151"
+            >
+              <path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z" />
+            </svg>
+          </button>
+           <span
+            class="hover:bg-blue-300 cursor-pointer theme-bg-secondary theme-bg-gray p-2 rounded-lg"
+            (click)="clearSelection()"
+          >
+            Clear
+          </span>
+        </div>
+
+        <hr class="theme-border" />
+      </div>
+
+      <div class="grid grid-cols-7 gap-1 mb-2">
+        <div class="text-center text-md font-semibold text-gray-500">Sun</div>
+        <div class="text-center text-md font-semibold text-gray-500">Mon</div>
+        <div class="text-center text-md font-semibold text-gray-500">Tue</div>
+        <div class="text-center text-md font-semibold text-gray-500">Wed</div>
+        <div class="text-center text-md font-semibold text-gray-500">Thu</div>
+        <div class="text-center text-md font-semibold text-gray-500">Fri</div>
+        <div class="text-center text-md font-semibold text-gray-500">Sat</div>
+      </div>
+
+      <div class="grid grid-cols-7 gap-1">
+        @for (day of days; track $index) {
+          <div
+            (click)="selectDate(day)"
+            [class.bg-blue-500]="isSelected(day)"
+            [class.text-white]="isSelected(day)"
+            [class.font-bold]="isSelected(day)"
+            [class.shadow-lg]="isSelected(day)"
+            [class.scale-105]="isSelected(day)"
+            [class.text-gray-200]="isDisabled(day)"
+            [class.bg-gray-100]="isDisabled(day)"
+            [class.cursor-not-allowed]="isDisabled(day)"
+            [class.pointer-events-none]="isDisabled(day)"
+            class="h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-200 text-gray-700 hover:bg-blue-50 hover:text-blue-600 hover:scale-105 active:scale-95"
+          >
+            {{ day }}
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

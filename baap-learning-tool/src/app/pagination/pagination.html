@@ -1,0 +1,49 @@
+<div class="fixed bottom-0 bg-white flex flex-col sm:flex-row sm:justify-between items-center gap-3 p-2 shadow-2xl border-t theme-border z-10 left-2 right-2 sm:left-3 sm:right-3 md:left-6 md:right-6 lg:left-8 lg:right-8"
+    [class.md:ml-[250px]]="sidebarService.isOpen()" [class.md:ml-0]="!sidebarService.isOpen()">
+    <div class="flex flex-wrap justify-center sm:justify-start gap-2">
+        <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
+            class="px-3 py-1 rounded border bg-white disabled:opacity-50 theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out">
+            Prev
+        </button>
+
+        @for (page of pages; track page) {
+        <button
+            class="px-3 py-1 rounded theme-text-dark theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out border"
+            (click)="goToPage(page)" [class.font-bold]="currentPage === page"
+            [class.theme-bg-secondary]="currentPage === page">
+            {{ page }}
+        </button>
+        }
+
+        <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+            class="px-3 py-1 rounded border bg-white disabled:opacity-50 theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out">
+            Next
+        </button>
+    </div>
+
+    <div class="flex items-center justify-center sm:justify-end gap-3 relative mr-1">
+        <label class="text-sm">Records per page:</label>
+        <div class="relative text-left">
+            <button type="button"
+                class="inline-flex justify-center w-full border px-3 py-1 bg-white text-sm font-medium cursor-pointer rounded theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out"
+                (click)="toggleDropdown()">
+                {{ pageSize }}
+                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            @if (isDropdownOpen) {
+            <div
+                class="absolute bottom-full bg-white w-16 border border-gray-300 rounded shadow-lg overflow-hidden mb-1">
+                @for (size of pageSizeOptions; track size) {
+                <a (click)="onPageSizeChange(size)"
+                    class="block px-2 py-1 text-sm hover:bg-gray-100 theme-bg-gray theme-bg-secondary text-center cursor-pointer">
+                    {{ size }}
+                </a>
+                }
+            </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,197 @@
+{
+  "title": "Credit Portal",
+  "logo": "/assets/logo.svg",
+  "menuItems": [
+    {
+      "id": "dashboard",
+      "label": "Dashboard",
+      "icon": "dashboard",
+      "route": "/dashboard",
+      "active": false,
+      "hide": false,
+      "permissions": "LMS_R"
+    },
+    {
+      "id": "my-learning",
+      "label": "My Learning",
+      "icon": "book",
+      "route": "/my-learning",
+      "active": false,
+      "hide": false,
+      "permissions": "LMS_ML",
+      "comment": "LMS_ML this permission for All user but only candidate navigate click on course title",
+      "badge": {
+        "text": "3",
+        "class": "badge-primary"
+      }
+    },
+    {
+      "id": "courses",
+      "label": "courses",
+      "icon": "menu_book",
+      "route": "/courses",
+      "active": false,
+      "hide": false,
+      "permissions": "LMS_C",
+      "comment": "LMS_C this permission only for Tutor/Admin",
+      "badge": {
+        "text": "3",
+        "class": "badge-primary"
+      }
+    },
+    {
+      "id": "resume",
+      "label": "Resume",
+      "icon": "assignment_ind",
+      "route": "/resume",
+      "permissions": "LMS_R",
+      "comment": "LMS_R this permission for All user",
+      "active": false,
+      "hide": false
+    },
+    {
+      "id": "my-tests",
+      "label": "Tests", 
+      "icon": "assignment",
+      "permissions": "LMS_CT",
+      "comment": "LMS_C this permission only for Tutor/Admin",
+      "route": null,
+      "active": false,
+      "hide": false,
+      "subItems": [
+        {
+          "id": "tests-list",
+          "label": "Tests List",
+          "permissions": "LMS_C",
+          "comment": "LMS_C this permission only for Tutor/Admin",
+          "route": "/tests/test",
+          "active": false,
+          "hide": false
+        },
+        {
+          "id": "my-test",
+          "label": "My Tests",
+          "route": "/tests/my-test",
+          "permissions": "LMS_L",
+          "comment": "LMS_L this permission only for candidate",
+          "active": false,
+          "hide": false
+        },
+        {
+          "id": "tests-review",
+          "label": "Submitted Tests",
+          "route": "/tests/review-list",
+          "permissions": "LMS_C",
+          "comment": "LMS_C this permission only for Tutor/Admin",
+          "active": false,
+          "hide": false
+        },
+        {
+          "id": "test-result",
+          "label": "My Result",
+          "route": "/tests/test-result",
+          "permissions": "LMS_L",
+          "comment": "LMS_L this permission only for candidate",
+          "active": false,
+          "hide": false
+        },
+        {
+          "id": "student-result",
+          "label": "Student Result",
+          "route": "/tests/student-result",
+          "permissions": "LMS_C",
+          "comment": "LMS_C this permission only for Tutor/Admin",
+          "active": false,
+          "hide": false
+        }
+      ]
+    },
+    {
+      "id": "leaderboard",
+      "label": "Leader board",
+      "icon": "leaderboard",
+      "route": "/leaderboard",
+      "permissions": "LMS_LB",
+      "comment": "LMS_LB this permission only for All user",
+      "active": false,
+      "hide": true
+    },
+    {
+      "id": "action-items",
+      "label": "Actions Items",
+      "icon": "checklist",
+      "permissions": "LMS_AI",
+      "comment": "LMS_AI this permission for All user, this is main menu item",
+      "active": false,
+      "hide": false,
+      "badge": {
+        "text": "5",
+        "class": "badge-warning"
+      },
+      "subItems": [
+        {
+          "id": "action-items-list",
+          "label": "Action Items",
+          "route": "/action-items",
+          "permissions": "LMS_C",
+          "comment": "LMS_C this permission only for Tutor/Admin",
+          "active": false,
+          "hide": false
+        },
+        {
+          "id": "my-action-items",
+          "label": "My Action Items",
+          "route": "/action-items/my-action-items",
+          "permissions": "LMS_L",
+          "comment": "LMS_L this permission only for candidate",
+          "active": false,
+          "hide": false
+        },
+        {
+          "id": "submitted-action-items",
+          "label": "Submitted Action Items",
+          "route": "/action-items/submitted-action-items",
+          "permissions": "LMS_C",
+          "comment": "LMS_C this permission only for Tutor/Admin",
+          "active": false,
+          "hide": false
+        }
+      ]
+    },
+    {
+      "id": "credit-score",
+      "label": "Credit Score",
+      "icon": "trending_up",
+      "route": "/credit-score",
+      "permissions": "LMS_CS",
+      "comment": "LMS_CS this permission for All user",
+      "active": false,
+      "hide": false
+    },
+    {
+      "id": "Live-Classes",
+      "label": "Live Stream",
+      "icon": "grid_view",
+      "route": "/live-stream/live-classes",
+      "permissions": "LMS_CS",
+      "active": false,
+      "hide": true
+    }
+  ],
+  "footerItems": [
+    {
+      "id": "theme-selector",
+      "label": "Change Theme",
+      "icon": "contrast",
+      "action": "theme-selector",
+      "active": false
+    },
+    {
+      "id": "logout",
+      "label": "Logout",
+      "icon": "logout",
+      "action": "logout",
+      "active": false
+    }
+  ]
+}

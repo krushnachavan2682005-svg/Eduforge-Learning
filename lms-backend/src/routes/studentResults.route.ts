@@ -26,6 +26,10 @@ const paginationSchema = {
                 type: "string",
                 enum: ["completed"],
                 description: "Filter by review status (only 'completed' is supported)"
+            },
+            search: {
+                type: "string",
+                description: "Search keyword for filtering results"
             }
         }
     }

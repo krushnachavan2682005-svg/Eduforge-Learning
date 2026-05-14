@@ -1,0 +1,272 @@
+<div class="flex w-full min-h-screen">
+  <div class="flex-grow min-w-0 mx-8">
+    <div
+      class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 select-none theme-text-secondary theme-text-dark"
+    >
+      <div class="bg-white p-3 rounded-lg shadow-sm">
+        <div class="flex flex-wrap gap-4">
+          <div
+            class="flex items-center cursor-pointer h-10 w-10 mt-3 rounded-md pl-2 theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark"
+            (click)="goBack()"
+          >
+            <i class="material-icons mr-1 text-2xl">arrow_back</i>
+          </div>
+          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
+            <p>Student Name</p>
+            <h2 class="font-semibold text-lg">
+              {{ examData()?.student_name }}
+            </h2>
+          </div>
+          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
+            <p>Reviewed By</p>
+            <h2 class="font-semibold text-lg">
+              {{ examData()?.reviewer_name || "--" }}
+            </h2>
+          </div>
+          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
+            <p>Exam Name</p>
+            <h2 class="font-semibold text-lg">
+              {{ examData()?.test_name }}
+            </h2>
+          </div>
+
+          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
+            <p>Duration</p>
+            <span class="font-semibold">
+              {{ examData()?.duration_minutes }} Min
+            </span>
+          </div>
+
+          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
+            <p>Total Marks</p>
+            <span class="font-semibold">
+              {{ examData()?.total_marks }}
+            </span>
+          </div>
+
+          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
+            <p>Passing Marks</p>
+            <span class="font-semibold">
+              {{ examData()?.passing_marks }}
+            </span>
+          </div>
+
+          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
+            <p>Status</p>
+            <span class="font-semibold capitalize">
+              {{ examData()?.review_status }}
+            </span>
+          </div>
+
+          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
+            <p>Submitted At</p>
+            <span class="font-semibold text-md">
+              {{ examData()?.submitted_at | date: "medium" }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <h3 class="font-semibold text-lg mb-1">Summary</h3>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-gray-50 p-3 rounded">
+            <p>Total Questions</p>
+            <span class="font-semibold">
+              {{ examData()?.summary?.total_questions }}
+            </span>
+          </div>
+
+          <div class="bg-green-50 p-3 rounded">
+            <p>Correct</p>
+            <span class="font-semibold text-green-600">
+              {{ examData()?.summary?.correct_answers }}
+            </span>
+          </div>
+
+          <div class="bg-red-50 p-3 rounded">
+            <p>Wrong</p>
+            <span class="font-semibold text-red-600">
+              {{ examData()?.summary?.wrong_answers }}
+            </span>
+          </div>
+
+          <div class="bg-blue-50 p-3 rounded">
+            <p>Marks</p>
+            <span class="font-semibold text-blue-600">
+              {{ examData()?.summary?.achieved_marks }} /
+              {{ examData()?.summary?.total_marks }}
+            </span>
+          </div>
+
+          <div class="bg-yellow-50 p-3 rounded">
+            <p>Percentage</p>
+            <span class="font-semibold">
+              {{ examData()?.summary?.percentage }}%
+            </span>
+          </div>
+
+          <div class="bg-purple-50 p-3 rounded">
+            <p>Grade</p>
+            <span class="font-semibold">
+              {{ examData()?.summary?.grade }}
+            </span>
+          </div>
+
+          <div class="bg-gray-100 p-3 rounded">
+            <p>Result</p>
+            <span
+              class="font-semibold"
+              [ngClass]="{
+                'text-green-600': examData()?.summary?.passed,
+                'text-red-600': !examData()?.summary?.passed,
+              }"
+            >
+              {{ examData()?.summary?.passed ? "Pass" : "Fail" }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white mt-4 p-4 rounded-lg shadow-sm">
+        <div class="flex justify-between">
+          <div>
+            Type:
+            <span class="font-semibold">
+              {{ questions()[currentQuestionIndex]?.question_type | uppercase }}
+            </span>
+          </div>
+
+          <div>
+            Marks:
+            <span class="font-semibold">
+              {{ questions()[currentQuestionIndex]?.question_marks }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-2 font-semibold text-xl">
+          Q{{ currentQuestionIndex + 1 }}.
+          {{ questions()[currentQuestionIndex]?.question_text }}
+        </div>
+        @if (questions()[currentQuestionIndex]?.question_type === "mcq") {
+          <div class="mt-4">
+            @for (
+              option of questions()[currentQuestionIndex]?.options;
+              track option
+            ) {
+              <div
+                class="flex items-center p-2 mb-5 border-2 rounded-xl cursor-pointer transition-all duration-200 bg-white"
+                [ngClass]="{
+                  'border-green-500':
+                    option.option_text ===
+                    questions()[currentQuestionIndex]?.correct_answer,
+                  'border-red-500':
+                    option.option_text ===
+                      questions()[currentQuestionIndex]?.user_answer &&
+                    !questions()[currentQuestionIndex]?.is_correct,
+                }"
+              >
+                <div
+                  class="rounded-full border-2 border-slate-300 p-1 flex items-center mr-2"
+                >
+                  <div
+                    class="w-3.5 h-3.5 rounded-full flex-shrink-0 transition-all duration-200"
+                    [ngClass]="{
+                      'bg-blue-500 ring-2 ring-blue-500':
+                        option?.option_text ===
+                        questions()[currentQuestionIndex]?.user_answer,
+                      'bg-transparent':
+                        option?.option_text !==
+                        questions()[currentQuestionIndex]?.user_answer,
+                    }"
+                  ></div>
+                </div>
+
+                {{ option.option_text }}
+              </div>
+            }
+          </div>
+        }
+        @if (questions()[currentQuestionIndex]?.question_type === "short") {
+          <textarea
+            class="w-full mt-3 border resize-none p-2 rounded"
+            [value]="questions()[currentQuestionIndex]?.user_answer"
+            disabled
+          >
+          </textarea>
+        }
+
+        @if (questions()[currentQuestionIndex]?.question_type === "long") {
+          <textarea
+            class="w-full mt-3 border resize-none p-2 rounded h-[120px]"
+            [value]="questions()[currentQuestionIndex]?.user_answer"
+            disabled
+          >
+          </textarea>
+        }
+        <div class="mt-4">
+          @if (questions()[currentQuestionIndex]?.question_type === "mcq") {
+            <span class="flex gap-2">
+              Correct Answer:
+              <p class="text-green-600">
+                {{ questions()[currentQuestionIndex]?.correct_answer || "--" }}
+              </p>
+            </span>
+          }
+
+          <span class="flex gap-2">
+            Status:
+            <p
+              [ngClass]="{
+                'text-green-600': questions()[currentQuestionIndex]?.is_correct,
+                'text-red-600': !questions()[currentQuestionIndex]?.is_correct,
+              }"
+            >
+              {{
+                questions()[currentQuestionIndex]?.is_correct
+                  ? "Correct"
+                  : "Wrong"
+              }}
+            </p>
+          </span>
+          <span class="flex gap-2"
+            >Marks Obtained:
+            <p class="text-md">
+              {{ questions()[currentQuestionIndex]?.marks_obtained }}
+            </p>
+          </span>
+          @if (questions()[currentQuestionIndex]?.reviewer_comment) {
+            <span class="flex gap-2"
+              >Reviewer Comment:
+              <p class="text-md">
+                {{
+                  questions()[currentQuestionIndex]?.reviewer_comment || "--"
+                }}
+              </p>
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="flex justify-between mt-4">
+        <button
+          class="px-3 py-2 rounded font-semibold disabled:opacity-50 bg-blue-600 text-white"
+          [disabled]="currentQuestionIndex === 0"
+          (click)="goToPreviousQuestion()"
+        >
+          Previous
+        </button>u
+
+        <button
+          class="px-3 py-2 rounded font-semibold disabled:opacity-50 bg-blue-600 text-white"
+          [disabled]="currentQuestionIndex === questions().length - 1"
+          (click)="goToNextQuestion()"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,88 @@
+<div class="bg-gray-800 p-3 py-2 text-white overflow-y-auto font-inter">
+  <div class="flex flex-col lg:flex-row items-start lg:items-center mb-3 gap-2">
+    <h4
+      class="font-semibold text-xl text-white m-0 flex items-center cursor-pointer"
+    >
+      Code Editor
+    </h4>
+    <div
+      class="flex flex-col md:flex-row items-center gap-2 w-full bg-gray-700 p-2 rounded-lg"
+    >
+      <div class="flex-grow overflow-x-auto">
+        <ul class="flex gap-2 mb-0 w-auto flex-nowrap">
+          @for (t of techList(); track t) {
+            <li class="nav-item">
+              <a
+                class="nav-link font-semibold text-xl cursor-pointer py-2 px-4 rounded-3xl"
+                [ngClass]="{ 'bg-blue-600 text-white': tech() === t }"
+                (click)="selectTech(t)"
+                tabindex="0"
+              >
+                {{ t | titlecase }}
+              </a>
+            </li>
+          }
+        </ul>
+      </div>
+      <div class="flex flex-nowrap items-center gap-2">
+        <button
+          class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md flex items-center"
+          (click)="copyCode()"
+          aria-label="Copy code"
+          type="button"
+        >
+          <i class="material-icons mr-2">content_copy</i> Copy
+        </button>
+        <button
+          class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md flex items-center"
+          (click)="runCode()"
+          type="button"
+        >
+          Run <i class="fas fa-play ml-2"></i>
+        </button>
+        <button
+          class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md flex items-center"
+          (click)="toggleTheme()"
+          title="Toggle theme"
+          type="button"
+        >
+          <span class="material-icons">
+            {{ isDarkTheme() ? "light_mode" : "dark_mode" }}
+          </span>
+        </button>
+        <button
+          class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md flex items-center"
+          (click)="toggleLayout()"
+          type="button"
+        >
+          <i class="fas fa-sync-alt mr-2"></i>
+          {{ isRowLayout() ? "Col" : "Row" }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <hr class="border-t border-gray-600" />
+  <div
+    [ngClass]="isRowLayout() ? 'flex-col' : 'flex-row'"
+    class="flex editor-layout mb-3 gap-2"
+  >
+    <div class="editor-pane flex-grow">
+      <textarea
+        class="w-full h-96 p-4 rounded-lg border-gray-700 border-2 resize-none focus:outline-none"
+        [ngClass]="
+          isDarkTheme() ? 'bg-gray-600 text-white' : 'bg-white text-black'
+        "
+        [placeholder]="'Write your ' + tech().toUpperCase() + ' code here...'"
+        [(ngModel)]="codeMap()[tech()]"
+        (keydown)="onKeyDown($event)"
+      ></textarea>
+    </div>
+    <div class="output-pane flex-grow">
+      <iframe
+        #jsFrame
+        class="w-full h-96 border-2 border-gray-700 rounded-lg"
+        [ngClass]="isDarkTheme() ? 'bg-gray-600 ' : 'bg-white'"
+      ></iframe>
+    </div>
+  </div>
+</div>

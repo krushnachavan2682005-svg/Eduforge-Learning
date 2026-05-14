@@ -1,0 +1,118 @@
+<div class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 theme-text theme-text-dark">
+  <div class="header bg-white">
+    <div
+      class="flex flex-col gap-4 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+    >
+      <div class="flex-1 min-w-[250px]">
+        @for (list of headers; track list) {
+          <app-header
+            [name]="list?.title"
+            [studentClass]="list?.subtitle"
+          ></app-header>
+        }
+      </div>
+    </div>
+  </div>
+
+  <p class="font-semibold mb-3 text-lg">ASSIGNED COURSES</p>
+
+  @if (assignCourses().length > 0) {
+    <div
+      class="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-3 cursor-pointer"
+    >
+      @for (course of assignCourses(); track course) {
+        <div
+          class="w-40 rounded overflow-visible"
+          (click)="navigateTOCources(course)"
+        >
+          <div class="flex justify-center items-center">
+            @if (course?.signedUrl) {
+              <div>
+                <img
+                  [src]="course?.signedUrl"
+                  class="h-[88px] w-[120px] rounded"
+                />
+              </div>
+            } @else {
+              <img
+                src="images/Best-online-course-platforms.webp"
+                class="h-[88px] w-[120px] rounded"
+                alt="Course Image"
+              />
+            }
+          </div>
+          <div class="px-5 py-2 inline-block ellipsis">
+            <div class="font-bold mb-2 text-lg">
+              <p
+                #titleElement
+                [appTooltip]="isTruncated(titleElement) ? course?.title : ''"
+                tooltipPosition="bottom"
+                class="truncate relative"
+              >
+                {{ course?.title || "--" }}
+              </p>
+            </div>
+            <p class="text-gray-600 text-base mb-2">
+              {{ course?.trainer }}
+            </p>
+
+            <div class="w-full">
+              <div class="h-2 bg-gray-300 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-cyan-400"
+                  [style.width.%]="course?.progress_percentage"
+                ></div>
+              </div>
+              <div class="flex justify-between text-xs mt-1">
+                <span class="text-gray-700 text-base">
+                  {{ course?.completed_sections || 0 }}/{{
+                    course?.total_sections || 0
+                  }}
+                </span>
+                <span class="text-blue-600 font-semibold text-base">
+                  {{ course?.progress_percentage || 0 }}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (isLoadingCourses()) {
+    <div class="p-1">
+      <ngx-skeleton-loader
+        appearance="line"
+        count="18"
+        [theme]="skeletonService.boxTheme"
+      >
+      </ngx-skeleton-loader>
+    </div>
+  } @else if (coursesLoaded() && assignCourses().length === 0) {
+    <div class="flex flex-col items-center justify-center py-12 text-center">
+      <div
+        class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
+      >
+        <svg
+          class="w-12 h-12 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+          ></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">
+        No Assigned Courses
+      </h3>
+      <p class="text-gray-500 mb-4 theme-text-secondary theme-text-dark">
+        You don't have any courses assigned yet. Contact your administrator to
+        get started with learning.
+      </p>
+    </div>
+  }
+</div>

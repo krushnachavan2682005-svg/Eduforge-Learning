@@ -1,0 +1,195 @@
+<div
+  class="flex justify-between items-center pt-1 mb-2 theme-text-secondary theme-text-dark"
+>
+  @if (!showBackButton && !showBackBtnAndTitleSubtitle) {
+    <div>
+      <div class="flex items-center">
+        <button
+          (click)="toggleSidebar()"
+          class="theme-text-secondary theme-text-dark no-print mr-3 flex items-center"
+          [appTooltip]="isSidebarOpen() ? 'Close Sidebar' : 'Open Sidebar'"
+          tooltipPosition="right"
+        >
+          <i class="material-icons theme-text-secondary theme-text-dark">
+            {{ isSidebarOpen() ? "menu_open" : "menu" }}
+          </i>
+        </button>
+        <div class="flex flex-col">
+          <p class="text-lg sm:text-xl font-bold">
+            {{ name }}
+          </p>
+
+          @if (studentClass) {
+            <p class="text-md mt-0" [innerHTML]="studentClass"></p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3 pt-2">
+      @if (showActionButton && !isResumePage) {
+        <button
+          class="px-3 py-2 rounded theme-bg-secondary theme-border theme-bg-gray"
+        >
+          {{ actionButtonLabel || "Action" }}
+        </button>
+      }
+      @if (creditScore !== null && creditScore !== undefined && !isResumePage) {
+        <div class="text-right">
+          <p class="text-xs font-bold">
+            <span class="underline underline-offset-1">CR</span>EDIT SCORE
+          </p>
+          <p class="text-3xl font-bold">
+            {{ creditScore }}
+          </p>
+        </div>
+      }
+      <div class="flex items-center mb-2">
+        <ng-content></ng-content>
+      </div>
+      @if (isResumePage) {
+        <div class="flex items-center gap-2 no-print">
+          <button
+            class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition self-center theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark"
+            (click)="createLink()"
+            appTooltip="Create Shareable Link"
+            tooltipPosition="bottom"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
+              />
+            </svg>
+          </button>
+          <button
+            class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition self-center theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark"
+            (click)="downloadResume()"
+            appTooltip="Download Resume"
+            tooltipPosition="bottom"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              class="w-5 h-5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+              />
+            </svg>
+          </button>
+          <button
+            class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition self-center theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark"
+            (click)="goToCreateResume()"
+            appTooltip="Edit Resume"
+            tooltipPosition="bottom"
+          >
+            <svg
+              tooltipPosition="left"
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0
+                  002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      }
+    </div>
+  }
+  @if (showBackBtnAndTitleSubtitle) {
+    <div class="flex justify-between w-full">
+      <div class="flex items-start gap-3">
+        <i
+          appTooltip="Back "
+        tooltipPosition="bottom"
+        class="material-icons-outlined text-[24px] cursor-pointer mt-4"
+        (click)="goBack()"
+      >
+        arrow_back
+      </i>
+
+      <div class="flex flex-col">
+        <p
+          class="text-2xl sm:text-2xl font-semibold flex items-center gap-2 cursor-pointer rounded transition"
+        >
+          {{ titleName }}
+        </p>
+
+        @if (subTitle) {
+          <p class="text-lg mt-0">
+            {{ subTitle }}
+          </p>
+        }
+      </div>
+      </div>
+      <div class="flex items-center">
+        <ng-content select="[header-actions]"></ng-content>
+      </div>
+    </div>
+  }
+  @if (showBackButton) {
+    <div class="flex justify-between items-center w-full">
+      <p
+        class="text-2xl sm:text-2xl font-semibold flex items-center gap-2 cursor-pointer rounded transition"
+        (click)="goBack()"
+      >
+        @if (isEditMode) {
+          <i class="material-icons-outlined text-[24px]">arrow_back</i>
+        }
+        {{ title }}
+      </p>
+
+      <button
+        type="submit"
+        class="px-2 py-2 rounded theme-bg-secondary text-lg font-semibold theme-bg-gray cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="resumeForm?.invalid || isLoading"
+      >
+        @if (isLoading) {
+          <svg
+            class="inline w-4 h-4 animate-spin mr-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        }
+        {{ isEditMode ? "Update" : "Create" }} Resume
+      </button>
+    </div>
+  }
+</div>
+<hr class="mb-2 mt-1 theme-border" />

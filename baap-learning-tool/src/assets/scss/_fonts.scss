@@ -1,0 +1,169 @@
+/* Afacad Flux Font Family - Local Font Declarations */
+
+/* Regular Weight (400) */
+@font-face {
+  font-family: "Afacad Flux";
+  src: url("../fonts/AfacadFlux-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Medium Weight (500) */
+@font-face {
+  font-family: "Afacad Flux";
+  src: url("../fonts/AfacadFlux-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* SemiBold Weight (600) */
+@font-face {
+  font-family: "Afacad Flux";
+  src: url("../fonts/AfacadFlux-SemiBold.woff") format("woff");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bold Weight (700) */
+@font-face {
+  font-family: "Afacad Flux";
+  src: url("../fonts/AfacadFlux-Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Font Family Variables */
+:root {
+  --font-family-primary:
+    "Afacad Flux", "Inter", system-ui, -apple-system, sans-serif;
+  --font-family-display:
+    "Afacad Flux", "Inter", system-ui, -apple-system, sans-serif;
+  --font-family-mono:
+    "JetBrains Mono", "Fira Code", Consolas, Monaco, "Courier New", monospace;
+}
+
+/* Global Font Application */
+* {
+  font-family: var(--font-family-primary);
+}
+
+/* Body Font Styling */
+body {
+  font-family: var(--font-family-primary);
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Font Utility Classes */
+.font-primary {
+  font-family: var(--font-family-primary);
+}
+
+.font-display {
+  font-family: var(--font-family-display);
+}
+
+.font-mono {
+  font-family: var(--font-family-mono);
+}
+
+/* Font Weight Utilities */
+.font-regular {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+/* Typography Scale */
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
+/* Responsive Typography */
+@media (max-width: 640px) {
+  .text-responsive-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+}
+
+@media (min-width: 641px) {
+  .text-responsive-xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+}
+
+/* Letter Spacing Utilities */
+.tracking-tighter {
+  letter-spacing: -0.05em;
+}
+
+.tracking-tight {
+  letter-spacing: -0.025em;
+}
+
+.tracking-normal {
+  letter-spacing: 0em;
+}
+
+.tracking-wide {
+  letter-spacing: 0.025em;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}

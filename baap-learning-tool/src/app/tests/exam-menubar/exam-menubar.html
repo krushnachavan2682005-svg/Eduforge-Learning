@@ -1,0 +1,39 @@
+<div class="w-24 theme-bg-secondary theme-text-secondary min-h-screen">
+  @if (!questions || questions.length === 0) {
+    <div class="flex justify-center items-center h-40">
+      <div
+        class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+      ></div>
+    </div>
+  }
+  <div class="pt-2">
+    <div
+      class="flex flex-col items-center bg-blue-500 text-white border-blue-500 text-md font-bold px-5 py-3 ml-2 mr-2 rounded-lg"
+    >
+      <span
+        >Total Q.No {{ currentQuestionIndex + 1 }} of
+        {{ questions.length }}</span
+      >
+    </div>
+  </div>
+  <div class="auto_scroll ml-8 mt-10">
+    @for (question of questions; track $index) {
+      <div
+        class="w-10 h-10 mb-2 cursor-pointer flex justify-center items-center rounded-3xl border font-semibold text-lg p-3 transition duration-150 ease-in-out"
+        [ngClass]="{
+          ' bg-green-600 text-white border-green-500':
+            answeredStatus[$index] && $index !== currentQuestionIndex,
+
+          'bg-blue-500 text-white border-blue-500':
+            $index === currentQuestionIndex,
+
+          'hover:bg-gray-100 bg-white theme-text-secondary border-gray-300':
+            $index !== currentQuestionIndex && !answeredStatus[$index],
+        }"
+        (click)="onQuestionClick($index)"
+      >
+        <span> {{ $index + 1 }}</span>
+      </div>
+    }
+  </div>
+</div>

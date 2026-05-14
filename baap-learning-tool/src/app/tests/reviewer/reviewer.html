@@ -1,0 +1,329 @@
+<div class="mx-2 sm:mx-3 md:mx-4 lg:mx-8 theme-text-secondary theme-text-dark">
+  <div class="header bg-white">
+    <div class="pt-2 mt-1">
+      <div class="flex flex-wrap gap-2 sm:gap-2 justify-between">
+        <div
+          class="flex items-center cursor-pointer h-10 w-10 mt-3 rounded-md pl-2 hover:theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark"
+          (click)="cancelExam = true"
+        >
+          <i class="material-icons mr-1 text-2xl">arrow_back</i>
+        </div>
+
+        <div
+          class="theme-bg-secondary theme-bg-gray px-2 sm:px-2 md:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[280px]"
+        >
+          <p>Exam Name:</p>
+          <span class="font-semibold text-xl">
+            <p class="text-lg">
+              {{ examData()?.test_name || "--" }}
+            </p></span
+          >
+        </div>
+        <div
+          class="theme-bg-secondary theme-bg-gray px-2 sm:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[60px]"
+        >
+          <p>Student Name</p>
+          <span class="font-semibold text-xl">{{
+            examData()?.student_name || "--"
+          }}</span>
+        </div>
+        <div
+          class="theme-bg-secondary theme-bg-gray px-2 sm:px-2 md:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[280px]"
+        >
+          <p>Total Question</p>
+          <span class="font-semibold text-xl">
+            <p class="text-lg">
+              Q.No: {{ currentQuestionIndex + 1 }} of
+              {{ questions().length }}
+            </p></span
+          >
+        </div>
+
+        <div
+          class="theme-bg-secondary theme-bg-gray px-2 sm:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[60px]"
+        >
+          <p>Total Marks</p>
+          <span class="font-semibold text-xl">{{
+            examData()?.total_marks || "--"
+          }}</span>
+        </div>
+      </div>
+    </div>
+    <hr class="mb-3 mt-4 theme-border" />
+
+    <div class="p-2 mb-24 sm:mb-40 mt-3 border theme-border rounded-lg">
+      <div class="flex justify-between mx-2 pt-1 font-semibold text-lg">
+        <span class="flex items-center text-xl">
+          <p class="mx-1">Q.no :</p>
+          {{ currentQuestionIndex + 1 }}
+        </span>
+
+        <div class="flex items-center gap-6">
+          <span class="flex items-center text-lg">
+            <p class="mx-1">Type :</p>
+            {{ questions()[currentQuestionIndex]?.question_type | titlecase }}
+          </span>
+          <span class="text-lg">
+            Marks :
+            {{ questions()[currentQuestionIndex]?.question_marks || 0 }}
+          </span>
+        </div>
+      </div>
+
+      <div class="pl-2 sm:pl-3">
+        <div
+          class="justify-center font-semibold text-xl sm:text-xl theme-text-secondary theme-text-dark"
+        >
+          {{ questions()[currentQuestionIndex]?.question_text }}
+        </div>
+        <div>
+          @if (
+            questions()[currentQuestionIndex]?.question_type?.toLowerCase() ===
+            "mcq"
+          ) {
+            @for (
+              option of questions()[currentQuestionIndex]?.options;
+              track $index
+            ) {
+              <div>
+                <div
+                  class="p-2 sm:p-3 mt-4 sm:mt-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-1 bg-white"
+                >
+                  <input
+                    type="radio"
+                    [id]="'option' + $index"
+                    [disabled]="true"
+                    [name]="'question' + currentQuestionIndex"
+                    [value]="option?.option_text"
+                    [(ngModel)]="selectedOptions()[currentQuestionIndex]"
+                    class="w-5 h-5 custom-radio rounded-full border"
+                    [ngClass]="{
+                      'bg-green-600 border-green-600':
+                        option?.option_text ===
+                        questions()[currentQuestionIndex]?.correct_answer,
+
+                      'bg-red-600 border-red-600':
+                        selectedOptions()[currentQuestionIndex] ===
+                          option?.option_text &&
+                        option?.option_text !==
+                          questions()[currentQuestionIndex]?.correct_answer,
+                    }"
+                  />
+
+                  <label
+                    [for]="'option' + $index"
+                    class="ml-2 theme-text theme-text-dark text-base sm:text-lg font-semibold"
+                  >
+                    {{ option?.option_text }}
+                  </label>
+                </div>
+              </div>
+            }
+            <div class="font-normal text-lg flex pt-2">
+              <p>Correct Answer :</p>
+              <span class="ml-3 font-semibold text-xl">
+                {{ questions()[currentQuestionIndex]?.correct_answer }}
+              </span>
+            </div>
+          } @else if (
+            questions()[currentQuestionIndex]?.question_type?.toLowerCase() ===
+            "short"
+          ) {
+            <div class="mt-4 sm:mt-4 rounded-lg">
+              <textarea
+                type="text"
+                readonly="true"
+                class="p-2 border theme-border rounded-lg w-full resize-none outline-none placeholder:theme-text-secondary"
+                placeholder="Enter your short answer..."
+                [(ngModel)]="selectedOptions()[currentQuestionIndex]"
+              >
+              </textarea>
+            </div>
+          } @else if (
+            questions()[currentQuestionIndex]?.question_type?.toLowerCase() ===
+            "long"
+          ) {
+            <div class="pt-3">
+              <textarea
+                type="text"
+                readonly="true"
+                class="p-3 border theme-border rounded-lg w-full h-[36vh] resize-none outline-none placeholder:theme-text-secondary"
+                placeholder="Enter your long answer..."
+                [(ngModel)]="selectedOptions()[currentQuestionIndex]"
+              >
+              </textarea>
+            </div>
+          } @else if (
+            questions()[currentQuestionIndex]?.question_type?.toLowerCase() ===
+            "practical"
+          ) {
+            <div>
+              <app-code-editor></app-code-editor>
+            </div>
+          }
+        </div>
+      </div>
+      <hr class="mb-3 mt-4 theme-border" />
+
+      <div class="pl-3 mt-5 flex justify-between">
+        <div>
+          <div class="text-lg font-medium">Add Comment</div>
+          <textarea
+            type="text"
+            placeholder="Add Reviewer Comment"
+            class="p-2 border resize-none theme-border rounded outline-none h-11 w-96"
+            [(ngModel)]="reviewerComments()[currentQuestionIndex]"
+          >
+          </textarea>
+        </div>
+
+        <div class="justify-end">
+          <div class="text-lg font-medium flex item-center">
+            Review Options<span class="text-red-600 mt-1 px-1">*</span>
+          </div>
+
+          <div>
+            <button
+              type="button"
+              class="px-2.5 py-1 mr-3 rounded font-semibold cursor-pointer text-white"
+              [class.bg-green-600]="
+                reviewIsCorrect()[currentQuestionIndex] === true
+              "
+              [class.bg-blue-600]="
+                reviewIsCorrect()[currentQuestionIndex] !== true
+              "
+              (click)="setReviewStatus(true)"
+            >
+              <span class="flex items-center">
+                <i class="material-icons font-semibold text-xl">check</i>
+              </span>
+            </button>
+
+            <button
+              type="button"
+              class="px-2.5 py-1 rounded font-semibold cursor-pointer text-white"
+              [class.bg-red-600]="
+                reviewIsCorrect()[currentQuestionIndex] === false
+              "
+              [class.bg-blue-600]="
+                reviewIsCorrect()[currentQuestionIndex] !== false
+              "
+              (click)="setReviewStatus(false)"
+            >
+              <span class="flex items-center">
+                <i class="material-icons font-semibold text-xl px-1">close</i>
+              </span>
+            </button>
+          </div>
+        </div>
+        <div class="mr-4">
+          <div class="text-lg font-medium flex item-center">
+            Give Marks<span class="text-red-600 mt-1 px-1">*</span>
+          </div>
+          <div>
+            <input
+              type="number"
+              class="p-2 border theme-border rounded outline-none w-32 cursor-pointer"
+              placeholder="Enter Marks"
+              [max]="questions()[currentQuestionIndex]?.question_marks"
+              min="0"
+              [(ngModel)]="reviewMarks()[currentQuestionIndex]"
+              (ngModelChange)="validateMarks(currentQuestionIndex)"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        class="p-2 sm:p-3 flex flex-col sm:flex-row justify-between gap-2 sm:gap-0"
+      >
+        <button
+          type="button"
+          class="px-3 py-2 rounded font-semibold disabled:opacity-50 bg-blue-600 text-white"
+          [disabled]="currentQuestionIndex === 0"
+          (click)="goToPreviousQuestion()"
+        >
+          <span class="flex items-center"
+            ><i class="material-icons font-medium text-sm">arrow_back_ios</i>
+            Previous Question</span
+          >
+        </button>
+        @if (currentQuestionIndex === questions().length - 1) {
+          <button
+            (click)="submitExam()"
+            type="submit"
+            class="px-4 py-2 rounded bg-blue-600 text-white flex items-center justify-center gap-2"
+          >
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-md"> Submit Final Review</span>
+            </div>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="px-3 py-2 rounded font-semibold bg-blue-600 text-white"
+            (click)="goToNextQuestion()"
+          >
+            <span class="font-semibold text-md flex items-center">
+              Review & Next<i class="material-icons font-medium text-sm ml-1"
+                >arrow_forward_ios</i
+              ></span
+            >
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (examSubmiteed || cancelExam) {
+    <div class="fixed inset-0 flex items-center justify-center z-50">
+      <div class="absolute inset-0 bg-black/50"></div>
+      <div
+        class="relative bg-white rounded-lg p-8 shadow-lg z-10 w-[80%] max-w-md text-center"
+      >
+        @if (examSubmiteed) {
+          <div class="mb-6">
+            <div class="fex items-center mb-3">
+              <i
+                class="material-icons text-green-600 text-5xl border rounded-3xl p-2"
+              >
+                check_circle
+              </i>
+            </div>
+            <span class="text-2xl font-semibold text-green-600"
+              >Exam Reviewed Successfully!</span
+            >
+          </div>
+        } @else if (cancelExam) {
+          <div class="mb-6">
+            <div class="fex items-center mb-3">
+              <i class="material-icons text-red-600 text-4xl"> cancel </i>
+            </div>
+            <span class="text-2xl font-extrabold text-red-600"
+              >Are you sure you want to Cancel review Exam?</span
+            >
+          </div>
+        }
+        <button
+          type="button"
+          class="mt-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold"
+          (click)="goBack()"
+        >
+          @if (cancelExam) {
+            <span class="text-lg fort-semibold">Yes</span>
+          } @else {
+            <span class="text-lg fort-semibold">Ok</span>
+          }
+        </button>
+        @if (cancelExam) {
+          <button
+            type="button"
+            class="mt-2 px-4 ml-10 py-2 rounded bg-blue-600 text-white font-semibold"
+            (click)="closePupUp()"
+          >
+            <span class="text-lg fort-semibold">No</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,18 @@
+@if (open) {
+  <div class="fixed inset-0 bg-black/10 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg w-full p-4 relative" 
+     [ngClass]="{
+        'max-w-sm': isSmallPopup,
+        'max-w-2xl': !isSmallPopup
+      }">
+      <button
+        class="absolute top-3 right-6 text-3xl hover:text-red-700"
+        title="Close"
+        (click)="close.emit()"
+      >
+        &times;
+      </button>
+      <ng-content></ng-content>
+    </div>
+  </div>
+}

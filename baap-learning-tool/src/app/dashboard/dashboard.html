@@ -1,0 +1,436 @@
+<div class="mx-2 sm:mx-4 md:mx-6 lg:mx-8 theme-text-dark theme-text-secondary">
+  <div class="theme-text theme-text-dark">
+    <div class="header bg-white pt-2">
+      <app-header
+        [name]="'Dashboard'"
+        [studentClass]="'Manage and explore your dashboard here'"
+      >
+        <div class="relative flex items-center">
+          <input
+            type="text"
+            [ngModel]="searchKey()"
+            (ngModelChange)="searchKey.set($event)"
+            placeholder="Search timeline..."
+            class="pl-10 pr-10 py-2 border rounded-full focus:outline-none focus:ring-1 focus:ring-slate-400 w-full sm:w-80 shadow-sm theme-border"
+          />
+          <span class="material-icons absolute left-3 text-gray-400 text-md">
+            search
+          </span>
+          @if (searchKey()) {
+            <span
+              class="material-icons absolute right-3 text-gray-400 text-md cursor-pointer hover:text-red-500"
+              (click)="searchKey.set('')"
+            >
+              close
+            </span>
+          }
+        </div>
+      </app-header>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 auto_scroll">
+    <!-- LEFT SECTION -->
+
+    <div class="lg:col-span-3 space-y-2">
+      <span class="text-xl font-semibold m-2">Profile</span>
+      <div class="bg-white rounded-lg border border-gray-200 p-4">
+        @if (userName()?.profile_image) {
+          <img
+            [src]="userName()?.profile_image"
+            alt="Profile Image"
+            class="w-12 h-12 rounded-full object-cover border border-gray-300"
+          />
+        } @else {
+          <div
+            class="w-12 h-12 rounded-full theme-bg-secondary theme-bg-gray p-4 flex items-center justify-center text-xl font-semibold"
+          >
+            {{
+              getInitials(
+                profileData()?.name || userName()
+                  ? userName()?.first_name + " " + userName()?.last_name
+                  : "--"
+              )
+            }}
+          </div>
+        }
+
+        <h2 class="text-2xl font-semibold">
+          {{
+            userName()
+              ? userName()?.first_name + " " + userName()?.last_name
+              : "--"
+          }}
+        </h2>
+
+        <p class="text-md">
+          {{ roleName() || "--" }}
+        </p>
+
+        <p class="text-md text-gray-400">
+          {{ address()?.name || "--" }}
+        </p>
+
+        <!-- </div> -->
+      </div>
+
+      <!-- Profile Viewers -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 items-center">
+        <div class="flex justify-between">
+          <p class="text-lg font-semibold">Profile Viewers</p>
+          <p class="text-blue-600 font-semibold text-lg font-semibold">
+            {{ profileData()?.profileViews }}
+          </p>
+        </div>
+        <div>
+          <a class="text-lg font-semibold hover:text-blue-600 cursor-pointer">
+            View All Analytics
+          </a>
+        </div>
+      </div>
+
+      <!-- Premium -->
+      <div class="bg-[#FFF6E6] rounded-lg border border-[#FFE2B3] p-4">
+        <p class="text-lg font-semibold">Achieve your goals with Premium</p>
+        <button
+          class="mt-2 bg-[#FFB020] hover:bg-[#f59e0b] text-white text-lg font-semibold px-4 py-1 rounded"
+        >
+          Try Premium for ₹0
+        </button>
+      </div>
+
+      <!-- Menu -->
+      <div
+        class="bg-white rounded-lg border border-gray-200 p-4 space-y-3 text-lg font-semibold"
+      >
+        <p class="hover:text-blue-600 cursor-pointer">Saved items</p>
+        <p class="hover:text-blue-600 cursor-pointer">Groups</p>
+        <p class="hover:text-blue-600 cursor-pointer">Events</p>
+      </div>
+    </div>
+
+    <!-- CENTER SECTION -->
+    <div class="lg:col-span-6">
+      <span class="text-xl font-semibold ml-8">TimeLine</span>
+      @if (timelineData().length > 0) {
+        @if (filteredTimelineData().length > 0) {
+        <div class="auto_scroll space-y-4 mx-9 mt-2">
+          @for (activity of filteredTimelineData(); track activity) {
+            <div
+              class="bg-white shadow-md rounded-lg border border-gray-200 p-4"
+            >
+              <div class="box-shadow bg-white rounded-md p-1 py-2">
+                <div class="flex justify-between items-center mb-2">
+                  <div class="flex bg-white rounded-lg">
+                    <div
+                      class="w-8 h-8 rounded-full theme-bg-secondary theme-bg-gray p-5 flex items-center justify-center text-lg font-semibold"
+                    >
+                      {{
+                        getInitials(
+                          activity?.studentName || userName()
+                            ? activity?.studentName +
+                                " " +
+                                activity?.studentName
+                            : "--"
+                        )
+                      }}
+                    </div>
+                    <div class="mx-4 mt-1">
+                      <p class="text-lg">
+                        <span class="font-semibold text-md">{{
+                          activity?.studentName | titlecase
+                        }}</span>
+                        <span class="text-blue-600 font-semibold ml-1">
+                          {{ activity?.type }}
+                        </span>
+                        update
+                      </p>
+                    </div>
+                  </div>
+                  <p>
+                    <span class="text-sm">{{ activity?.date }}</span>
+                  </p>
+                </div>
+                <div>
+                  @if (activity?.description && activity?.type !== "Exam") {
+                    <p class="w-90 break-words">
+                      {{ activity?.description }}
+                    </p>
+                  }
+                </div>
+                <hr class="border-gray-300 my-3" />
+                <div class="flex justify-center mt-2">
+                  <p class="w-full break-words">
+                    Completed
+                    <span class="text-blue-600 font-semibold text-lg"
+                      >{{ activity?.title  }} </span
+                    >{{ activity?.type }}
+                  </p>
+                </div>
+                <span class="flex justify-end">
+                  Score:
+                  @if (activity?.type === "Action Item" && activity?.marks) {
+                    <span class="text-blue-600">{{ activity?.marks }}</span>
+                  }
+                  @if (
+                    activity?.type === "Exam" && activity?.raw?.achieved_marks
+                  ) {
+                    <span class="text-blue-600"
+                      >{{ activity?.raw?.achieved_marks }}/{{
+                        activity?.raw?.total_marks
+                      }}</span
+                    >
+                  }
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+        } @else {
+          <div
+            class="flex flex-col items-center justify-center pt-10 text-center"
+          >
+            <h3 class="text-lg font-medium text-gray-900 mb-2">
+              No results found
+            </h3>
+            <p class="theme-text-secondary theme-text-dark">
+              We couldn't find anything matching "{{ searchKey() }}"
+            </p>
+          </div>
+        }
+      } @else if (timelineLoading()) {
+        <div class="p-1">
+          <ngx-skeleton-loader
+            appearance="line"
+            count="18"
+            [theme]="skeletonService.expanded"
+          >
+          </ngx-skeleton-loader>
+        </div>
+      } @else {
+        <div
+          class="flex flex-col items-center justify-center pt-20 text-center"
+        >
+          <div
+            class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
+          >
+            <svg
+              class="w-12 h-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              ></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">
+            No public submissions available yet
+          </h3>
+          <p class="mb-4 theme-text-secondary theme-text-dark">
+            Once users publish their submissions, they will be visible here for
+            everyone.
+          </p>
+        </div>
+      }
+    </div>
+
+    <!-- RIGHT SECTION -->
+    <div class="lg:col-span-3">
+      <span class="text-xl font-semibold m-2">Recent Completed Activity</span>
+      <div class="auto_scroll space-y-4 mt-2">
+        <div class="bg-white rounded-lg border border-gray-200 px-4 py-2">
+          <h3 class="text-xl font-semibold">Courses</h3>
+
+          <div class="space-y-4">
+            @if (recentActivityData()?.courses?.length > 0) {
+              @for (item of recentActivityData()?.courses; track item) {
+                <div>
+                  <div class="flex justify-between text-md">
+                    <span>{{ item?.name || "--" }}</span>
+                    <span>{{ item?.percentage || "--" }}%</span>
+                  </div>
+
+                  <div class="w-full bg-gray-200 h-2 rounded mt-1">
+                    <div
+                      class="h-full bg-cyan-400 rounded-md"
+                      [style.width.%]="item?.percentage"
+                    ></div>
+                  </div>
+                </div>
+              }
+            } @else if (courseProgress()?.length !== 0) {
+              <div class="bg-white rounded-lg border p-4">
+                <div class="grid grid-cols-1 gap-2 text-md">
+                  <p>
+                    Created: <b>{{ courseProgress()?.created || "--" }}</b>
+                  </p>
+                  <p>
+                    Assigned: <b>{{ courseProgress()?.assigned || "--" }}</b>
+                  </p>
+                  <p>
+                    Total Students:
+                    <b>{{ courseProgress()?.totalStudentsAssigned || "--" }}</b>
+                  </p>
+                  <p>
+                    Students Assigned:
+                    <b>{{ courseProgress()?.totalStudentsAssigned || "--" }}</b>
+                  </p>
+                  <p>
+                    Completed By Students:
+                    <b>{{ courseProgress()?.completedByStudents || "--" }}</b>
+                  </p>
+                  <p>
+                    Pending Completion:
+                    <b>{{ courseProgress()?.pendingCompletion || "--" }}</b>
+                  </p>
+                </div>
+              </div>
+            } @else {
+              <p class="text-center">No recent course activity</p>
+            }
+          </div>
+        </div>
+        <div class="bg-white rounded-lg border border-gray-200 px-4 py-2">
+          <h3 class="text-xl font-semibold font-semibold mb-1">Tests</h3>
+          <div class="space-y-4">
+            @if (recentActivityData()?.tests?.length > 0) {
+              @for (test of recentActivityData()?.tests; track test) {
+                <div class="flex justify-between items-center">
+                  <span>{{ test?.name }}</span>
+                  <span
+                    class="text-md font-semibold"
+                    [ngClass]="{
+                      'text-green-600': test.status === 'Pass',
+                      'text-red-500': test.status === 'Fail',
+                    }"
+                  >
+                    {{ test?.status || "--" }}
+                  </span>
+                </div>
+              }
+            } @else if (
+              examProgress() &&
+              (examProgress()?.created > 0 ||
+                examProgress()?.assigned > 0 ||
+                examProgress()?.totalStudentsAssigned > 0 ||
+                examProgress()?.submittedByStudents > 0 ||
+                examProgress()?.reviewedByTutor > 0 ||
+                examProgress()?.pendingReview > 0 ||
+                examProgress()?.pendingSubmission > 0)
+            ) {
+              <div class="bg-white rounded-lg border p-4">
+                <div class="grid grid-cols-1 gap-2 text-md">
+                  <p>
+                    Created: <b>{{ examProgress()?.created || "--" }}</b>
+                  </p>
+
+                  <p>
+                    Assigned: <b>{{ examProgress()?.assigned || "--" }}</b>
+                  </p>
+
+                  <p>
+                    Total Students:
+                    <b>{{ examProgress()?.totalStudentsAssigned || "--" }}</b>
+                  </p>
+
+                  <p>
+                    Submitted:
+                    <b>{{ examProgress()?.submittedByStudents || "--" }}</b>
+                  </p>
+
+                  <p>
+                    Reviewed:
+                    <b>{{ examProgress()?.reviewedByTutor || "--" }}</b>
+                  </p>
+
+                  <p>
+                    Pending Review:
+                    <b>{{ examProgress()?.pendingReview || "--" }}</b>
+                  </p>
+
+                  <p>
+                    Pending Submission:
+                    <b>{{ examProgress()?.pendingSubmission || "--" }}</b>
+                  </p>
+                </div>
+              </div>
+            } @else {
+              <p class="text-center">No recent test activity</p>
+            }
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 px-4 py-2">
+          <h3 class="text-xl font-semibold font-semibold mb-1">Action items</h3>
+
+          <div class="space-y-4">
+            @if (recentActivityData()?.actionItems?.length > 0) {
+              @for (item of recentActivityData()?.actionItems; track item) {
+                <div>
+                  <div class="flex justify-between text-md">
+                    <span>{{ item?.name || "--" }}</span>
+                    <span>{{ item?.percentage || "--" }}%</span>
+                  </div>
+
+                  <div class="w-full bg-gray-200 h-2 rounded mt-1">
+                    <div
+                      class="h-full bg-cyan-400 rounded-md"
+                      [style.width.%]="item?.percentage"
+                    ></div>
+                  </div>
+                </div>
+              }
+            } @else if (
+              actionProgress() &&
+              (actionProgress()?.created > 0 ||
+                actionProgress()?.assigned > 0 ||
+                actionProgress()?.totalStudentsAssigned > 0 ||
+                actionProgress()?.submittedByStudents > 0 ||
+                actionProgress()?.reviewedByTutor > 0 ||
+                actionProgress()?.pendingReview > 0 ||
+                actionProgress()?.pendingSubmission > 0)
+            ) {
+              <div class="bg-white rounded-lg border p-4">
+                <div class="grid grid-cols-1 gap-2 text-md">
+                  <p>
+                    Created: <b>{{ actionProgress()?.created || "--" }}</b>
+                  </p>
+                  <p>
+                    Assigned: <b>{{ actionProgress()?.assigned || "--" }}</b>
+                  </p>
+                  <p>
+                    Total Students:
+                    <b>{{ actionProgress()?.totalStudentsAssigned || "--" }}</b>
+                  </p>
+                  <p>
+                    Submitted:
+                    <b>{{ actionProgress()?.submittedByStudents || "--" }}</b>
+                  </p>
+                  <p>
+                    Reviewed:
+                    <b>{{ actionProgress()?.reviewedByTutor || "--" }}</b>
+                  </p>
+                  <p>
+                    Pending Review:
+                    <b>{{ actionProgress()?.pendingReview || "--" }}</b>
+                  </p>
+                  <p>
+                    Pending Submission:
+                    <b>{{ actionProgress()?.pendingSubmission || "--" }}</b>
+                  </p>
+                </div>
+              </div>
+            } @else {
+              <p class="text-center">No action items assigned</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

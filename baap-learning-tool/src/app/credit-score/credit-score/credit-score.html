@@ -1,0 +1,178 @@
+<div class="mx-2 sm:mx-4 md:mx-6 lg:mx-8 theme-text-secondary theme-text-dark">
+  <div class="header bg-white">
+    <app-header
+      [name]="
+        student() ? student()?.first_name + ' ' + student()?.last_name : '--'
+      "
+      [studentClass]="user.class"
+      [creditScore]="creditScore()"
+    >
+    </app-header>
+  </div>
+  @if (allLevels().length > 0) {
+    @for (level of allLevels(); let $i = $index; track $i) {
+      <div class="mb-4 border rounded-lg">
+        <div
+          class="flex justify-between items-center cursor-pointer p-2 rounded-lg theme-bg-secondary theme-bg-gray"
+          (click)="toggleLevel($i)"
+        >
+          <div class="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+            <span class="mr-1 text-2xl">
+              @if (!level?.expanded) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 inline-block mb-1"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              }
+              @if (level?.expanded) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 inline-block mb-1"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M5 8l7 11 7-11z" />
+                </svg>
+              }
+            </span>
+
+            <h3 class="font-bold text-lg">{{ level?.level }}</h3>
+            <p class="text-base sm:mt-0 mt-1 ml-2 sm:ml-4">
+              [
+              {{ level?.start_date | date: "MMM d, y" }}
+              -
+              {{ level?.end_date | date: "MMM d, y" }}
+              ]
+            </p>
+          </div>
+          <div class="text-base font-medium flex items-center gap-1">
+            <span class="flex items-center gap-1">
+              @if (getMedalByPercentage(level?.percent) === "gold") {
+                <img src="images/solid-medal.svg" class="w-5 h-5" />
+                <img src="images/medal-outline.svg" class="w-5 h-5" />
+              } @else if (getMedalByPercentage(level?.percent) === "silver") {
+                <img src="images/medal-outline.svg" class="w-5 h-5" />
+              }
+
+              @if (level?.obtained_score) {
+                {{ level?.obtained_score }} / {{ level?.totalScore }}
+              }
+            </span>
+          </div>
+        </div>
+
+        @if (level?.expanded) {
+          @if (!level?.students || level?.students?.length === 0) {
+            <div class="mt-2 ml-6">
+              @for (
+                task of level?.action_items;
+                let $i = $index;
+                track task?.id
+              ) {
+                <div
+                  class="flex justify-between items-center px-3 py-1"
+                  [ngClass]="{
+                    'border-b border-dotted border-gray-300': !$i,
+                  }"
+                >
+                  <span>{{ task?.task_name }}</span>
+                  <span class="font-medium"
+                    >{{ task?.score }}/{{ task?.total_score }}
+                  </span>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="my-3 mx-6 space-y-5">
+              @for (student of level?.students; track student?.user_id) {
+                <div class="border rounded-md">
+                  <div
+                    class="flex justify-between font-semibold theme-bg-secondary theme-bg-gray p-2"
+                  >
+                    <span>{{ student?.student_name }}</span>
+
+                    <span class="flex items-center gap-1">
+                      @if (getMedalByPercentage(student?.percent) === "gold") {
+                        <img src="images/solid-medal.svg" class="w-5 h-5" />
+                        <img src="images/medal-outline.svg" class="w-5 h-5" />
+                      } @else if (
+                        getMedalByPercentage(student?.percent) === "silver"
+                      ) {
+                        <img src="images/medal-outline.svg" class="w-5 h-5" />
+                      }
+
+                      {{ student?.obtained_score }}/{{ student?.totalScore }}
+                    </span>
+                  </div>
+
+                  <div class="mt-2">
+                    @for (
+                      task of student?.action_items;
+                      let $i = $last;
+                      track task?.id
+                    ) {
+                      <div
+                        class="flex justify-between py-1 px-3"
+                        [ngClass]="{
+                          'border-b border-dotted border-gray-300': !$i,
+                        }"
+                      >
+                        <span>{{ task?.task_name }}</span>
+                        <span class="font-medium"
+                          >{{ task?.score }}/{{ task?.total_score }}</span
+                        >
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    }
+  } @else if (isLoadingCredit()) {
+    <div class="mt-4">
+      <ngx-skeleton-loader
+        appearance="line"
+        count="5"
+        [theme]="skeletonService.expanded"
+      >
+      </ngx-skeleton-loader>
+    </div>
+  } @else if (creditLoaded() && allLevels().length === 0) {
+    <div
+      class="flex flex-col items-center justify-center py-12 mt-48 text-center"
+    >
+      <div
+        class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
+      >
+        <svg
+          class="w-12 h-12 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+          ></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">
+        Not Credit Score Available
+      </h3>
+      <p class="mb-4 theme-text-secondary theme-text-dark">
+        There are no Credit Score available right now. Please contact your
+        administrator to get started. administrator to get started with Credit
+        Score.
+      </p>
+    </div>
+  }
+</div>

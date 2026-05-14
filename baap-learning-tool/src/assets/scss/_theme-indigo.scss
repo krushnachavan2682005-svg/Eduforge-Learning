@@ -1,0 +1,37 @@
+/* Indigo Theme Variables and Styles */
+
+[data-theme="indigo"] {
+  --theme-primary: theme("colors.indigo-theme.500");
+  --theme-primary-dark: theme("colors.indigo-theme.700");
+  --theme-primary-light: theme("colors.indigo-theme.300");
+  --theme-secondary: theme("colors.indigo-theme.600");
+  --theme-accent: theme("colors.indigo-theme.400");
+  --theme-bg: theme("colors.indigo-theme.50");
+  --theme-bg-secondary: theme("colors.indigo-theme.100");
+  --theme-text: theme("colors.indigo-theme.900");
+  --theme-text-secondary: theme("colors.indigo-theme.700");
+  --theme-btn-custom-bg: theme("colors.indigo-theme.600");
+  --theme-btn-custom-text: #f8fafc;
+}
+
+/* Indigo Theme Specific Styling */
+[data-theme="indigo"] {
+  .theme-gradient-bg {
+    background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  }
+
+  .theme-card-shadow {
+    box-shadow:
+      0 4px 6px -1px rgba(99, 102, 241, 0.1),
+      0 2px 4px -1px rgba(99, 102, 241, 0.06);
+  }
+
+  .theme-border-accent {
+    border-color: #6366f1;
+  }
+
+  .theme-premium-badge {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+  }
+}

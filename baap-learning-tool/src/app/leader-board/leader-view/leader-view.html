@@ -1,0 +1,188 @@
+<div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+  <!-- Header Section -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+    <div class="flex flex-col lg:flex-row lg:relative">
+      <!-- Profile Section (Left) -->
+      <div class="flex gap-4">
+        <!-- Profile Image -->
+        <div class="flex-shrink-0">
+          @if (userProfile().profileImage && !profileImageError()) {
+            <img
+              [src]="userProfile().profileImage"
+              [alt]="userProfile().name"
+              class="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
+              (error)="onImageError()"
+            />
+          } @else {
+            <div class="w-32 h-32 rounded-full bg-gray-300 flex items-center justify-center text-4xl font-bold text-gray-600 border-4 border-gray-200">
+              {{ getInitials(userProfile().name) }}
+            </div>
+          }
+        </div>
+
+        <!-- Profile Info -->
+        <div>
+          <h1 class="text-2xl font-bold mb-3">{{ userProfile().name || "User" }}</h1>
+          
+          <div class="space-y-2">
+            @if (userProfile().phone) {
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+                <span class="text-base">{{ userProfile().phone }}</span>
+              </div>
+            }
+
+            @if (userProfile().qualification) {
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                </svg>
+                <span class="text-base">{{ userProfile().qualification }}</span>
+              </div>
+            }
+
+            @if (userProfile().email) {
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                </svg>
+                <span class="text-base">{{ userProfile().email }}</span>
+              </div>
+            }
+
+            @if (userProfile().location) {
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-base">{{ userProfile().location }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Learning Overview (Centered) -->
+      <div class="lg:absolute lg:left-1/2 lg:transform lg:-translate-x-1/5  mt-6 lg:mt-0">
+        <h3 class="text-lg font-bold mb-3">Learning Overview</h3>
+        <div class="flex gap-3 bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div class="text-center px-3 border-r border-gray-300">
+            <div class="text-2xl font-bold">{{ learningOverview().currentCourses }}</div>
+            <div class="text-sm text-gray-600 mt-1 leading-tight font-medium">Current<br/>Courses</div>
+          </div>
+          <div class="text-center px-3 border-r border-gray-300">
+            <div class="text-2xl font-bold">{{ learningOverview().creditScore }}</div>
+            <div class="text-sm text-gray-600 mt-1 leading-tight font-medium">Credit<br/>Score</div>
+          </div>
+          <div class="text-center px-3">
+            <div class="text-2xl font-bold">{{ learningOverview().badges }}</div>
+            <div class="text-sm text-gray-600 mt-1 leading-tight font-medium">Badges</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Left Column -->
+    <div class="space-y-6">
+      <!-- Course Progress -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-bold mb-4 uppercase">Course Progress</h3>
+        <div class="space-y-4">
+          @for (course of courseProgress(); track course.name) {
+            <div>
+              <div class="flex justify-between mb-2">
+                <span class="text-sm font-medium uppercase">{{
+                  course.name
+                }}</span>
+                <span class="text-sm font-bold">{{ course.progress }}%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  class="bg-blue-600 h-2 rounded-full"
+                  [style.width.%]="course.progress"
+                ></div>
+              </div>
+            </div>
+          }
+          @if (courseProgress().length === 0) {
+            <p class="text-sm text-gray-500 text-center py-4">
+              No courses available
+            </p>
+          }
+        </div>
+      </div>
+
+      <!-- Course History -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-bold mb-4 uppercase">Course History</h3>
+        <div class="space-y-3">
+          @for (course of courseProgress(); track course.name) {
+            <div
+              class="flex justify-between items-center py-2 border-b last:border-0"
+            >
+              <span class="text-sm font-medium uppercase">{{
+                course.name
+              }}</span>
+              <button
+                [disabled]="!course.courseId"
+                class="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+              >
+                Continue
+              </button>
+            </div>
+          }
+          @if (courseProgress().length === 0) {
+            <p class="text-sm text-gray-500 text-center py-4">
+              No courses available
+            </p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="space-y-6">
+      <!-- Action Items -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-bold mb-4">Action Items</h3>
+        <ul class="space-y-3">
+          @for (item of actionItems(); track item.id) {
+            <li class="flex items-start gap-3">
+              <div class="w-2 h-2 rounded-full bg-gray-400 mt-2"></div>
+              <span class="text-sm">{{ item.title }}</span>
+            </li>
+          }
+          @if (actionItems().length === 0) {
+            <li class="text-sm text-gray-500 text-center py-4">
+              No action items
+            </li>
+          }
+        </ul>
+      </div>
+
+      <!-- Resources -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-bold mb-4">Resources</h3>
+        <button
+          class="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-300 rounded hover:bg-gray-50"
+          type="button"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"
+            />
+            <path d="M3 8a2 2 0 012-2v10h8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+          </svg>
+          <span class="font-medium">Resume</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

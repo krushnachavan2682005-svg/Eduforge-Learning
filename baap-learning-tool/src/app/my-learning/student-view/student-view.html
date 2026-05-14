@@ -1,0 +1,340 @@
+<div class="flex w-full h-screen overflow-hidden bg-slate-50 font-sans">
+  <div
+    class="transition-all duration-300 relative z-20"
+    [ngClass]="{
+      'w-[280px]': isSidebarOpen,
+      'w-0 overflow-hidden': !isSidebarOpen,
+    }"
+  >
+    <app-lessons-menu
+      [courseId]="courseId"
+      (sectionSelected)="onSectionSelected($event)"
+      (dataLoaded)="onDataLoaded()"
+    >
+    </app-lessons-menu>
+  </div>
+
+  <div
+    class="flex-1 flex flex-col relative overflow-y-auto overflow-x-hidden transition-all duration-300 h-screen scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent bg-slate-50"
+    [ngClass]="{
+      'ml-0': !isSidebarOpen,
+      'ml-[0px] md:ml-[30px]': isSidebarOpen,
+    }"
+  >
+    @if (isLoading()) {
+      <div class="flex justify-center items-center h-full">
+        <div
+          class="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent"
+        ></div>
+      </div>
+    } @else {
+      <div
+        class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80 transition-all duration-300 px-4 sm:px-6 py-4 flex justify-between items-center"
+      >
+        <div class="flex items-center gap-4">
+          <button
+            (click)="toggleSidebar()"
+            class="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors"
+            title="Toggle Sidebar"
+          >
+            <i class="material-icons text-2xl">
+              {{ isSidebarOpen ? "menu_open" : "menu" }}
+            </i>
+          </button>
+          <h1
+            class="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight"
+          >
+            {{ lessonTitle() | titlecase }}
+          </h1>
+        </div>
+
+        <button
+          class="p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors"
+          (click)="goToBack()"
+          title="Back to Course"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex-1 px-4 sm:px-6 lg:px-8 py-4">
+        <div class="max-w-6xl mx-auto">
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6 hover:shadow-md transition-all duration-200 p-6 sm:p-8 w-full"
+          >
+            @if (!showQuizSection) {
+              <div class="space-y-6">
+                @for (content of course(); track $index) {
+                  @if (content?.type?.toLowerCase() === "text") {
+                    <div class="ql-container ql-snow" style="border: none">
+                      <div
+                        class="ql-editor ql-editor-view break-words"
+                        [innerHTML]="content?.value | safeHtml"
+                      ></div>
+                    </div>
+                  }
+                  @if (content?.type?.toLowerCase() === "image") {
+                    @if (content?.position?.toLowerCase() === "left") {
+                      <div class="flex justify-start my-6">
+                        <img
+                          [src]="content?.signedUrl"
+                          [alt]="content?.file_name || 'Lesson Image'"
+                          class="rounded-lg shadow-md max-w-full max-h-[500px] object-contain"
+                          loading="eager"
+                          fetchpriority="high"
+                        />
+                      </div>
+                    }
+                    @if (content?.position?.toLowerCase() === "center") {
+                      <div class="flex justify-center my-6">
+                        <img
+                          [src]="content?.signedUrl"
+                          [alt]="content?.file_name || 'Lesson Image'"
+                          class="rounded-lg shadow-md max-w-full max-h-[500px] object-contain"
+                          loading="eager"
+                          fetchpriority="high"
+                        />
+                      </div>
+                    }
+                    @if (content?.position?.toLowerCase() === "right") {
+                      <div class="flex justify-end my-6">
+                        <img
+                          [src]="content?.signedUrl"
+                          [alt]="content?.file_name || 'Lesson Image'"
+                          class="rounded-lg shadow-md max-w-full max-h-[500px] object-contain"
+                          loading="eager"
+                          fetchpriority="high"
+                        />
+                      </div>
+                    }
+                  }
+                  @if (content?.type?.toLowerCase() === "pdf") {
+                    <div
+                      class="w-full h-[600px] rounded-lg overflow-hidden border border-slate-200"
+                    >
+                      <iframe
+                        [src]="content?.signedUrl | safeUrl"
+                        class="w-full h-full"
+                        loading="lazy"
+                      ></iframe>
+                    </div>
+                  }
+
+                  @if (content?.type?.toLowerCase() === "video") {
+                    <div
+                      class="relative pb-[56.25%] h-0 overflow-hidden max-w-full rounded-xl shadow-sm bg-black my-6"
+                    >
+                      <iframe
+                        [src]="getVideoUrl(content?.value)"
+                        title="Video player"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen
+                        loading="lazy"
+                        class="absolute top-0 left-0 w-full h-full"
+                      ></iframe>
+                    </div>
+                  }
+                } @empty {
+                  <div
+                    class="flex flex-col items-center justify-center mt-20 text-center"
+                  >
+                    <div
+                      class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-1"
+                    >
+                      <svg
+                        class="w-12 h-12 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                        ></path>
+                      </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">
+                      NO SECTIONS FOUND
+                    </h3>
+                    <p
+                      class="text-gray-500 mb-4 theme-text-secondary theme-text-dark"
+                    >
+                      No sections found for this lesson yet.
+                    </p>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="mt-2">
+                @if (data?.quizzes?.length) {
+                  <div class="mb-8 p-1">
+                    <div
+                      class="flex justify-between items-start text-xl font-semibold text-slate-800 mb-6 pl-2 border-l-4 border-blue-500"
+                    >
+                      <p>
+                        <span class="text-slate-800 mr-2"
+                          >Q{{ currentQuizIndex + 1 }}.</span
+                        >
+                        {{ data?.quizzes[currentQuizIndex]?.question }}
+                      </p>
+                      <span
+                        class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full whitespace-nowrap ml-4"
+                      >
+                        Score: {{ getCorrectAnswersCount() }} /
+                        {{ data?.quizzes?.length }}
+                      </span>
+                    </div>
+
+                    <div class="space-y-3 pl-2 sm:pl-4">
+                      @for (
+                        option of data?.quizzes[currentQuizIndex]?.options;
+                        track $index
+                      ) {
+                        <div
+                          class="flex items-center p-2 mb-5 border-2 rounded-xl cursor-pointer transition-all duration-200 bg-white"
+                          [ngClass]="{
+                            'border-blue-500 bg-blue-50':
+                              selectedAnswers[currentQuizIndex] === option,
+                            'border-slate-200 hover:border-blue-300 hover:bg-sky-50':
+                              selectedAnswers[currentQuizIndex] !== option &&
+                              !selectedAnswers[currentQuizIndex],
+                            'border-green-500 bg-green-50 text-green-800':
+                              selectedAnswers[currentQuizIndex] &&
+                              option ===
+                                data?.quizzes[currentQuizIndex]?.correct_answer,
+                            'border-red-500 bg-red-50 text-red-800':
+                              selectedAnswers[currentQuizIndex] === option &&
+                              option !==
+                                data?.quizzes[currentQuizIndex]?.correct_answer,
+                            'opacity-90 cursor-default':
+                              !!selectedAnswers[currentQuizIndex] &&
+                              selectedAnswers[currentQuizIndex] !== option,
+                          }"
+                          (click)="
+                            !selectedAnswers[currentQuizIndex] &&
+                              selectOption(currentQuizIndex, option)
+                          "
+                        >
+                          <div
+                            class="rounded-full border-2 border-slate-300 p-1 flex items-center mr-2"
+                          >
+                            <div
+                              class="w-3.5 h-3.5 rounded-full flex-shrink-0 transition-all duration-200"
+                              [ngClass]="{
+                                'bg-blue-500 ring-2 ring-blue-500':
+                                  selectedAnswers[currentQuizIndex] === option,
+                                'bg-transparent':
+                                  selectedAnswers[currentQuizIndex] !== option,
+                              }"
+                            ></div>
+                          </div>
+
+                          <span class="text-base text-slate-700 flex-1">{{
+                            option
+                          }}</span>
+                          @if (selectedAnswers[currentQuizIndex]) {
+                            @if (
+                              option ===
+                              data?.quizzes[currentQuizIndex]?.correct_answer
+                            ) {
+                              <i class="material-icons text-green-500"
+                                >check_circle</i
+                              >
+                            }
+                            @if (
+                              selectedAnswers[currentQuizIndex] === option &&
+                              option !==
+                                data?.quizzes[currentQuizIndex]?.correct_answer
+                            ) {
+                              <i class="material-icons text-red-500">cancel</i>
+                            }
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (data) {
+        <div
+          class="relative bottom-2 left-2/4 z-40 flex justify-center w-auto min-w-[320px] max-w-[90%] transition-[margin] duration-300 -translate-x-1/2"
+          [ngClass]="{ 'ml-[10px] max-md:ml-0': isSidebarOpen }"
+        >
+          <div
+            class="flex items-center gap-6 p-1 px-3 bg-white/90 backdrop-blur-xl rounded-full border border-white/50 shadow-2xl"
+          >
+            @if (data?.quizzes?.length) {
+              <button
+                class="px-5 py-2 rounded-full font-medium transition-all duration-200 flex items-center gap-2"
+                [ngClass]="
+                  showQuizSection
+                    ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    : 'bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:brightness-110 shadow-lg shadow-blue-500/30'
+                "
+                (click)="toggleQuizSection()"
+              >
+                {{ showQuizSection ? "Skip" : "Practice" }}
+              </button>
+            }
+
+            @if (showQuizSection) {
+              @if (currentQuizIndex > 0) {
+                <button
+                  class="px-5 py-2 rounded-full font-medium transition-all duration-200 flex items-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  (click)="prevQuiz()"
+                >
+                  <i class="material-icons text-sm">arrow_back</i> Previous
+                </button>
+              }
+              @if (currentQuizIndex < (data?.quizzes?.length || 0) - 1) {
+                <button
+                  class="px-5 py-2 rounded-full font-medium transition-all duration-200 flex items-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  (click)="nextQuiz()"
+                >
+                  Next <i class="material-icons text-sm">arrow_forward</i>
+                </button>
+              }
+            }
+
+            <button
+              type="button"
+              (click)="markAsCompleted()"
+              [disabled]="is_completed || !areAllQuizzesAnswered()"
+              class="px-4 py-2 rounded-full font-medium text-sm transition-all duration-200 border"
+              [ngClass]="
+                is_completed
+                  ? 'bg-gradient-to-br from-green-500 to-green-600 text-white cursor-not-allowed shadow-lg shadow-green-500/30'
+                  : areAllQuizzesAnswered()
+                    ? 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed border-slate-200'
+              "
+            >
+              {{ is_completed ? "Completed" : "Mark Completed" }}
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
