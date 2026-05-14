@@ -1,0 +1,358 @@
+<div class="flex justify-end items-center">
+  <button
+    class="px-4 py-2 font-medium rounded-md theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark"
+    (click)="openSidebar()"
+  >
+    {{ isEditMode ? "Edit Course" : "Add Course" }}
+  </button>
+</div>
+
+@if (showModal) {
+  <div
+    class="fixed inset-0 bg-black z-40 transition-opacity duration-300"
+    [ngClass]="isEditMode ? 'bg-opacity-50' : 'bg-opacity-50'"
+    (click)="closeSidebar()"
+  ></div>
+}
+
+@if (isSidebarOpen) {
+  <div
+    class="fixed top-0 right-0 h-full w-full sm:w-[430px] bg-white shadow-xl z-50 transform transition-transform duration-300 flex flex-col"
+    [class.translate-x-full]="!isSidebarOpen"
+  >
+    <!-- Sidebar Header -->
+    <div class="shrink-0 sticky top-0 pt-8 bg-white border-gray-200 py-0 z-10">
+      <div class="flex justify-between items-center px-4 sm:px-6">
+        <h2 class="text-lg sm:text-xl font-semibold">
+          {{ isEditMode ? "Edit Course" : "Add New Course" }}
+        </h2>
+        <button
+          (click)="closeSidebar()"
+          class="theme-text-secondary theme-text-dark"
+        >
+          <svg
+            class="px-1 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            ></path>
+          </svg>
+        </button>
+      </div>
+      <hr class="theme-border mt-6" />
+    </div>
+    <!-- Sidebar Content -->
+    <div class="flex-1 overflow-auto pt-5 sm:p-7">
+      <form
+        [formGroup]="courseForm"
+        (ngSubmit)="submitForm()"
+        class="space-y-4"
+      >
+        <div class="mb-4">
+          <label class="block mb-1 text-sm sm:text-base">
+            Course Name <span class="text-red-600 font-bold">*</span>
+          </label>
+          <input
+            type="text"
+            class="border p-2 w-full focus:outline-none rounded placeholder:text-sm placeholder:theme-text-secondary"
+            formControlName="title"
+            placeholder="Enter Course Name"
+            (input)="onTitleInput($event)"
+            [maxlength]="35"
+          />
+          @if (
+            courseForm.get("title")?.touched &&
+            courseForm.get("title")?.errors?.["required"]
+          ) {
+            <div class="text-red-600 font-semibold text-md">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Course name is required.</span>
+              </span>
+            </div>
+          }
+          @if (
+            courseForm.get("title")?.touched &&
+            courseForm.get("title")?.errors?.["pattern"]
+          ) {
+            <div class="text-red-600 font-semibold text-md">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Special character must be followed by a character.</span>
+              </span>
+            </div>
+          }
+        </div>
+
+        <div class="mb-2">
+          <label class="block mb-1 text-sm sm:text-base"> Description </label>
+          <textarea
+            class="border rounded focus:outline-none px-3 resize-none w-full placeholder:text-sm placeholder:theme-text-secondary"
+            formControlName="description"
+            placeholder="Enter Description"
+            rows="3"
+            (keypress)="onDescriptionKeypress($event)"
+            (paste)="onDescriptionChange($event)"
+            (input)="onDescriptionChange($event)"
+            (blur)="onDescriptionChange($event)"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block theme-text-dark mb-2 text-sm sm:text-base"
+            >Course Thumbnail</label
+          >
+          <div class="space-y-2">
+            <!-- File Input -->
+            <div class="flex items-center justify-center w-full">
+              <label
+                for="thumbnail-upload"
+                class="flex flex-col items-center justify-center w-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+              >
+                @if (selectedFile) {
+                  <p class="p-4 text-base break-all">{{ selectedFile }}</p>
+                } @else {
+                  <div class="flex flex-col items-center justify-center p-4">
+                    <svg
+                      class="w-7 h-5 mb-3 theme-text-dark theme-text-secondary"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 20 16"
+                    >
+                      <path
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                      />
+                    </svg>
+
+                    <p class="mb-2 text-sm">
+                      <span
+                        class="font-semibold theme-text-secondary theme-text-dark"
+                        >Click to upload
+                      </span>
+                      <span class="theme-text-secondary theme-text-dark">
+                        or drag and drop</span
+                      >
+                    </p>
+                    <p class="text-xs theme-text-secondary">
+                      PNG, JPG, GIF up to 10MB
+                    </p>
+                  </div>
+                }
+                <input
+                  id="thumbnail-upload"
+                  type="file"
+                  class="hidden"
+                  accept="image/*"
+                  (change)="onFileSelected($event)"
+                />
+              </label>
+            </div>
+
+            <!-- Image Preview -->
+            <!-- @if (selectedImage && !isEditMode) {
+              <div class="relative">
+                <img
+                  [src]="selectedImage"
+                  alt="Thumbnail preview"
+                  class="w-70 h-45 object-cover rounded-lg border"
+                />
+                <button
+                  type="button"
+                  (click)="removeImage()"
+                  class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            } -->
+
+            <!-- @if (uploading) {
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  [style.width.%]="uploadProgress"
+                ></div>
+              </div>
+            } -->
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 mb-5">
+          <div class="w-full sm:w-1/2">
+            <label class="block mb-1 text-sm sm:text-base">
+              Level <span class="text-red-600 font-bold">*</span>
+            </label>
+
+            <div class="flex gap-2 text-sm lessons-page theme-placeholder">
+              <ng-select
+                [items]="levels"
+                bindLabel="label"
+                bindValue="value"
+                placeholder="Select Level"
+                formControlName="level"
+                class="flex-1 theme-placeholder"
+              >
+              </ng-select>
+            </div>
+
+            @if (
+              courseForm.get("level")?.touched &&
+              courseForm.get("level")?.errors?.["required"]
+            ) {
+              <div class="text-red-600 text-md font-semibold">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Level is required.</span>
+                </span>
+              </div>
+            }
+          </div>
+
+          <div class="w-full sm:w-1/2">
+            <label class="block mb-1 text-sm sm:text-base">
+              Language <span class="text-red-600 font-bold">*</span>
+            </label>
+
+            <div class="flex gap-2 text-sm lessons-page theme-placeholder">
+              <ng-select
+                [items]="languages"
+                bindLabel="label"
+                bindValue="value"
+                placeholder="Select Language"
+                formControlName="language"
+                class="flex-1"
+              >
+              </ng-select>
+            </div>
+
+            @if (
+              courseForm.get("language")?.touched &&
+              courseForm.get("language")?.errors?.["required"]
+            ) {
+              <div class="text-red-600 text-md font-semibold">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Language is required.</span>
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="block mb-1 text-sm sm:text-base">Tags</label>
+          <div class="flex flex-col sm:flex-row gap-2 mb-3">
+            <input
+              type="text"
+              class="border p-2 focus:outline-none rounded flex-1 border-b placeholder:text-sm placeholder:theme-text-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+              formControlName="tags"
+              placeholder="Enter Tag Name"
+              (keyup.enter)="addTag()"
+              (input)="removeNonTextCharacters($event, 'first_name')"
+              maxlength="25"
+              [disabled]="tags.length >= 5"
+            />
+            <button
+              type="button"
+              class="px-4 py-2 rounded theme-bg-secondary theme-bg-gray theme-text-dark disabled:opacity-50 disabled:cursor-not-allowed"
+              (click)="addTag()"
+              [disabled]="tags.length >= 5"
+            >
+              Add
+            </button>
+          </div>
+
+          @if (tags.length > 0) {
+            <div class="flex flex-wrap gap-2">
+              @for (tag of tags; track tag; let i = $index) {
+                <span
+                  class="font-semibold theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                >
+                  {{ tag }}
+                  <button type="button" (click)="removeTag(i)" class="text-2xl">
+                    ×
+                  </button>
+                </span>
+              }
+            </div>
+          }
+        </div>
+      </form>
+    </div>
+    <div
+      class="shrink-0 theme-border bottom-0 left-0 right-0 bg-white border-t p-2 flex justify-between px-6"
+    >
+      <button
+        type="button"
+        class="px-5 py-2 rounded-lg transition-colors theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark w-full sm:w-auto"
+        (click)="closeSidebar()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="px-3 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark w-full sm:w-auto"
+        [disabled]="!courseForm.valid || isLoading"
+        (click)="submitForm()"
+      >
+        @if (isLoading) {
+          <span class="flex items-center gap-2">
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Saving...
+          </span>
+        } @else {
+          {{ isEditMode ? "Update" : "Save Course" }}
+        }
+      </button>
+    </div>
+  </div>
+}

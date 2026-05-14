@@ -1,0 +1,94 @@
+/* Shared Theme Utility Classes */
+
+@layer utilities {
+  /* Base theme utilities that work across all themes */
+  .theme-primary {
+    color: var(--theme-primary);
+  }
+
+  .theme-bg-primary {
+    background-color: var(--theme-primary);
+  }
+
+  .theme-bg {
+    background-color: var(--theme-bg);
+  }
+
+  .theme-bg-secondary {
+    background-color: var(--theme-bg-secondary);
+  }
+
+  .theme-text {
+    color: var(--theme-text);
+  }
+
+  .theme-text-secondary {
+    color: var(--theme-text-secondary);
+  }
+
+  .theme-border {
+    border-color: var(--theme-primary);
+  }
+
+  /* Additional utility classes */
+  .theme-hover-primary {
+    transition: background-color 0.2s ease;
+  }
+
+  .theme-hover-primary:hover {
+    background-color: var(--theme-primary-light);
+  }
+
+  .theme-focus-ring {
+    outline: 2px solid var(--theme-primary);
+    outline-offset: 2px;
+  }
+
+  .theme-transition {
+    transition: all 0.3s ease;
+  }
+
+  /* Theme-aware animations */
+  .theme-fade-in {
+    animation: themeAwareFadeIn 0.5s ease-in-out;
+  }
+
+  .theme-slide-up {
+    animation: themeAwareSlideUp 0.6s ease-out;
+  }
+
+
+  .theme-btn-custom {
+    background-color: var(--theme-btn-custom-bg);
+    color: var(--theme-btn-custom-text);
+    transition: all 0.3s ease;
+  }
+
+  .theme-btn-custom:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+}
+
+/* Animation keyframes */
+@keyframes themeAwareFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes themeAwareSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

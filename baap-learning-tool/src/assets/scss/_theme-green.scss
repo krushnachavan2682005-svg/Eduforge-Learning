@@ -1,0 +1,37 @@
+/* Green Theme Variables and Styles */
+
+[data-theme="green"] {
+  --theme-primary: theme("colors.green-theme.500");
+  --theme-primary-dark: theme("colors.green-theme.700");
+  --theme-primary-light: theme("colors.green-theme.300");
+  --theme-secondary: theme("colors.green-theme.600");
+  --theme-accent: theme("colors.green-theme.400");
+  --theme-bg: theme("colors.green-theme.50");
+  --theme-bg-secondary: theme("colors.green-theme.100");
+  --theme-text: theme("colors.green-theme.900");
+  --theme-text-secondary: theme("colors.green-theme.700");
+  --theme-btn-custom-bg: theme("colors.green-theme.300");
+  --theme-btn-custom-text: #f8fafc;
+}
+
+/* Green Theme Specific Styling */
+[data-theme="green"] {
+  .theme-gradient-bg {
+    background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  }
+
+  .theme-card-shadow {
+    box-shadow:
+      0 4px 6px -1px rgba(34, 197, 94, 0.1),
+      0 2px 4px -1px rgba(34, 197, 94, 0.06);
+  }
+
+  .theme-border-accent {
+    border-color: #22c55e;
+  }
+
+  .theme-success-indicator {
+    background-color: #22c55e;
+    color: white;
+  }
+}

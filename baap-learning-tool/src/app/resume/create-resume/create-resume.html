@@ -1,0 +1,1022 @@
+<div class="mx-2 sm:mx-4 md:mx-7 lg:mx-8 theme-text-secondary theme-text-dark">
+  <form [formGroup]="resumeForm" (ngSubmit)="onSubmit()">
+    <div class="header bg-white pt-4">
+      <app-header
+        [title]="headerTitle"
+        [showBackButton]="true"
+        [isEditMode]="isEditMode"
+        [resumeForm]="resumeForm"
+        [isLoading]="isLoading"
+      ></app-header>
+    </div>
+    <div class="w-full flex gap-4">
+      <div class="flex-1">
+        <label class="block text-md mb-1 "
+          >Name <span class="text-red-500">*</span></label
+        >
+        <input
+          type="text"
+          [maxlength]="50"
+          placeholder="Enter name"
+          formControlName="name"
+          oninput="this.value = this.value
+    ?.replace(/[^a-zA-Z\s]/g, '')
+    ?.replace(/^\s+/g, '')
+    ?.replace(/\s{2,}/g, ' ')
+    ?.replace(/(?!^.*$)\s$/g, ' ')"
+          class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+        />
+        <div
+          class="flex align-items-center text-red-600 mt-1 text-md font-semibold"
+        >
+          @if (
+            resumeForm.get("name")?.errors?.["required"] &&
+            resumeForm.get("name")?.touched
+          ) {
+            <svg class="w-4 h-4 mt-1" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span class="mx-1">Name is required.</span>
+          }
+        </div>
+      </div>
+      <div class="flex-1">
+        <label class="block text-md mb-1"
+          >Label
+          <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          [maxlength]="70"
+          placeholder="Enter title"
+          formControlName="label"
+          class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+          oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');"
+        />
+        <div
+          class="inline-flex items-center text-red-600 text-sm font-semibold"
+        >
+          @if (
+            resumeForm.get("label")?.errors?.["required"] &&
+            resumeForm.get("label")?.touched
+          ) {
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span>Label is required.</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-2">
+      <label class="block text-md mb-1">
+        Summary <span class="text-red-500">*</span>
+      </label>
+
+      <textarea
+        rows="4"
+        placeholder="Write about yourself..."
+        formControlName="summary"
+        class="w-full border rounded p-2 resize-none outline-none placeholder:theme-text-secondary"
+      ></textarea>
+
+      <!-- Validation message (same style as Name) -->
+      @if (
+        resumeForm.get("summary")?.errors?.["required"] &&
+        resumeForm.get("summary")?.touched
+      ) {
+        <div class="flex items-center text-red-600 mt-1 text-md font-semibold">
+          <svg class="w-4 h-4 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <span class="mx-1">Summary is required.</span>
+        </div>
+      }
+      @if (
+        resumeForm.get("summary")?.errors?.["minlength"] &&
+        resumeForm.get("summary")?.touched
+      ) {
+        <div class="flex items-center text-red-600 mt-1 text-md font-semibold">
+          <svg class="w-4 h-4 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <span class="mx-1">Summary must be at least 30 characters.</span>
+        </div>
+      }
+      @if (
+        resumeForm.get("summary")?.errors?.["maxlength"] &&
+        resumeForm.get("summary")?.touched
+      ) {
+        <div class="flex items-center text-red-600 mt-1 text-md font-semibold">
+          <svg class="w-4 h-4 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <span class="mx-1">Summary cannot exceed 500 characters.</span>
+        </div>
+      }
+    </div>
+
+    <div class="mb-2 space-y-1">
+      <h3 class="text-lg font-semibold mt-2">Contact</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-md mb-1">
+            Email <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="email"
+            placeholder="Enter email"
+            formControlName="email"
+            class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+          />
+          <div
+            class="flex align-items-center text-red-600 pt-1 text-md font-semibold"
+          >
+            @if (
+              resumeForm.get("email")?.touched &&
+              (resumeForm.get("email")?.errors?.["required"] ||
+                resumeForm.get("email")?.errors?.["pattern"])
+            ) {
+              <svg class="w-4 h-4 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              @if (resumeForm.get("email")?.errors?.["required"]) {
+                <span class="mx-1">Email is required.</span>
+              }
+              @if (resumeForm.get("email")?.errors?.["pattern"]) {
+                <span class="mx-1">Please enter a valid email</span>
+              }
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-md mb-1">
+            Phone <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            placeholder="Enter phone"
+            formControlName="phone"
+            maxlength="10"
+            oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);"
+            class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+          />
+          <div>
+            @if (
+              resumeForm.get("phone")?.invalid &&
+              (resumeForm.get("phone")?.touched ||
+                resumeForm.get("phone")?.dirty)
+            ) {
+              <div>
+                <div
+                  class="flex align-items-center text-red-600 mt-1 text-md font-semibold"
+                >
+                  <svg
+                    class="w-4 h-4 mt-1 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+
+                  <div>
+                    @if (resumeForm.get("phone")?.errors?.["required"]) {
+                      <span class="block">Phone is required.</span>
+                    }
+                    @if (
+                      resumeForm.get("phone")?.errors?.["minlength"] ||
+                      resumeForm.get("phone")?.errors?.["maxlength"]
+                    ) {
+                      <span class="block">Number should be 10 digits.</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium mb-1"> linkedin URL </label>
+
+          <input
+            type="text"
+            placeholder="Enter website url"
+            formControlName="url"
+            class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+          />
+          @if (
+            resumeForm.get("url")?.hasError("pattern") &&
+            resumeForm.get("url")?.touched
+          ) {
+            <div
+              class="flex items-center text-red-600 mt-1 text-md font-semibold"
+            >
+              <svg class="w-4 h-4 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="mx-1"> Please enter a valid URL pattern </span>
+            </div>
+          }
+        </div>
+
+        <div
+          formGroupName="location"
+          class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          <div>
+            <label class="block mb-1 text-sm sm:text-base"
+              >Address <span class="text-red-500">*</span></label
+            >
+            <input
+              type="text"
+              placeholder="Enter address"
+              formControlName="address"
+              #addressInput
+              (input)="onAddressInput(addressInput.value)"
+              onkeypress="return event.key !== ' ' || (this.value.length > 1 && this.value.slice(-1) !== ' ')"
+              class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+            />
+            <div
+              class="flex align-items-center text-red-600 mt-1 text-md font-semibold"
+            >
+              @if (
+                resumeForm.get("location.address")?.errors?.["required"] &&
+                resumeForm.get("location.address")?.touched
+              ) {
+                <svg
+                  class="w-4 h-4 mt-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span class="mx-1">Address is required.</span>
+              }
+              @if (isGeocoding) {
+                <div class="text-md text-blue-600">
+                  <svg
+                    class="inline w-4 h-4 animate-spin mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    ></path>
+                  </svg>
+                  Looking up location...
+                </div>
+              }
+              @if (
+                geocodeNotFound &&
+                !isGeocoding &&
+                (resumeForm.get("location.address")?.value || "")?.trim()
+                  ?.length > 0
+              ) {
+                <div
+                  class="flex align-items-center text-red-600 text-md font-semibold"
+                >
+                  <svg
+                    class="w-4 h-4 mt-1 mx-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Location not found. Please refine the address.
+                </div>
+              }
+            </div>
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm sm:text-base"
+              >City <span class="text-red-500">*</span></label
+            >
+            <input
+              type="text"
+              placeholder="Enter city"
+              formControlName="city"
+              class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+            />
+            <div
+              class="flex align-items-center text-red-600 mt-1 text-md font-semibold"
+            >
+              @if (
+                resumeForm.get("location.city")?.errors?.["required"] &&
+                resumeForm.get("location.city")?.touched
+              ) {
+                <svg
+                  class="w-4 h-4 mt-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span class="mx-1">City is required.</span>
+              }
+            </div>
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm sm:text-base"
+              >Region <span class="text-red-500">*</span></label
+            >
+            <input
+              type="text"
+              placeholder="Enter region"
+              formControlName="region"
+              class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+            />
+            <div
+              class="flex align-items-center text-red-600 mt-1 text-md font-semibold"
+            >
+              @if (
+                resumeForm.get("location.region")?.errors?.["required"] &&
+                resumeForm.get("location.region")?.touched
+              ) {
+                <svg
+                  class="w-4 h-4 mt-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span class="mx-1">Region is required.</span>
+              }
+            </div>
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm sm:text-base"
+              >Country <span class="text-red-500">*</span></label
+            >
+            <input
+              type="text"
+              placeholder="Enter country"
+              formControlName="country"
+              class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+            />
+            <div
+              class="flex align-items-center text-red-600 mt-1 text-md font-semibold"
+            >
+              @if (
+                resumeForm.get("location.country")?.errors?.["required"] &&
+                resumeForm.get("location.country")?.touched
+              ) {
+                <svg
+                  class="w-4 h-4 mt-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span class="mx-1">Country is required.</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div formArrayName="education">
+      <h3 class="text-lg font-semibold mt-5 mb-2">Education</h3>
+
+      @for (edu of education.controls; track $index) {
+        <div [formGroupName]="$index" class="mb-4 space-y-2 border p-3 rounded">
+          <div class="grid grid-cols-3 gap-4">
+            <!-- Degree -->
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Degree <span class="text-red-500">*</span>
+              </label>
+
+              <input
+                type="text"
+                [maxlength]="35"
+                formControlName="study_type"
+                placeholder="e.g. MSc Computer Science"
+                class="border p-2 rounded w-full outline-none placeholder:theme-text-secondary"
+              />
+              <div
+                class="inline-flex items-center text-red-600 text-sm font-semibold"
+              >
+                @if (
+                  edu.get("study_type")?.errors?.["required"] &&
+                  edu.get("study_type")?.touched
+                ) {
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Degree is required.</span>
+                }
+              </div>
+            </div>
+
+            <!-- Grade / CGPA -->
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Grade / CGPA <span class="text-red-500">*</span>
+              </label>
+
+              <input
+                type="text"
+                formControlName="score"
+                placeholder="e.g. 7.5 CGPA"
+                class="border p-2 rounded w-full outline-none placeholder:theme-text-secondary"
+              />
+              <div
+                class="inline-flex items-center text-red-600 text-sm font-semibold"
+              >
+                @if (
+                  edu.get("score")?.errors?.["required"] &&
+                  edu.get("score")?.touched
+                ) {
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Grade is required.</span>
+                }
+              </div>
+            </div>
+
+            <!-- Institute / Board -->
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Institute / Board <span class="text-red-500">*</span>
+              </label>
+
+              <input
+                type="text"
+                [maxlength]="40"
+                formControlName="institution"
+                placeholder="Enter institute"
+                class="border p-2 rounded w-full outline-none placeholder:theme-text-secondary"
+              />
+              <div
+                class="inline-flex items-center text-red-600 text-sm font-semibold"
+              >
+                @if (
+                  edu.get("institution")?.errors?.["required"] &&
+                  edu.get("institution")?.touched
+                ) {
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Institute name is required.</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-4">
+            <!-- Area -->
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Area <span class="text-red-500">*</span>
+              </label>
+
+              <input
+                type="text"
+                formControlName="area"
+                placeholder="Enter area"
+                class="w-full border rounded p-2 outline-none placeholder:theme-text-secondary"
+              />
+              <div
+                class="inline-flex items-center text-red-600 text-sm font-semibold"
+              >
+                @if (
+                  edu.get("area")?.errors?.["required"] &&
+                  edu.get("area")?.touched
+                ) {
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Area is required.</span>
+                }
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                Start Year <span class="text-red-500">*</span>
+              </label>
+              <div class="lessons-page placeholder:theme-text-secondary">
+                <ng-select
+                  [items]="years"
+                  bindLabel="year"
+                  bindValue="year"
+                  placeholder="Select Start Year"
+                  formControlName="start_date"
+                  [clearable]="true"
+                ></ng-select>
+              </div>
+              @if (
+                edu?.get("start_date")?.touched &&
+                !edu?.get("start_date")?.value
+              ) {
+                <div
+                  class="flex align-items-center text-red-600 pt-1 text-md font-semibold gap-1"
+                >
+                  <svg
+                    class="w-4 h-4 mt-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Start year is required
+                </div>
+              }
+              @if (edu?.get("start_date")?.hasError("futureDate")) {
+                <div
+                  class="flex align-items-center text-red-600 pt-1 text-md  gap-1 font-semibold"
+                >
+                  <svg
+                    class="w-4 h-4 mt-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Future date not allowed
+                </div>
+              }
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">
+                End Year <span class="text-red-500">*</span>
+              </label>
+              <div class="lessons-page">
+                <ng-select
+                  [items]="years"
+                  bindLabel="year"
+                  bindValue="year"
+                  placeholder="Select End Year"
+                  formControlName="end_date"
+                  [clearable]="true"
+                ></ng-select>
+              </div>
+              @if (
+                edu?.get("end_date")?.touched && !edu?.get("end_date")?.value
+              ) {
+                <div
+                  class="flex align-items-center text-red-600 pt-1 text-md font-semibold gap-1"
+                >
+                  <svg
+                    class="w-4 h-4 mt-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  End year is required
+                </div>
+              }
+              @if (
+                edu?.errors?.["invalidOrder"] &&
+                (edu.get("end_date")?.touched || edu.get("start_date")?.touched)
+              ) {
+                <div
+                  class="flex items-center text-red-600 mt-1 text-sm font-semibold"
+                >
+                  <svg
+                    class="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>End year must be after Start year.</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          @if ($index > 0) {
+            <button
+              type="button"
+              (click)="removeEducation($index)"
+              class="text-red-600 text-sm theme-bg-gray theme-bg-secondary px-2 py-2 rounded"
+            >
+              Remove
+            </button>
+          }
+        </div>
+      }
+
+      <button
+        type="button"
+        (click)="addEducation()"
+        class="text-blue-600 text-md theme-bg-gray theme-bg-secondary px-2 py-2 rounded"
+      >
+        + Add Education
+      </button>
+    </div>
+
+    <div formArrayName="skills">
+      <h3 class="text-lg font-semibold mt-5 mb-2">Skills</h3>
+      @for (skill of skills.controls; track $index) {
+        <div [formGroupName]="$index" class="mb-4 space-y-2 border p-3 rounded">
+          <div class="grid grid-cols-2 gap-4 mb-2">
+            <div>
+              <label class="block mb-1 text-sm sm:text-base"
+                >Skill Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                [maxlength]="30"
+                formControlName="name"
+                placeholder="e.g. Generative AI"
+                class="border p-2 rounded w-full outline-none placeholder:theme-text-secondary"
+              />
+              <div
+                class="flex align-items-center text-red-600 mt-1 text-md font-semibold"
+              >
+                @if (
+                  skill.get("name")?.errors?.["required"] &&
+                  skill.get("name")?.touched
+                ) {
+                  <svg
+                    class="w-4 h-4 mt-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span class="mx-1">Skill name is required.</span>
+                }
+              </div>
+            </div>
+            <div>
+              <label class="block mb-1 text-sm sm:text-base"
+                >Skill Level <span class="text-red-500">*</span></label
+              >
+              <div class="lessons-page theme-placeholder">
+                <ng-select
+                  formControlName="level"
+                  [items]="skillLevels"
+                  bindLabel="level"
+                  bindValue="level"
+                  placeholder="Select level"
+                  [clearable]="true"
+                  [searchable]="true"
+                  class="w-full"
+                >
+                </ng-select>
+                <div
+                  class="flex align-items-center text-red-600 mt-1 text-md font-semibold"
+                >
+                  @if (
+                    skill.get("level")?.errors?.["required"] &&
+                    skill.get("level")?.touched
+                  ) {
+                    <svg
+                      class="w-4 h-4 mt-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span class="mx-1">Skill level is required.</span>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+          @if ($index >= 0) {
+            <button
+              type="button"
+              (click)="removeSkill($index)"
+              class="text-red-600 text-sm theme-bg-gray theme-bg-secondary px-2 py-2 rounded"
+            >
+              Remove
+            </button>
+          }
+        </div>
+      }
+      <button
+        type="button"
+        (click)="addSkill()"
+        class="text-blue-600 text-md theme-bg-gray theme-bg-secondary px-2 py-2 rounded"
+      >
+        + Add Skill
+      </button>
+    </div>
+
+    <div formArrayName="work">
+      <h3 class="text-lg font-semibold mt-5 mb-2">Experience</h3>
+      @for (exp of work.controls; track $index) {
+        <div [formGroupName]="$index" class="mb-4 space-y-2 border p-3 rounded">
+          <div>
+            <label class="block text-sm font-medium mb-1">Job Title</label>
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="e.g. Founder, CEO"
+              class="border p-2 rounded w-full outline-none placeholder:theme-text-secondary"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Company Name</label>
+            <input
+              type="text"
+              formControlName="position"
+              placeholder="Enter company name"
+              class="border p-2 rounded w-full outline-none placeholder:theme-text-secondary"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Location</label>
+            <input
+              type="text"
+              formControlName="location"
+              placeholder="Enter company location"
+              class="border p-2 rounded w-full outline-none placeholder:theme-text-secondary"
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Start Date</label>
+              <app-calendar
+                [value]="exp?.get('start_date')?.value"
+                (dateSelected)="
+                  exp?.get('start_date')?.setValue($event);
+                  exp?.get('start_date')?.markAsTouched()
+                "
+              ></app-calendar>
+              @if (
+                exp?.get("start_date")?.errors?.["invalidOrder"] &&
+                exp?.get("start_date")?.touched
+              ) {
+                <div
+                  class="flex align-items-center text-red-600 pt-1 text-md  gap-1 font-semibold"
+                >
+                  <svg
+                    class="w-4 h-4 mt-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Future date not allowed
+                </div>
+              }
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">End Date</label>
+              <app-calendar
+                [value]="exp?.get('end_date')?.value"
+                (dateSelected)="
+                  exp?.get('end_date')?.setValue($event);
+                  exp?.get('end_date')?.markAsTouched()
+                "
+              ></app-calendar>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1"
+              >Job Description</label
+            >
+            <textarea
+              formControlName="summary"
+              placeholder="Write about your role"
+              class="border p-2 rounded w-full resize-none outline-none placeholder:theme-text-secondary"
+            ></textarea>
+          </div>
+          @if ($index > 0) {
+            <button
+              type="button"
+              (click)="removeExperience($index)"
+              class="text-red-600 text-sm theme-bg-gray theme-bg-secondary px-2 py-2 rounded"
+            >
+              Remove
+            </button>
+          }
+        </div>
+      }
+      <button
+        type="button"
+        (click)="addExperience()"
+        class="text-blue-600 text-md theme-bg-gray theme-bg-secondary px-2 py-2 rounded"
+      >
+        + Add Experience
+      </button>
+    </div>
+    <div formArrayName="projects">
+      <h3 class="text-lg font-semibold mt-5 mb-2">Projects</h3>
+      @for (proj of projects.controls; track $index) {
+        <div [formGroupName]="$index" class="mb-4 space-y-2 border p-3 rounded">
+          <div>
+            <label class="block text-sm font-medium mb-1">Project Title</label>
+            <input
+              type="text"
+              formControlName="name"
+              placeholder="e.g. E-commerce Website"
+              class="border p-2 rounded w-full outline-none placeholder:theme-text-secondary"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Client</label>
+            <input
+              type="text"
+              formControlName="entity"
+              placeholder="Enter client name"
+              class="border p-2 rounded w-full outline-none placeholder:theme-text-secondary"
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1"
+                >Project Start</label
+              >
+
+              <app-calendar
+                [value]="proj?.get('start_date')?.value"
+                (dateSelected)="
+                  proj?.get('start_date')?.setValue($event);
+                  proj.get('start_date')?.markAsTouched()
+                "
+              ></app-calendar>
+
+              @if (
+                proj?.get("start_date")?.errors?.["invalidOrder"] &&
+                proj?.get("start_date")?.touched
+              ) {
+                <div
+                  class="flex align-items-center text-red-600 pt-1 gap-1 text-md font-semibold"
+                >
+                  <svg
+                    class="w-4 h-4 mt-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  Future date not allowed
+                </div>
+              }
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">Project End</label>
+              <app-calendar
+                [value]="proj?.get('end_date')?.value"
+                (dateSelected)="
+                  proj?.get('end_date')?.setValue($event);
+                  proj?.get('end_date')?.markAsTouched()
+                "
+              ></app-calendar>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1"
+              >Project Description</label
+            >
+            <textarea
+              formControlName="summary"
+              placeholder="Write about the project"
+              class="border p-2 rounded w-full resize-none outline-none placeholder:theme-text-secondary"
+            ></textarea>
+          </div>
+          @if ($index > 0) {
+            <button
+              type="button"
+              (click)="removeProject($index)"
+              class="text-red-600 text-sm theme-bg-gray theme-bg-secondary px-2 py-2 rounded"
+            >
+              Remove
+            </button>
+          }
+        </div>
+      }
+      <button
+        type="button"
+        (click)="addProject()"
+        class="text-blue-600 text-md theme-bg-gray theme-bg-secondary px-2 py-2 rounded mb-4"
+      >
+        + Add Projects
+      </button>
+    </div>
+  </form>
+</div>

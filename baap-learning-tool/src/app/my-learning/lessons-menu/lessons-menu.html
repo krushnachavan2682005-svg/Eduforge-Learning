@@ -1,0 +1,96 @@
+<div
+  class="menubar theme-bg-secondary theme-text-secondary sidebar-text-white sidebar-bg-black min-h-screen p-3"
+>
+  @if (course()?.title) {
+    <div>
+      <span class="font-semibold text-2xl py-4">{{ course()?.title }}</span>
+      <div class="flex flex-wrap gap-2 mt-2">
+        @for (tag of course()?.tags; track $index) {
+          <span
+            [ngClass]="{
+              'bg-green-200 text-green-800': $index % 4 === 0,
+              'bg-blue-200 text-blue-900': $index % 4 === 1,
+              'bg-red-200 text-red-900': $index % 4 === 2,
+              'bg-yellow-200 text-yellow-800': $index % 4 === 3,
+            }"
+            class="px-2 text-sm font-normal rounded-full"
+          >
+            {{ tag }}
+          </span>
+        }
+      </div>
+      <hr class="theme-border my-3" />
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex justify-center items-center h-40">
+      <div
+        class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+      ></div>
+    </div>
+  } @else if (!lessons().length) {
+    <div class="flex flex-col justify-center items-center h-40 text-slate-400">
+      <i class="material-symbols-outlined text-4xl mb-2">menu_book</i>
+      <span class="text-sm font-medium">No lessons available</span>
+    </div>
+  }
+
+  <div class="auto_scroll">
+    @for (lesson of lessons(); track $index) {
+      <div
+        class="my-2 px-3 cursor-pointer flex justify-between items-center rounded-lg"
+        (click)="toggleLesson(lesson)"
+      >
+        <span
+          class="cursor-pointer text-lg titlecase font-normal hover:font-semibold ml-2 truncate flex-1 min-w-0"
+          [appTooltip]="lesson?.title?.length > 25 ? lesson?.title : ''"
+          tooltipPosition="right"
+        >
+          {{ lesson?.title }}
+        </span>
+        <span class="pt-2 flex-none">
+          @if (lesson?.expanded) {
+            <i class="material-symbols-outlined">stat_minus_1 </i>
+          } @else {
+            <i class="material-symbols-outlined">chevron_forward </i>
+          }
+        </span>
+      </div>
+
+      @if (lesson?.expanded) {
+        <ul class="flex flex-col pl-6">
+          @for (section of lesson?.sections; track section) {
+            <li
+              class="flex items-center text-base font-semibold rounded-md"
+              (click)="selectSection(lesson, section)"
+            >
+              @if (section?.is_completed === true) {
+                <input
+                  type="checkbox"
+                  class="w-5 h-5 accent-green-500 pointer-events-none align-middle mb-2 ml-1"
+                  [checked]="section?.is_completed"
+                />
+              } @else {
+                <span class="material-symbols-outlined mb-2"> lock </span>
+              }
+
+              <span
+                class="text-lg relative cursor-pointer font-normal hover:font-semibold mb-2 ml-2 rounded-md px-2 py-1 truncate w-full"
+                [appTooltip]="section?.title?.length > 25 ? section?.title : ''"
+                tooltipPosition="top"
+                [ngClass]="
+                  selectedSectionId === section?.id
+                    ? 'text-white bg-slate-600'
+                    : 'text-dark hover:font-semibold'
+                "
+              >
+                {{ section?.title }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    }
+  </div>
+</div>

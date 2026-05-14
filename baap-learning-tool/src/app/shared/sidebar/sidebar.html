@@ -1,0 +1,224 @@
+<div class="row h-screen">
+  <div class="col-12 col-md-3 h-full">
+    <div
+      class="sidebar theme-bg-secondary theme-text-secondary sidebar-text-white sidebar-bg-black flex flex-col h-full"
+      [class.collapsed]="isCollapsed"
+    >
+      @if (!isCollapsed) {
+        <div class="pl-6 pt-3 flex gap-3 items-center shrink-0">
+          <div
+            class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white flex-shrink-0"
+          >
+            @if (logoUrl) {
+              <img
+                [src]="logoUrl"
+                class="w-full h-full object-cover rounded-full"
+              />
+            } @else {
+              <img
+                src="images/baap-logo.png"
+                alt="default-logo"
+                class="w-full h-full object-cover rounded-full"
+              />
+            }
+          </div>
+
+          <div>
+            <p
+              class="ellipsis text-lg sm:text-lg relative font-semibold px-1"
+              appTooltip="{{ legalOrgName }}"
+              tooltipPosition="bottom"
+            >
+              {{ legalOrgName }}
+            </p>
+          </div>
+        </div>
+      }
+
+      @if (isPermitted()) {
+        <div class="pl-1 mt-5">
+          <ul class="nav-list ml-4 auto_scroll">
+            @for (item of sidebarConfig?.menuItems; track item) {
+              @if (!item?.hide) {
+                <div
+                  class="nav-item mt-3"
+                  [class.active]="item?.active"
+                  *authorize="item?.permissions ?? ''"
+                >
+                  <div
+                    class="nav-link flex items-center justify-between cursor-pointer hover:bg-gray-100 mr-2 hover:text-blue-600 px-2 py-1 rounded-md"
+                    (click)="onMenuLabelClick(item)"
+                  >
+                    <div class="flex items-center">
+                      <i class="material-icons mr-1 text-xl">{{
+                        item?.icon
+                      }}</i>
+                      @if (!isCollapsed) {
+                        <span
+                          class="nav-text cursor-pointer pt-1 not-italic text-sm uppercase mb-1 ml-2"
+                        >
+                          {{ item?.label }}
+                        </span>
+                      }
+                    </div>
+                    @if (!isCollapsed && (item?.subItems?.length ?? 0) > 0) {
+                      <i class="material-icons text-xl">
+                        {{
+                          openMenuId === item?.id
+                            ? 'keyboard_arrow_down'
+                            : 'keyboard_arrow_right'
+                        }}
+                      </i>
+                    }
+                  </div>
+
+                  <!-- Submenu -->
+                  @if (
+                    openMenuId === item?.id && (item?.subItems?.length ?? 0) > 0
+                  ) {
+                    <div class="ml-8">
+                      @for (subItem of item?.subItems; track subItem) {
+                        @if (!subItem?.hide) {
+                          <div
+                            *authorize="subItem?.permissions ?? ''"
+                            class="nav-link flex items-center cursor-pointer mt-1 hover:bg-gray-100 mr-2 hover:text-blue-600 px-2 py-1 rounded-md"
+                            [class.active]="activeSubMenuId === subItem?.id"
+                            (click)="onMenuItemClick(subItem)"
+                          >
+                            <i class="material-icons text-base mr-1">{{
+                              subItem?.icon
+                            }}</i>
+                            <span class="text-md">{{
+                              subItem?.label
+                            }}</span>
+                          </div>
+                        }
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </ul>
+        </div>
+      }
+
+      <div
+        class="sidebar-footer theme-border border-t w-60 pl-5 pb-2 pt-5 mx-2 relative shrink-0"
+      >
+        @if (!isCollapsed) {
+          <div class="flex items-center pl-2">
+            @if (users()?.profile_image) {
+              <img
+                [src]="users()?.profile_image"
+                alt="Profile Image"
+                class="w-6 h-6 rounded-full object-cover border border-gray-300"
+              />
+            } @else {
+              <div
+                class="w-6 h-6 rounded-full bg-white flex items-center justify-center text-black text-md font-semibold"
+              >
+                {{ users()?.first_name?.[0] | uppercase
+                }}{{ users()?.last_name?.[0] | uppercase }}
+              </div>
+            }
+            <span class="ml-2 text-md">
+              {{ users()?.first_name | titlecase }}
+              {{ users()?.last_name | titlecase }}
+            </span>
+          </div>
+        }
+        @if (canSwitchOrg()) {
+          <div
+            class="flex items-center gap-2 pl-2 cursor-pointer rounded-md mt-1"
+            (click)="navigateCliet()"
+          >
+            @if (!isCollapsed) {
+              <i class="material-icons mr-1 text-xl">sync_alt</i>
+              <span>Switch Organization</span>
+            }
+          </div>
+        }
+        <div>
+          <div
+            class="flex items-center gap-2 pl-2 cursor-pointer rounded-md mt-1"
+            (click)="showThemeSelector = !showThemeSelector"
+          >
+            @if (!isCollapsed) {
+              <i class="material-icons mr-1 text-xl">contrast</i>
+              <span>Theme</span>
+            }
+          </div>
+          @if (showThemeSelector) {
+            <div
+              class="absolute bottom-20 left-4 w-44 bg-white theme-text-dark theme-text-secondary shadow-lg rounded-lg p-3 z-50"
+            >
+              <div class="space-y-2">
+                @for (theme of availableThemes; track theme) {
+                  <button
+                    class="flex items-center gap-2 pl-2 rounded-md w-full hover:bg-gray-100"
+                    [class.border]="currentTheme === theme?.value"
+                    [class.border-gray-400]="currentTheme === theme?.value"
+                    (click)="
+                      selectTheme(theme.value); showThemeSelector = false
+                    "
+                  >
+                    <div
+                      class="w-4 h-4 rounded-full mt-0"
+                      [style.background-color]="theme?.color"
+                    ></div>
+                    <span>{{ theme?.name }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <div
+          class="flex items-center gap-2 pl-2 cursor-pointer rounded-md mt-1"
+          (click)="showLogoutConfirm = true"
+        >
+          @if (!isCollapsed) {
+            <i class="material-icons mr-1 text-xl">logout</i>
+            <span>Logout</span>
+          }
+        </div>
+      </div>
+    </div>
+    @if (!sidebarConfig) {
+      <div class="sidebar-loading">
+        <div class="loading-spinner"></div>
+      </div>
+    }
+  </div>
+</div>
+
+@if (showLogoutConfirm) {
+  <div
+    class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[1001] p-4"
+  >
+    <div
+      class="bg-white rounded-xl text-center w-full max-w-[550px] shadow-lg flex flex-col justify-center items-center px-8 py-8"
+    >
+      <p
+        class="text-2xl font-semibold mb-8 theme-text-secondary theme-text-dark"
+      >
+        Are you sure you want to logout?
+      </p>
+      <div class="flex gap-4 w-full justify-center">
+        <button
+          class="rounded-md text-base font-medium transition w-[90px] theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark"
+          (click)="confirmLogout()"
+        >
+          Yes
+        </button>
+        <button
+          class="px-5 py-3 rounded-md text-base font-medium transition w-[90px] theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark"
+          (click)="cancelLogout()"
+        >
+          No
+        </button>
+      </div>
+    </div>
+  </div>
+}

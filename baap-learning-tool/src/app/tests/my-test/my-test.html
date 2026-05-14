@@ -1,0 +1,360 @@
+<div class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 theme-text-secondary theme-text-dark">
+  <div class="header bg-white pt-2">
+    <app-header [name]="headers[0].title" [studentClass]="headers[0].subtitle">
+    </app-header>
+  </div>
+
+  @if (TestList().length > 0) {
+    @for (test of TestList(); track test) {
+      <div class="theme-bg border rounded-md overflow-hidden mb-3 mt-3">
+        <div
+          class="flex flex-col md:flex-row cursor-pointer justify-between items-start md:items-center gap-2 p-2 theme-bg-secondary theme-bg-gray"
+          (click)="toggleCard(test)"
+        >
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <span style="float: right">
+              @if (activeCardId !== test?.id) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              }
+
+              @if (activeCardId === test?.id) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M5 8l7 11 7-11z" />
+                </svg>
+              }
+            </span>
+            <p
+              class="mb-0 text-xl sm:text-xl font-semibold truncate max-w-[55ch] break-words"
+              appTooltip="{{
+                (test?.title?.length || 0) > 55 ? test?.title : ''
+              }}"
+            >
+              {{ test?.title }}
+            </p>
+          </div>
+
+          <div class="flex items-center mr-7 px-1">
+            @if (test?.is_completed === true) {
+              <div class="flex items-center px-1 min-w-[110px]">
+                <label
+                  class="mx-2 relative inline-flex items-center cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    class="sr-only peer"
+                    [checked]="test?.is_published"
+                    (change)="onPublish($event, test)"
+                  />
+                  <div
+                    class="w-8 h-4 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-3 after:h-3 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"
+                  ></div>
+                </label>
+                <span
+                  class="w-16"
+                  [ngClass]="
+                    test?.is_published
+                      ? 'text-green-500 font-semibold'
+                      : 'text-gray-700 font-semibold'
+                  "
+                >
+                  {{ test?.is_published ? "Public" : "Private" }}
+                </span>
+              </div>
+            }
+            <p>
+              @if (test?.is_completed === true && !test?.is_updated) {
+                <p
+                  class="inline-flex min-w-[96px] items-center justify-center font-medium text-white bg-green-600 px-5 py-1 rounded-full whitespace-nowrap"
+                >
+                  Submitted
+                </p>
+              } @else if (isExamExpired(test)) {
+                <p
+                  class="inline-flex min-w-[96px] items-center justify-center font-medium bg-red-600 text-white px-3 py-1 rounded-full whitespace-nowrap"
+                >
+                  Exam Expired
+                </p>
+              } @else {
+                <p
+                  class="inline-flex min-w-[96px] items-center justify-center font-medium bg-yellow-200 text-red-600 px-7 py-1 rounded-full whitespace-nowrap"
+                >
+                  Pending
+                </p>
+              }
+            </p>
+          </div>
+        </div>
+
+        @if (activeCardId === test?.id) {
+          <div class="px-4 sm:px-8 py-3 bg-white">
+            <div
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 text-sm sm:text-base mb-5"
+            >
+              <div>
+                <div class="justify-start">Course Name</div>
+                <div
+                  class="font-semibold truncate max-w-[15ch]"
+                  tooltipPosition="right"
+                  appTooltip="{{
+                    (test?.subject?.length || 0) > 15 ? test?.subject : ''
+                  }}"
+                >
+                  {{ test?.subject }}
+                </div>
+              </div>
+              <div>
+                <div class="justify-start">Reviewer</div>
+                <div class="font-semibold flex flex-wrap gap-2">
+                  @for (reviewer of test?.reviewers; track $index) {
+                    <span
+                      class="px-2 py-1 theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark rounded font-semibold text-sm"
+                    >
+                      {{ reviewer?.name }}
+                    </span>
+                  }
+                </div>
+              </div>
+              <div>
+                <div class="text-center">Passing Marks</div>
+                <div class="font-semibold text-center">
+                  {{ test?.passing_marks }}
+                </div>
+              </div>
+              <div>
+                <div class="-secondary - text-center">Total Marks</div>
+                <div class="font-semibold text-center">
+                  {{ test?.total_marks }}
+                </div>
+              </div>
+
+              <div>
+                <div class="text-center">Duration</div>
+                <div class="font-semibold text-center">
+                  {{ test?.duration_minutes }} min
+                </div>
+              </div>
+
+              <div>
+                <div class="text-center">Exam Schedule</div>
+                <div class="font-semibold text-center">
+                  {{ test?.exam_date | date }}
+                </div>
+              </div>
+
+              <div>
+                <div class="text-center">Exam Time</div>
+                <div class="font-semibold text-center">
+                  {{ getExamTime(test) }}
+                </div>
+              </div>
+
+              <!-- <div>
+                <div class="text-center">Created On</div>
+                <div class="font-semibold text-center">
+                  {{ test?.created_on | date }}
+                </div>
+              </div> -->
+            </div>
+            <button
+              class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              (click)="openExamModal(test)"
+              [disabled]="test?.is_completed || !isStartAllowed(test)"
+              [appTooltip]="
+                test?.is_completed
+                  ? 'Test already completed'
+                  : !isStartAllowed(test)
+                    ? 'You can start only 5 minutes before exam time'
+                    : 'Start Test'
+              "
+            >
+              Get Started
+            </button>
+
+            @if (test?.is_completed === true) {
+              <button
+                class="px-4 py-2 mx-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                [disabled]="test?.review_status === 'pending_review'"
+                (click)="goToRechack(test?.id)"
+              >
+                ReCheck
+              </button>
+            }
+          </div>
+        }
+      </div>
+      <app-modal [open]="showModal" (close)="closeModal()">
+        <div class="mx-auto sm:p-2">
+          <h2 class="text-xl sm:text-2xl font-bold text-center sm:text-left">
+            Exam Instructions
+          </h2>
+          <hr class="my-2 theme-border" />
+
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 gap-8 font-medium sm:font-semibold text-base sm:text-lg lg:text-xl"
+          >
+            <div>
+              <p>Title Name : {{ selectedTest?.title }}</p>
+              <p>Passing Marks : {{ selectedTest?.passing_marks }}</p>
+            </div>
+
+            <div>
+              <p>Total Marks : {{ selectedTest?.total_marks }}</p>
+              <p>Duration : {{ selectedTest?.duration_minutes }} min</p>
+            </div>
+          </div>
+
+          <div class="mt-4 text-sm sm:text-base lg:text-lg space-y-4">
+            <p class="flex items-start">
+              <span
+                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
+                >1</span
+              >
+              Please read all instructions carefully before starting the exam.
+            </p>
+            <hr class="theme-border" />
+
+            <p class="flex items-start">
+              <span
+                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
+                >2</span
+              >
+              Ensure you have a stable internet connection throughout the exam
+              duration.
+            </p>
+            <hr class="theme-border" />
+
+            <p class="flex items-start">
+              <span
+                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
+                >3</span
+              >
+              Do not refresh the page or navigate away during the exam.
+            </p>
+            <hr class="theme-border" />
+
+            <p class="flex items-start">
+              <span
+                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
+                >4</span
+              >
+              All questions must be answered within the allotted time.
+            </p>
+            <hr class="theme-border" />
+
+            <p class="flex items-start">
+              <span
+                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
+                >5</span
+              >
+              Once you start the exam, the timer will begin and cannot be
+              paused.
+            </p>
+            <hr class="theme-border" />
+
+            <p class="flex items-start">
+              <span
+                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
+                >6</span
+              >
+              If you encounter any technical issues, please contact support
+              immediately.
+            </p>
+            <hr class="my-2 theme-border" />
+          </div>
+
+          <div class="flex flex-col sm:flex-row justify-between gap-3 pt-4">
+            <button
+              type="button"
+              class="px-3 py-2 rounded theme-bg-secondary theme-bg-gray w-full sm:w-auto"
+              (click)="closeModal()"
+            >
+              Cancel
+            </button>
+            <button
+              *authorize="'TSE'"
+              (click)="
+                canStartExam(selectedTest) &&
+                  !isStarted(selectedTest) &&
+                  startExam(selectedTest?.id)
+              "
+              [disabled]="
+                !canStartExam(selectedTest) || isStarted(selectedTest)
+              "
+              tooltipPosition="right"
+              [appTooltip]="
+                !canStartExam(selectedTest)
+                  ? 'Exam can only be started at scheduled time (' +
+                    (selectedTest?.exam_date | date) +
+                    ' ' +
+                    (selectedTest?.exam_start_time | date: 'hh:mm a') +
+                    ')'
+                  : isStarted(selectedTest)
+                    ? 'You cannot start again.'
+                    : ''
+              "
+              class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Start Exam
+            </button>
+          </div>
+        </div>
+      </app-modal>
+    }
+  } @else if (isLoadingExams()) {
+    <div class="mt-4">
+      <ngx-skeleton-loader
+        appearance="line"
+        count="5"
+        [theme]="skeletonService.expanded"
+      >
+      </ngx-skeleton-loader>
+    </div>
+  } @else if (testsLoaded() && TestList().length === 0) {
+    <div class="flex flex-col items-center justify-center mt-64 text-center">
+      <div
+        class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
+      >
+        <svg
+          class="w-12 h-12 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+          ></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">NO TESTS ASSIGNED</h3>
+      <p class="text-gray-500 mb-4 theme-text-secondary theme-text-dark">
+        You don't have any Tests assigned yet. Contact your administrator to get
+        started with Test
+      </p>
+    </div>
+  }
+  <app-pagination
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    (pageChange)="goToPage($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+  ></app-pagination>
+</div>

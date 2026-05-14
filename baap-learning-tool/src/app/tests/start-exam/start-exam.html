@@ -1,0 +1,331 @@
+<div class="flex w-full min-h-screen">
+  <div
+    class="flex-grow min-w-0 mx-20"
+    (contextmenu)="disableRightClick($event)"
+    (copy)="preventCopyPaste($event)"
+    (cut)="preventCopyPaste($event)"
+    (paste)="preventCopyPaste($event)"
+  >
+    <div
+      class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 select-none theme-text-secondary theme-text-dark"
+    >
+      <div class="header bg-white pt-4">
+        <div class="pt-2">
+          <div class="flex flex-wrap gap-2 sm:gap-2 justify-between">
+            <!-- <span
+              class="px-1 mr-3 flex items-center cursor-pointer rounded-3xl font-semibold text-md"
+              (click)="cancelExam = true"
+            >
+              <div
+                class="flex items-center cursor-pointer h-10 w-10 rounded-xl pl-2 hover:bg-gray-200 theme-text-secondary theme-text-dark"
+              >
+                <i class="material-icons mr-1 text-2xl">arrow_back</i>
+              </div>
+            </span> -->
+            <div
+              class="theme-bg-secondary theme-bg-gray px-2 sm:px-2 md:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[280px]"
+            >
+              <p>Exam Name</p>
+              <h2
+                class="font-semibold text-xl truncate max-w-[40ch]"
+                tooltipPosition="right"
+                appTooltip="{{
+                  (examData()?.title?.length || 0) > 40 ? examData()?.title : ''
+                }}"
+              >
+                {{ examData()?.title }}
+              </h2>
+            </div>
+            <div
+              class="theme-bg-secondary theme-bg-gray px-2 sm:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[60px]"
+            >
+              <p>Duration</p>
+              <span class="font-semibold text-xl"
+                >{{ examData()?.duration_minutes }} Min</span
+              >
+            </div>
+
+            <div
+              class="theme-bg-secondary theme-bg-gray px-2 sm:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[100px]"
+            >
+              <p>Total Marks</p>
+              <span class="font-semibold text-xl"
+                >{{ examData()?.total_marks }} Marks</span
+              >
+            </div>
+            <div
+              class="theme-bg-secondary theme-bg-gray px-2 sm:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[140px]"
+            >
+              <p>Timing Remaining</p>
+              <span class="font-semibold text-xl">{{
+                formatRemainingTime() + " min"
+              }}</span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="mb-3 mt-4 theme-border" />
+      </div>
+      <div class="p-2 sm:mb-40 mt-3 border theme-border rounded-lg">
+        <div class="sm:p-3">
+          <div class="flex justify-between">
+            <div>
+              Q. Type :
+              <span class="font-semibold text-lg">
+                {{ questions()[currentQuestionIndex]?.type | titlecase }}
+              </span>
+            </div>
+            <span class="flex justify-end font-semibold text-lg mb-1">
+             Q. Marks : {{ questions()[currentQuestionIndex]?.marks }}
+            </span>
+          </div>
+          <div class="flex items-center font-semibold text-lg sm:text-xl">
+            <span class="text-lg p-1">
+              Q.no :- {{ currentQuestionIndex + 1 }}
+            </span>
+            <span class="break-words ml-2">
+              {{ questions()[currentQuestionIndex]?.text }}
+            </span>
+          </div>
+          <div class="mt-4">
+            @if (
+              questions()[currentQuestionIndex]?.type?.toLowerCase() === "mcq"
+            ) {
+              @for (
+                option of questions()[currentQuestionIndex]?.options;
+                track $index
+              ) {
+                <div>
+                  <div
+                    class="p-2 sm:p-3 mt-4 sm:mt-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-1 bg-white"
+                  >
+                    <input
+                      type="radio"
+                      [id]="'option' + $index"
+                      [name]="'question' + currentQuestionIndex"
+                      [value]="option?.option_text"
+                      class="w-5 h-5 cursor-pointer"
+                      [(ngModel)]="selectedOptions()[currentQuestionIndex]"
+                      (paste)="preventCopyPaste($event)"
+                      (copy)="preventCopyPaste($event)"
+                      (cut)="preventCopyPaste($event)"
+                      (keydown)="preventKeyboardShortcuts($event)"
+                    />
+                    <label
+                      [for]="'option' + $index"
+                      class="ml-2 theme-text theme-text-dark text-base cursor-pointer sm:text-lg font-semibold"
+                    >
+                      {{ option?.option_text }}
+                    </label>
+                  </div>
+                </div>
+              }
+            } @else if (
+              questions()[currentQuestionIndex]?.type?.toLowerCase() === "short"
+            ) {
+              <div class="mt-4 sm:mt-4 rounded-lg">
+                <textarea
+                  type="text"
+                  class="p-2 border theme-border rounded-lg w-full resize-none outline-none placeholder:theme-text-secondary"
+                  placeholder="Enter your short answer..."
+                  [(ngModel)]="selectedOptions()[currentQuestionIndex]"
+                  (paste)="preventCopyPaste($event)"
+                  (copy)="preventCopyPaste($event)"
+                  (cut)="preventCopyPaste($event)"
+                  (keydown)="preventKeyboardShortcuts($event)"
+                ></textarea>
+              </div>
+            } @else if (
+              questions()[currentQuestionIndex]?.type?.toLowerCase() === "long"
+            ) {
+              <div class="pt-3">
+                <textarea
+                  type="text"
+                  class="p-3 border theme-border rounded-lg w-full h-[36vh] resize-none outline-none placeholder:theme-text-secondary"
+                  placeholder="Enter your long answer..."
+                  [(ngModel)]="selectedOptions()[currentQuestionIndex]"
+                  (paste)="preventCopyPaste($event)"
+                  (copy)="preventCopyPaste($event)"
+                  (cut)="preventCopyPaste($event)"
+                  (keydown)="preventKeyboardShortcuts($event)"
+                ></textarea>
+              </div>
+            } @else if (
+              questions()[currentQuestionIndex]?.type?.toLowerCase() ===
+              "practical"
+            ) {
+              <div>
+                <app-code-editor></app-code-editor>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+      <div
+        class="-mt-[145px] flex flex-col sm:flex-row justify-between gap-2 sm:gap-0"
+      >
+        <button
+          type="button"
+          class="px-3 py-2 rounded font-semibold disabled:opacity-50 bg-blue-600 text-white"
+          [disabled]="currentQuestionIndex === 0"
+          (click)="goToPreviousQuestion()"
+        >
+          <span class="flex items-center">
+            <i class="material-icons text-sm">arrow_back_ios</i>
+            Previous
+          </span>
+        </button>
+        <div
+          [ngClass]="{
+            'text-green-500 font-semibold text-lg bg-green-100 px-5 py-2 rounded':
+              message.includes('successfully'),
+            'text-red-600 font-semibold text-lg': message.includes('failed'),
+          }"
+        >
+          {{ message }}
+        </div>
+        @if (currentQuestionIndex === questions().length - 1) {
+          <div class="flex gap-3">
+            <button
+              type="button"
+              class="px-4 py-2 rounded bg-blue-600 text-white flex items-center gap-2"
+              (click)="goToNextQuestion()"
+            >
+              <span class="font-semibold text-md"> Save</span>
+            </button>
+
+            <button
+              type="button"
+              class="px-4 py-2 rounded bg-green-700 text-white flex items-center gap-2"
+              (click)="submitExam()"
+            >
+              <span class="font-semibold text-md"> Submit Exam </span>
+            </button>
+          </div>
+        } @else {
+          <button
+            type="button"
+            class="px-3 py-2 rounded font-semibold bg-blue-600 text-white"
+            (click)="goToNextQuestion()"
+          >
+            <span class="font-semibold text-md flex items-center">
+              Next
+              <i class="material-icons text-sm ml-1">arrow_forward_ios</i>
+            </span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="shadow-lg border-l theme-border">
+    <app-exam-menubar
+      [questions]="questions()"
+      [answeredStatus]="answeredStatus()"
+      (questionClicked)="onQuestionSelect($event)"
+      [currentQuestionIndex]="currentQuestionIndex"
+    ></app-exam-menubar>
+  </div>
+</div>
+
+@if (showTimeUpModal() || examSubmitted || cancelExam) {
+  <div class="fixed inset-0 flex items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black/50"></div>
+    <div
+      class="relative bg-white rounded-lg p-8 shadow-lg z-10 w-[40%] max-w-3xl text-center"
+    >
+      @if (examSubmitted) {
+        <div class="mb-6 text-center">
+          <!-- <button type="button" class="float-right">
+            <i
+              class="material-icons text-red-600 text-3xl cursor-pointer"
+              (click)="closePupUp()"
+              >close</i
+            >
+          </button> -->
+          <div class="flex justify-center mb-3">
+            <div
+              class="bg-green-100 rounded-full p-1 ml-6 flex items-center justify-center"
+            >
+              <i class="material-icons text-green-500 text-7xl">check_circle</i>
+            </div>
+          </div>
+
+          <span class="text-2xl text-green-600 font-semibold block mb-6 mr-1">
+            Exam submitted successfully !</span
+          >
+          <!-- <div class="flex flex-wrap justify-center gap-4 mb-6">
+            <div
+              class="border-2 border-blue-500 rounded-xl p-4 min-w-[180px] text-center"
+            >
+              <span class="font-medium text-xl">Total Question</span>
+              <p class="text-xl font-bold mt-1">--</p>
+            </div>
+
+            <div
+              class="border-2 border-green-500 rounded-xl p-4 min-w-[180px] text-center"
+            >
+              <span class="font-medium text-xl">Attempt Questions</span>
+              <p class="text-xl font-bold mt-1">--</p>
+            </div>
+
+            <div
+              class="border-2 border-red-500 rounded-xl p-4 min-w-[180px] text-center"
+            >
+              <span class="font-medium text-xl">Not Attempt Questions</span>
+              <p class="text-xl font-bold mt-1">--</p>
+            </div>
+          </div>
+
+          <div class="flex justify-center">
+            <div
+              class="border-2 border-green-400 bg-green-50 rounded-xl px-10 py-4 text-center"
+            >
+              <span class="font-medium text-xl block">Total Marks</span>
+              <p class="text-xl font-bold">--</p>
+            </div>
+          </div>
+          -->
+        </div>
+      } @else if (cancelExam) {
+        <div class="mb-6">
+          <div class="fex items-center mb-3">
+            <i class="material-icons text-red-600 text-4xl p-2"> cancel </i>
+          </div>
+          <span class="text-xl font-extrabold text-red-600"
+            >Are you sure you want to cancel your exam?</span
+          >
+        </div>
+      } @else {
+        <div class="mb-6">
+          <div class="fex items-center mb-3">
+            <i class="material-icons text-red-600 text-4xl p-2"> timer_off </i>
+          </div>
+          <h3 class="text-xl font-semibold text-red-600">
+            Your Session Is Expired.
+          </h3>
+        </div>
+      }
+      <button
+        type="button"
+        class="mt-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold"
+        (click)="onTimeUpOk()"
+      >
+        @if (cancelExam) {
+          <span class="text-lg fort-semibold">Yes</span>
+        } @else {
+          <span class="text-lg fort-semibold">Ok</span>
+        }
+      </button>
+      @if (cancelExam) {
+        <button
+          type="button"
+          class="mt-2 px-4 ml-10 py-2 rounded bg-blue-600 text-white font-semibold"
+          (click)="closePupUp()"
+        >
+          <span class="text-lg fort-semibold">No</span>
+        </button>
+      }
+    </div>
+  </div>
+}

@@ -1,0 +1,159 @@
+<div class="flex justify-end items-center">
+  <button
+    class="px-4 py-2 font-medium rounded-md theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark"
+    (click)="openSidebar()"
+  >
+    Add Level
+  </button>
+</div>
+
+@if (showModal) {
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300"
+    (click)="closeSidebar()"
+  ></div>
+}
+
+@if (isSidebarOpen) {
+  <div
+    class="fixed top-0 right-0 h-full w-full sm:w-[430px] bg-white shadow-xl z-50 transform transition-transform duration-300 flex flex-col"
+    [class.translate-x-full]="!isSidebarOpen"
+  >
+    <div class="shrink-0 sticky top-0 pt-8 bg-white border-gray-200 py-0 z-10">
+      <div class="flex justify-between items-center px-4 sm:px-6">
+        <h2 class="text-lg font-semibold theme-text-secondary theme-text-dark">
+          Add New Level
+        </h2>
+        <button
+          (click)="closeSidebar()"
+          class="theme-text-secondary theme-text-dark"
+          aria-label="Close"
+          [appTooltip]="'Close Sidebar'"
+          tooltipPosition="left"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <hr class="theme-border mt-4" />
+    </div>
+
+    <div class="flex-1 overflow-auto pt-5 sm:p-7">
+      <form [formGroup]="levelForm" (ngSubmit)="submitForm()" class="space-y-4">
+        <div class="mb-2">
+          <label class="block mb-1 text-sm sm:text-base">
+            New Level Name <span class="text-red-600 font-bold">*</span>
+          </label>
+          <input
+            type="text"
+            class="border p-2 w-full focus:outline-none rounded placeholder:text-sm placeholder:theme-text-secondary"
+            formControlName="level_name"
+            placeholder="Enter Level Name"
+            (input)="onTitleInput($event)"
+            [maxlength]="35"
+          />
+          @if (
+            levelForm.get("level_name")?.touched &&
+            levelForm.get("level_name")?.errors?.["required"]
+          ) {
+            <div class="text-red-600 font-semibold text-md">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Level Name is required.</span>
+              </span>
+            </div>
+          }
+        </div>
+        @if (allLevels().length !== 0) {
+          <p class="text-lg font-semibold">Created Levels</p>
+        }
+        @for (level of allLevels(); track level?.id) {
+          <div
+            class="flex justify-between theme-bg-gray theme-bg-secondary pt-1 px-3 rounded"
+          >
+            <span>{{ level?.level_name || "--" }}</span>
+
+            <span class="flex">
+              <p class="mr-3 cursor-pointer text-blue-600">
+                <span
+                  (click)="editLevel(level)"
+                  class="material-symbols-outlined text-xl hover:text-blue-400 text-gray-600 cursor-pointer"
+                >
+                  edit</span
+                >
+              </p>
+
+              <p class="cursor-pointer text-red-600">
+                <span
+                  (click)="deleteLevel(level?.id)"
+                  class="material-symbols-outlined text-xl hover:text-red-400 text-gray-600 cursor-pointer"
+                >
+                  delete</span
+                >
+              </p>
+            </span>
+          </div>
+        }
+      </form>
+    </div>
+
+    <div
+      class="shrink-0 theme-border bottom-0 left-0 right-0 bg-white border-t p-1.5 px-6 flex flex-col sm:flex-row justify-between gap-3"
+    >
+      <button
+        type="button"
+        class="px-4 py-2 rounded-md theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark theme-border w-full sm:w-auto"
+        (click)="closeSidebar()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="px-4 py-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark theme-border w-full sm:w-auto"
+        [disabled]="levelForm.invalid || isLoading"
+        (click)="submitForm()"
+      >
+        @if (isLoading) {
+          <span class="flex items-center gap-2">
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Saving...
+          </span>
+        } @else {
+          Save Level
+        }
+      </button>
+    </div>
+  </div>
+}

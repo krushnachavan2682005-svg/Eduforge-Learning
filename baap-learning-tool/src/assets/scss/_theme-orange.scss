@@ -1,0 +1,51 @@
+/* Orange Theme Variables and Styles */
+
+[data-theme="orange"] {
+  --theme-primary: theme("colors.orange-theme.500");
+  --theme-primary-dark: theme("colors.orange-theme.700");
+  --theme-primary-light: theme("colors.orange-theme.300");
+  --theme-secondary: theme("colors.orange-theme.600");
+  --theme-accent: theme("colors.orange-theme.400");
+  --theme-bg: theme("colors.orange-theme.50");
+  --theme-bg-secondary: theme("colors.orange-theme.100");
+  --theme-text: theme("colors.orange-theme.900");
+  --theme-text-secondary: theme("colors.orange-theme.700");
+  --theme-btn-custom-bg: theme("colors.orange-theme.600");
+  --theme-btn-custom-text: #f8fafc;
+}
+
+/* Orange Theme Specific Styling */
+[data-theme="orange"] {
+  .theme-gradient-bg {
+    background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+  }
+
+  .theme-card-shadow {
+    box-shadow:
+      0 4px 6px -1px rgba(249, 115, 22, 0.1),
+      0 2px 4px -1px rgba(249, 115, 22, 0.06);
+  }
+
+  .theme-border-accent {
+    border-color: #f97316;
+  }
+
+  .theme-warning-indicator {
+    background-color: #f97316;
+    color: white;
+  }
+
+  .theme-energy-boost {
+    background: linear-gradient(45deg, #fb923c, #fdba74);
+    animation: energyPulse 2s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes energyPulse {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 1;
+  }
+}

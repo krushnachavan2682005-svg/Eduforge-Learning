@@ -1,0 +1,362 @@
+<div
+  class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 theme-text-secondary theme-text-dark flex flex-col min-h-[calc(100vh-110px)] pb-20 sm:pb-16"
+>
+  <div class="header bg-white pt-2">
+    <app-header
+      [titleName]="assignment?.task_name"
+      [subTitle]="assignment?.description || '--'"
+      [showBackBtnAndTitleSubtitle]="true"
+    >
+      <div header-actions class="relative flex items-center">
+        <input
+          type="text"
+          [ngModel]="searchKey()"
+          (ngModelChange)="searchKey.set($event)"
+          placeholder="Search student submissions..."
+          class="pl-10 pr-10 py-2 border rounded-full focus:outline-none focus:ring-1 focus:ring-slate-400  w-80 shadow-sm theme-border"
+        />
+
+        <span class="material-icons absolute left-3 text-gray-400 text-md">
+          search
+        </span>
+
+        @if (searchKey()) {
+          <span
+            class="material-icons absolute right-3 text-gray-400 text-md cursor-pointer hover:text-red-500"
+            (click)="searchKey.set('')"
+          >
+            close
+          </span>
+        }
+      </div>
+    </app-header>
+  </div>
+
+  <div class="px-3 sm:px-6 bg-white">
+    @for (studA of filteredResults(); track studA) {
+      <div class="theme-bg border rounded-md overflow-hidden my-3">
+        <div
+          class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 cursor-pointer p-2 theme-bg-secondary theme-bg-gray"
+          (click)="studA.subCardOpen = !studA.subCardOpen"
+        >
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <span>
+              @if (studA?.subCardOpen == true) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M5 8l7 11 7-11z" />
+                </svg>
+              }
+
+              @if (!studA?.subCardOpen == true) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              }
+            </span>
+            <p class="mb-0 text-lg sm:text-lg font-bold break-words">
+              {{ studA?.user_ids?.[0]?.name || "--" }}
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <div class="font-bold text-lg">
+              @if (studA?.status === "APPROVED") {
+                <span
+                  class="inline-flex items-center justify-center font-medium text-sm text-black bg-green-300 px-3 py-1 rounded-full whitespace-nowrap"
+                  >Approved</span
+                >
+              } @else if (studA?.status === "REJECTED") {
+                <span
+                  class="inline-flex items-center justify-center font-medium text-sm bg-red-600 text-white px-4 py-1 rounded-full whitespace-nowrap"
+                  >Rejected</span
+                >
+              } @else if (studA?.status === "SUBMITTED") {
+                <span
+                  class="inline-flex items-center justify-center font-medium text-sm bg-blue-600 text-white px-3 py-1 rounded-full whitespace-nowrap"
+                  >Submitted</span
+                >
+              } @else if (studA?.status === "ASSIGNED") {
+                <span
+                  class="inline-flex items-center justify-center font-medium text-sm bg-yellow-500 text-white px-3 sm:px-2 py-1 rounded-full whitespace-nowrap"
+                  >Not Submitted</span
+                >
+              }
+            </div>
+          </div>
+        </div>
+        @if (studA?.subCardOpen) {
+          <div class="grid grid-cols-4 md:grid-cols-5 gap-4 p-4 text-md">
+            <div>
+              <div>Total Score</div>
+              <div class="font-semibold">{{ assignment?.total_score }}</div>
+            </div>
+            <div>
+              <div>Level</div>
+              <div class="font-semibold">
+                {{ assignment?.level || "--" }}
+              </div>
+            </div>
+            <div>
+              <div>Assigned At</div>
+              <div class="font-semibold">
+                {{ studA?.assigned_at | date }}
+              </div>
+            </div>
+            <div>
+              <div>Submission Date</div>
+              <div class="font-semibold">
+                {{ assignment?.created_at | date }}
+              </div>
+            </div>
+            @if (studA?.comment) {
+              <div>
+                <div>Comment</div>
+                <div class="font-semibold">{{ studA?.comment }}</div>
+              </div>
+            }
+
+            <div>
+              @if (studA?.signedUrls?.length > 0) {
+                <div>
+                  <div>Submitted Assignment</div>
+                  @for (att of studA?.attachment; let i = $index; track att) {
+                    <div
+                      class="font-semibold theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark p-2 rounded-md mt-1 flex items-center justify-between"
+                    >
+                      <div
+                        class="truncate pr-2"
+                        [appTooltip]="getAttachmentFolderName(att)"
+                        tooltipPosition="top"
+                      >
+                        {{ getAttachmentFolderName(att) }}
+                      </div>
+
+                      <div class="flex items-center gap-3">
+                        <span
+                          [appTooltip]="'View & download'"
+                          tooltipPosition="left"
+                          class="flex justify-center text-blue-600 cursor-pointer"
+                          (click)="openPdf(studA?.signedUrls[i])"
+                        >
+                          <p class="pt-1">
+                            <svg
+                              viewBox="0 0 24 24"
+                              class="w-4 h-4 mr-1"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path d="M15 3h6v6" />
+                              <path d="M10 14 21 3" />
+                              <path
+                                d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                              />
+                            </svg>
+                          </p>
+                          <p>view</p>
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            @if (studA?.status === "SUBMITTED") {
+              <div class="mx-6 mt-6">
+                <button
+                  class="px-4 py-2 mr-3 bg-red-600 text-white rounded"
+                  (click)="onRejectClick(assignment, studA)"
+                >
+                  Reject
+                </button>
+
+                <button
+                  class="px-4 py-2 bg-green-600 text-white rounded"
+                  (click)="onApproveClick(assignment, studA)"
+                >
+                  Approve
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <app-modal [open]="showPdfModal" (close)="closePdfModal()">
+    @if (showPdfModal && pdfUrl) {
+      <div class="w-full min-w-[500px] md:min-w-[300px]">
+        <div
+          class="flex justify-between items-center px-4 py-3 border-b theme-bg-secondary theme-bg-gray"
+        >
+          <h2 class="text-lg font-semibold">Student Assignment</h2>
+        </div>
+
+        <div class="h-[75vh]">
+          <iframe
+            [src]="pdfUrl | safeUrl"
+            class="w-full h-full"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </div>
+    }
+  </app-modal>
+
+  <app-modal [open]="showRejectModal" (close)="closeRejectModal()">
+    @if (showRejectModal) {
+      <div class="mb-6 w-full min-w-[300px] md:min-w-[400px]">
+        <div
+          class="theme-bg-secondary theme-bg-gray px-4 py-3 -mx-4 -mt-4 mb-4 rounded-t-lg border-b"
+        >
+          <h2 class="text-xl font-bold">Reject Action Item</h2>
+        </div>
+        <div class="px-2">
+          <div class="mb-4">
+            <label class="block mb-2 font-semibold"
+              >Reason for Rejection <span class="text-red-500">*</span></label
+            >
+            <textarea
+              class="w-full border rounded-md p-2 text-sm focus:outline-none bg-white"
+              rows="4"
+              placeholder="Enter reason for rejection..."
+              [(ngModel)]="rejectComment"
+              (blur)="onRejectBlur()"
+              (input)="rejectTouched = true"
+            ></textarea>
+            @if (rejectTouched && !rejectComment.trim()) {
+              <div class="text-red-600 font-semibold text-md mt-1">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Reason for rejection is required.</span>
+                </span>
+              </div>
+            }
+          </div>
+          <div class="flex justify-end gap-3">
+            <button
+              type="button"
+              class="px-4 py-2 rounded theme-bg-secondary theme-bg-gray border"
+              (click)="closeRejectModal()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              [disabled]="isRejectDisabled()"
+              (click)="confirmRejection()"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </app-modal>
+
+  <app-modal [open]="showApproveModal" (close)="closeApproveModal()">
+    @if (showApproveModal) {
+      <div class="mb-6 w-full min-w-[300px] md:min-w-[400px]">
+        <div
+          class="theme-bg-secondary theme-bg-gray px-4 py-3 -mx-4 -mt-4 mb-4 rounded-t-lg border-b"
+        >
+          <h2 class="text-xl font-bold">Approve Action Item</h2>
+        </div>
+        <div class="mb-3 mx-2">
+          <label class="block mb-1 font-semibold">Student Notes</label>
+          <div
+            class="border rounded-md p-2 bg-white text-sm max-h-28 overflow-auto"
+          >
+            {{ selectedAssignment?.notes || "--" }}
+          </div>
+        </div>
+        <div class="px-2">
+          <div class="mb-4">
+            <label class="block mb-1 font-semibold">
+              Score <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              class="w-full border rounded-md p-2 text-sm focus:outline-none bg-white"
+              placeholder="Enter Score"
+              [(ngModel)]="approveScore"
+              (input)="onScoreInput($event)"
+              (blur)="onScoreBlur()"
+            />
+            @if (scoreTouched && !approveScore) {
+              <div class="text-red-600 font-semibold text-md mt-1">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Score is required.</span>
+                </span>
+              </div>
+            }
+            @if (scoreTouched && scoreError) {
+              <div class="text-red-600 font-semibold text-md mt-1">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span
+                    >Score cannot exceed {{ selectedItem?.total_score }}.</span
+                  >
+                </span>
+              </div>
+            }
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <button
+              type="button"
+              class="px-4 py-2 rounded border theme-bg-secondary theme-bg-gray"
+              (click)="closeApproveModal()"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="px-4 py-2 rounded bg-green-600 text-white font-semibold disabled:bg-green-500 disabled:cursor-not-allowed"
+              [disabled]="isApproveDisabled()"
+              (click)="confirmApproval()"
+            >
+              Approve
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </app-modal>
+</div>

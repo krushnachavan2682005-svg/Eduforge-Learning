@@ -1,0 +1,177 @@
+<div
+  class="h-screen text-white flex flex-col items-center justify-start overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+>
+  <!-- Container -->
+  <div class="w-full max-w-md flex flex-col">
+    <!-- Header Section (Static) -->
+    <div class="shrink-0 header bg-white">
+      <button
+        type="button"
+        class="inline-flex items-center text-sm sm:text-base mt-2 sm:mt-4 gap-2 sm:gap-4 pr-3 theme-text theme-text-dark ml-4 sm:ml-0"
+        (click)="goBack()"
+        aria-label="Go back"
+      >
+        <svg
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4 sm:w-4 sm:h-6 theme-text-dark theme-text-secondary"
+          fill="none"
+          viewBox="0 0 14 10"
+          stroke="currentColor"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M13 5H1m0 0 4 4M1 5l4-4"
+          />
+        </svg>
+        <span class="inline">Back</span>
+      </button>
+
+      <h2
+        class="text-base sm:text-lg font-semibold theme-text theme-text-dark mt-0 mb-1 sm:mb-2 text-center sm:text-left"
+      >
+        Choose your Organization
+      </h2>
+
+      <p
+        class="text-sm sm:text-base text-gray-400 mt-1 leading-relaxed theme-text theme-text-dark text-center sm:text-left px-2 sm:px-0"
+      >
+        Manage your business from a single platform. Choose the one to get
+        started.
+      </p>
+
+      <!-- Search -->
+      <div class="relative mt-4 w-full px-4 sm:px-0">
+        <input
+          type="text"
+          placeholder="Search Organizations"
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          class="w-full rounded-md text-sm sm:text-base px-4 py-2 pr-10 border theme-border focus:outline-none theme-text theme-text-dark placeholder:theme-text-secondary"
+        />
+        <span
+          class="absolute right-7 sm:right-3 top-1/2 -translate-y-1/2 flex items-center text-gray-400"
+        >
+          @if (searchTerm) {
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5 cursor-pointer theme-text theme-text-dark"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              (click)="restSearchData()"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          } @else {
+            <!-- Search icon -->
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 theme-text theme-text-dark"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          }
+        </span>
+      </div>
+
+      <!-- Removed duplicate static organization lists to avoid confusion -->
+    </div>
+
+    <!-- Scrollable Section -->
+    <div class="mt-4 flex-1 overflow-y-auto">
+      @if ((clientData().length || 0) === 0) {
+        <div
+          class="text-center text-sm sm:text-base text-gray-400 theme-text theme-text-dark px-4"
+        >
+          No organizations found.
+        </div>
+      } @else {
+        <div class="space-y-3 sm:space-y-4 px-4 sm:px-0">
+          @for (org of clientData(); track org) {
+            <div
+              class="w-full cursor-pointer flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 rounded-lg shadow-sm border theme-border transition theme-text theme-text-dark hover:bg-gray-100"
+              (click)="onClickClient(org)"
+            >
+              <!-- Left Side (Logo + Details) -->
+              <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <!-- Logo / Initial -->
+                <div
+                  class="h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center rounded-full overflow-hidden flex-shrink-0"
+                >
+                  @if (org?.orgn_details?.[0]?.logo) {
+                    <img
+                      [src]="org?.orgn_details?.[0]?.logo"
+                      alt="organization-logo"
+                      height="45"
+                      width="45"
+                      class="h-full w-full object-cover rounded-full"
+                    />
+                  } @else {
+                    <div
+                      class="h-9 w-9 sm:h-10 sm:w-10 bg-white text-blue-500 font-bold flex items-center justify-center rounded-full uppercase theme-bg-secondary theme-text theme-text-dark theme-bg-gray"
+                    >
+                      {{ org?.orgn_details?.[0]?.orgn_name?.charAt(0) || "N" }}
+                    </div>
+                  }
+                </div>
+
+                <!-- Name + Address -->
+                <div class="flex flex-col min-w-0">
+                  <p
+                    class="font-semibold text-sm sm:text-base truncate capitalize theme-text theme-text-dark"
+                  >
+                    {{ org?.orgn_details?.[0]?.orgn_name || "No name" }}
+                  </p>
+                  <p
+                    class="text-xs sm:text-sm text-gray-400 truncate capitalize theme-text theme-text-dark"
+                  >
+                    {{
+                      org?.primary_info?.[0]?.locations?.[0]?.address ||
+                        org?.orgn_details?.[0]?.address ||
+                        "No location"
+                    }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Right Arrow Icon -->
+              <div class="text-gray-400 flex-shrink-0 ml-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4 sm:h-5 sm:w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+/* Main Themes Import File */
+/* Import fonts first, then theme files */
+
+@use "fonts";
+@use "theme-blue";
+@use "theme-green";
+@use "theme-indigo";
+@use "theme-orange";
+@use "theme-dark";
+@use "theme-utilities";
+
+/* Global theme transitions and base styles */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Ensure smooth theme transitions */
+body {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Theme-aware scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--theme-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--theme-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-primary-dark);
+}
+
+/* Theme-aware selection styling */
+::selection {
+  background-color: var(--theme-primary-light);
+  color: var(--theme-text);
+}

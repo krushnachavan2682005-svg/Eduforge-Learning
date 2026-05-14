@@ -1,0 +1,808 @@
+<div
+  class="mx-2 sm:mx-4 md:mx-8 lg:mx-10 theme-text-secondary theme-text-dark relative"
+>
+  @if (isAiGenerating) {
+    <div
+      class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white bg-opacity-80 backdrop-blur-sm"
+    >
+      <div
+        class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"
+      ></div>
+      <h2 class="text-2xl font-semibold text-gray-800">
+        Generating AI Content...
+      </h2>
+      <p class="text-gray-600 mt-2 text-lg">
+        Please wait while we formulate the section based on your prompt.
+      </p>
+    </div>
+  }
+  <div
+    class="flex justify-between items-center mb-4 py-4 border-b header bg-white"
+  >
+    <div>
+      <h1 class="font-semibold text-xl flex items-center gap-2">
+        <i
+          class="material-icons cursor-pointer hover:bg-gray-100 p-1 rounded-md"
+          (click)="goBack()"
+        >
+          arrow_back
+        </i>
+        {{ isEditMode ? "Edit Section" : "Add New Section" }}
+      </h1>
+    </div>
+
+    <div>
+      <button
+        class="px-3 py-3 mx-4 rounded-lg theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark ml-4"
+        (click)="openAiSidebar()"
+      >
+        <span class="font-semibold text-lg">Generate Ai</span>
+      </button>
+      <button
+        type="submit"
+        (click)="submitsectionForm()"
+        class="px-3 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark w-full sm:w-auto"
+        [disabled]="!sectionForm.valid || isLoading || hasDescription"
+      >
+        @if (isLoading) {
+          <div class="flex items-center gap-2">
+            <svg
+              class="animate-spin h-5 w-5 text-gray-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+            @if (isEditMode) {
+              <span class="font-semibold text-lg">Updating...</span>
+            } @else {
+              <span class="font-semibold text-lg">Submitting...</span>
+            }
+          </div>
+        } @else {
+          <span class="font-semibold text-lg">
+            @if (isEditMode) {
+              Update Section
+            } @else {
+              Save Section
+            }
+          </span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <div>
+    <form [formGroup]="sectionForm">
+      @if (!showQuizQuestions()) {
+        <div>
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-6">
+              <label class="block text-md font-medium mb-1"
+                >Section Title <span class="text-red-700">*</span></label
+              >
+              <input
+                type="text"
+                formControlName="title"
+                class="w-full p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                placeholder="Enter Section title"
+                (keypress)="preventSpecialCharacters($event, 'Section Title')"
+                (blur)="cleanInput('title')"
+              />
+              @if (
+                sectionForm.get("title")?.invalid &&
+                sectionForm.get("title")?.touched
+              ) {
+                <div class="text-red-600 mt-1 text-md font-semibold">
+                  <span class="flex items-center gap-1">
+                    <svg
+                      class="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span>
+                      @if (sectionForm.get("title")?.hasError("required")) {
+                        Title is required.
+                      } @else if (
+                        sectionForm.get("title")?.hasError("minlength")
+                      ) {
+                        Minimum 3 characters required.
+                      } @else if (
+                        sectionForm.get("title")?.hasError("pattern")
+                      ) {
+                        Only letters, spaces, hyphen and underscore allowed; dot
+                        is not allowed.
+                      }
+                    </span>
+                  </span>
+                </div>
+              }
+            </div>
+
+            <div class="col-span-6">
+              <label class="block text-md font-medium mb-1"
+                >Duration(min) <span class="text-red-700">*</span></label
+              >
+              <input
+                type="text"
+                formControlName="duration"
+                class="w-full p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                placeholder="e.g., 30"
+                inputmode="numeric"
+                maxlength="3"
+                oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.value = this.value.replace(/^0+/, '');"
+              />
+
+              @if (
+                sectionForm.get("duration")?.hasError("required") &&
+                sectionForm.get("duration")?.touched
+              ) {
+                <div class="text-red-500 mt-1 text-md font-semibold">
+                  <span class="flex items-center gap-1">
+                    <svg
+                      class="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span>Duration is required.</span>
+                  </span>
+                </div>
+              }
+
+              @if (
+                sectionForm.get("duration")?.hasError("maxlength") &&
+                sectionForm.get("duration")?.touched
+              ) {
+                <div class="text-red-500 mt-1 text-sm">
+                  <span class="flex items-center gap-1">
+                    <svg
+                      class="w-4 h-4 text-red-400"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span>Maximum 3 digits allowed.</span>
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-5 mt-4">
+            <div class="mt-1">
+              <label class="block text-md font-medium mb-1">
+                Content Type <span class="text-red-700">*</span></label
+              >
+              <div class="lessons-page theme-placeholder">
+                <ng-select
+                  [items]="contentTypeOptions"
+                  bindLabel="label"
+                  bindValue="value"
+                  [clearable]="true"
+                  placeholder="Select content type"
+                  [searchable]="false"
+                  formControlName="contentType"
+                ></ng-select>
+              </div>
+            </div>
+            <div class="space-y-4">
+              @switch (sectionForm.get("contentType")?.value) {
+                @case ("VIDEO") {
+                  <div>
+                    <label class="block text-md font-medium mb-1">
+                      Video URL <span class="text-red-700">*</span>
+                    </label>
+                    <div class="flex gap-2">
+                      <input
+                        type="url"
+                        formControlName="video_url"
+                        class="w-full p-3 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                        placeholder="Enter video URL (YouTube, Vimeo, MP4, etc.)"
+                      />
+                      <button
+                        type="button"
+                        (click)="addVideoUrl()"
+                        class="px-3 py-2 rounded theme-bg-gray theme-bg-secondary"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    @if (
+                      (sectionForm.get("video_url")?.hasError("required") ||
+                        sectionForm.get("video_url")?.hasError("duplicate")) &&
+                      sectionForm.get("video_url")?.touched
+                    ) {
+                      <div class="text-red-500 mt-1 text-md font-semibold">
+                        <span class="flex items-center gap-1">
+                          <svg
+                            class="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                          <span>
+                            @if (
+                              sectionForm
+                                .get("video_url")
+                                ?.hasError("duplicate")
+                            ) {
+                              This video URL has already exist.
+                            } @else if (
+                              sectionForm.get("video_url")?.hasError("required")
+                            ) {
+                              Video URL is required.
+                            }
+                          </span>
+                        </span>
+                      </div>
+                    } @else {
+                      <p class="text-xs ml-2 mt-1">
+                        You can add multiple URLs.
+                      </p>
+                    }
+                  </div>
+                }
+                @case ("IMAGE") {
+                  <div>
+                    <label class="block text-md font-medium mb-1">
+                      Upload Image(s) <span class="text-red-700">*</span>
+                    </label>
+                    <div class="relative">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        (change)="onImageFilesSelected($event)"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <div
+                        class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      >
+                        <span class="flex justify-center">
+                          <span>
+                            <svg
+                              class="w-6 h-4 mb-1"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 20 16"
+                            >
+                              <path
+                                stroke="currentColor"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                              />
+                            </svg>
+                          </span>
+                          <p class="text-sm mx-3 font-medium">
+                            Click to upload image(s)
+                          </p>
+                        </span>
+                      </div>
+                      <p class="text-xs ml-2 mt-1">JPG, PNG, GIF, SVG</p>
+                    </div>
+                  </div>
+                }
+                @case ("PDF") {
+                  <div>
+                    <label class="block text-md font-medium mb-1">
+                      Upload PDF(s) <span class="text-red-700">*</span>
+                    </label>
+                    <div class="relative">
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        multiple
+                        (change)="onPdfFilesSelected($event)"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      />
+                      <div
+                        class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      >
+                        <span class="flex justify-center">
+                          <span>
+                            <svg
+                              class="w-6 h-4"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 20 16"
+                            >
+                              <path
+                                stroke="currentColor"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                              />
+                            </svg>
+                          </span>
+                          <p
+                            class="text-sm font-semibold theme-text-secondary mx-3 theme-text-dark"
+                          >
+                            Click to upload PDF(s)
+                          </p>
+                        </span>
+                      </div>
+                      <p class="text-xs ml-2 mt-1">PDF format</p>
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+          <div class="mt-4 col-span-2">
+            @if (sectionForm.get("contentType")?.value === "TEXT") {
+              <label class="block text-md font-medium mb-1">
+                Description <span class="text-red-700">*</span>
+              </label>
+              <div>
+                <quill-editor
+                  formControlName="description"
+                  [modules]="quillModules"
+                  [placeholder]="'Enter Section description (text content)...'"
+                  class="w-full min-h-[36vh] h-[36vh]"
+                ></quill-editor>
+              </div>
+              <div class="mt-2">
+                @if (hasDescription) {
+                  <button
+                    type="button"
+                    (click)="addTextContent()"
+                    class="px-3 py-2 rounded theme-bg-gray text-md font-semibold theme-bg-secondary"
+                  >
+                    Save Text
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        @if (uploadedFiles().length > 0) {
+          <div class="leading-relaxed">
+            <label
+              class="text-xl font-medium theme-text-secondary theme-text-dark"
+              >Added Items</label
+            >
+            <div
+              class="space-y-2 mt-2"
+              cdkDropList
+              (cdkDropListDropped)="drop($event)"
+            >
+              @for (item of uploadedFiles(); track item) {
+                <div class="p-4 border rounded cursor-move bg-white" cdkDrag>
+                  <div class="flex justify-between items-center flex-1 min-w-0">
+                    <p
+                      class="text-md mr-2 theme-text-secondary theme-text-dark flex-shrink-0"
+                    >
+                      <strong>{{ item?.file_type }}</strong> :
+                    </p>
+                    @if (item?.file_type?.toLowerCase() === "image") {
+                      <div class="lessons-page theme-placeholder mr-16">
+                        <label>Select Image Position</label>
+                        <ng-select
+                          bindLabel="label"
+                          bindValue="value"
+                          [clearable]="false"
+                          [searchable]="false"
+                          [ngModel]="item?.position"
+                          placeholder="Select position"
+                          [items]="IMAGE_POSITION_OPTIONS"
+                          (ngModelChange)="
+                            updateImagePosition(
+                              uploadedFiles().indexOf(item),
+                              $event
+                            )
+                          "
+                          [ngModelOptions]="{ standalone: true }"
+                          class="w-36"
+                        ></ng-select>
+                      </div>
+                    }
+                    <div class="flex items-center">
+                      @if (item?.file_type?.toLowerCase() === "text") {
+                        <button
+                          type="button"
+                          (click)="
+                            editTextContent(uploadedFiles().indexOf(item))
+                          "
+                          class="px-3 py-1 relative rounded cursor-pointer"
+                        >
+                          <svg
+                            appTooltip="Edit"
+                            tooltipPosition="left"
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            ></path>
+                          </svg>
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        (click)="
+                          removeUploadedItem(uploadedFiles().indexOf(item))
+                        "
+                        class="px-3 py-1 relative rounded cursor-pointer"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          appTooltip="Remove"
+                          tooltipPosition="left"
+                          class="w-5 h-5 text-red-500"
+                          viewBox="0 -960 960 960"
+                          fill="#EA3323"
+                        >
+                          <path
+                            d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  @if (
+                    item?.file_type?.toLowerCase() === "image" ||
+                    item?.file_type?.toLowerCase() === "pdf"
+                  ) {
+                    <div class="px-4 text-base break-words">
+                      {{ item?.file_name }}
+                    </div>
+                  } @else {
+                    <div
+                      class="px-4 text-base break-words [&_p]:mb-0 [&_p]:min-h-[1.2em] [&_ul]:ml-[1.5em] [&_ul]:mb-[1em] [&_ul]:list-outside [&_ul]:list-disc [&_ol]:ml-[1.5em] [&_ol]:mb-[1em] [&_ol]:list-outside [&_ol]:list-decimal [&_h1]:mt-[1em] [&_h1]:mb-[0.5em] [&_h1]:font-bold [&_h2]:mt-[1em] [&_h2]:mb-[0.5em] [&_h2]:font-bold [&_h3]:mt-[1em] [&_h3]:mb-[0.5em] [&_h3]:font-bold [&_h4]:mt-[1em] [&_h4]:mb-[0.5em] [&_h4]:font-bold [&_h5]:mt-[1em] [&_h5]:mb-[0.5em] [&_h5]:font-bold [&_h6]:mt-[1em] [&_h6]:mb-[0.5em] [&_h6]:font-bold [&_blockquote]:border-l-4 [&_blockquote]:border-[#ccc] [&_blockquote]:mb-[1em] [&_blockquote]:pl-[1em] [&_.ql-align-center]:text-center [&_.ql-align-right]:text-right [&_.ql-align-justify]:text-justify"
+                      [innerHTML]="item?.url"
+                    ></div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      <div class="space-y-3">
+        <div class="flex justify-between items-center my-2">
+          @if (!showQuizQuestions()) {
+            <button
+              [disabled]="!sectionForm.valid"
+              type="button"
+              (click)="handleAddQuiz()"
+              class="px-3 py-1 disabled:opacity-50 disabled:cursor-not-allowed rounded bg-blue-600 text-white font-semibold text-lg flex items-center gap-1"
+            >
+              Add Quiz
+              <i class="material-icons text-xl">keyboard_double_arrow_right</i>
+            </button>
+          }
+        </div>
+
+        @if (showQuizQuestions()) {
+          @for (question of questions(); track question?.key) {
+            <div class="border border-gray-200 rounded-lg p-5 relative">
+              <!-- Question Input -->
+              <div class="mb-4 mt-2">
+                <label class="block text-md font-medium mb-1"
+                  >Question Text</label
+                >
+                <input
+                  type="text"
+                  [value]="question.text"
+                  (input)="
+                    updateQuestionText(question.key, $any($event.target)?.value)
+                  "
+                  class="w-full p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                  placeholder="Enter quiz question"
+                />
+              </div>
+
+              <!-- Options -->
+              <div class="space-y-3">
+                <div class="grid grid-cols-12 gap-4">
+                  @for (option of question?.options; track option?.key) {
+                    <div class="col-span-6">
+                      <div class="grid grid-cols-12 gap-4 items-end">
+                        <div class="col-span-10">
+                          <label class="block text-md font-medium mb-1">{{
+                            option?.label
+                          }}</label>
+                          <input
+                            type="text"
+                            [value]="option?.value"
+                            (input)="
+                              updateQuizOption(
+                                question.key,
+                                option.key,
+                                $any($event.target)?.value
+                              )
+                            "
+                            class="w-full p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                            [placeholder]="
+                              'Enter ' + option.label.toLowerCase()
+                            "
+                            maxlength="150"
+                          />
+                        </div>
+                        <div
+                          class="col-span-1 flex justify-center items-center"
+                        >
+                          @if (question.options.length > 2) {
+                            <button
+                              type="button"
+                              (click)="
+                                removeQuizOption(question.key, option.key)
+                              "
+                              class="p-2 text-red-500 hover:text-red-700 rounded"
+                            >
+                              <i
+                                class="material-icons text-2xl"
+                                appTooltip="Remove option"
+                                tooltipPosition="right"
+                                >close</i
+                              >
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              @if (question.options.length < 4) {
+                <div class="flex mt-3">
+                  <button
+                    type="button"
+                    (click)="addQuizOption(question.key)"
+                    class="flex items-center gap-1 px-2 py-2 theme-bg-gray theme-bg-secondary rounded"
+                  >
+                    <i class="material-icons text-base">add</i>
+                    Add Option
+                  </button>
+                </div>
+              }
+
+              <!-- Correct Answer -->
+              <div class="grid grid-cols-12 gap-4 mt-4">
+                <div class="col-span-5">
+                  <label class="block text-md font-medium mb-1"
+                    >Correct Answer</label
+                  >
+                  <div class="lessons-page theme-placeholder">
+                    <ng-select
+                      [items]="question?.options"
+                      [bindLabel]="'value'"
+                      [bindValue]="'key'"
+                      [clearable]="true"
+                      placeholder="Select correct answer"
+                      [ngModel]="question?.correct_answer"
+                      (ngModelChange)="
+                        updateQuestionCorrectAnswer(question.key, $event)
+                      "
+                      [ngModelOptions]="{ standalone: true }"
+                    >
+                      <ng-template ng-label-tmp let-item="item">
+                        <span>{{
+                          item?.value ? item?.value : "Please enter option"
+                        }}</span>
+                      </ng-template>
+                      <ng-template ng-option-tmp let-item="item">
+                        <span>{{
+                          item?.value ? item?.value : "Please enter option"
+                        }}</span>
+                      </ng-template>
+                    </ng-select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="mt-3 flex justify-between">
+            <button
+              type="button"
+              (click)="toggleQuizQuestions()"
+              class="px-3 disabled:opacity-50 disabled:cursor-not-allowed rounded bg-blue-600 text-white font-semibold text-lg flex items-center gap-1"
+            >
+              <ng-container>
+                <i class="material-icons text-xl">keyboard_double_arrow_left</i>
+                Previous
+              </ng-container>
+            </button>
+            <button
+              type="button"
+              (click)="saveQuestion()"
+              class="flex items-center px-4 py-1 mt-1 rounded bg-blue-600 text-white hover:bg-green-700 font-semibold text-lg"
+            >
+              {{ editingKey !== null ? "Update Quiz" : "Save Quiz" }}
+            </button>
+          </div>
+          @if (savedQuestions().length > 0) {
+            <div class="mt-3">
+              @for (
+                savedQuestion of savedQuestions();
+                track savedQuestion?.key
+              ) {
+                <div
+                  class="border border-gray-200 rounded-lg p-4 bg-gray-50 mb-3 font-semibold"
+                >
+                  <div class="flex justify-between items-start mb-2">
+                    <div class="flex-1">
+                      <h4 class="text-lg font-semibold">
+                        Que. {{ savedQuestion?.key }}
+                      </h4>
+
+                      <p class="text-lg font-semibold">
+                        {{ savedQuestion?.text }}
+                      </p>
+
+                      <div>
+                        <strong>Options:</strong>
+                        <div class="flex flex-col mt-1 ml-8">
+                          @for (
+                            option of savedQuestion?.options;
+                            track option?.key;
+                            let i = $index
+                          ) {
+                            <div>{{ i + 1 }} ) {{ option?.value }}</div>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="mt-2">
+                        <strong>Answer:</strong>
+                        {{ getCorrectAnswer(savedQuestion) }}
+                      </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        (click)="editQuestion(savedQuestion.key)"
+                        class="text-blue-500 hover:text-blue-700"
+                        appTooltip="Edit question"
+                        tooltipPosition="left"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
+                        </svg>
+                      </button>
+
+                      <button
+                        type="button"
+                        (click)="deleteQuestion(savedQuestion.key)"
+                        class="text-red-500 hover:text-red-700 mx-3"
+                        appTooltip="Delete question"
+                        tooltipPosition="left"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </form>
+
+    @if (isAiSidebarOpen) {
+      <div class="fixed inset-0 z-[100] overflow-hidden">
+        <div
+          class="fixed inset-0 bg-black bg-opacity-50 opacity-100 transition-opacity"
+          (click)="closeAiSidebar()"
+        ></div>
+
+        <div
+          class="fixed inset-y-0 right-0 max-w-md w-full flex theme-text-secondary theme-text-dark"
+        >
+          <div
+            class="w-full h-full bg-white shadow-xl flex flex-col transform transition-transform ease-in-out duration-300"
+          >
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+              <h2 class="text-xl font-semibold">Generate Section Using AI</h2>
+              <button (click)="closeAiSidebar()">
+                <i class="material-icons">close</i>
+              </button>
+            </div>
+
+            <div class="flex-1 px-6 py-4 overflow-y-auto">
+              <label class="block text-md font-medium mb-2"
+                >Enter your prompt <span class="text-red-700">*</span></label
+              >
+              <textarea
+                [(ngModel)]="aiPrompt"
+                rows="8"
+                class="w-full p-3 border border-gray-300 rounded-lg outline-none placeholder:text-gray-400 resize-none"
+                placeholder="E.g. Create a section about Introduction to Angular, include a 10-minute video and 2 quiz questions..."
+              ></textarea>
+              <p class="text-md mt-3 leading-relaxed mt-3">
+                Describe the section you want to create. The AI will generate a
+                title, duration, content, and quiz questions based on your
+                prompt.
+              </p>
+            </div>
+
+            <div class="px-6 py-4 border-t bg-gray-50 flex justify-end gap-3">
+              <button
+                class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                [disabled]="!aiPrompt || !aiPrompt.trim()"
+                (click)="patchAiPrompt()"
+              >
+                <span class="flex items-center gap-2">
+                  <i class="material-icons text-sm">auto_awesome</i>
+                  Generate
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

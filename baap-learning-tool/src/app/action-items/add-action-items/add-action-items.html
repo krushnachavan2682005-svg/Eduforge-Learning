@@ -1,0 +1,349 @@
+<div class="flex justify-end items-center">
+  <button
+    class="px-4 py-2 font-medium rounded-md theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark"
+    (click)="openSidebar()"
+  >
+    Add Action Item
+  </button>
+</div>
+
+@if (showModal) {
+  <div
+    class="fixed inset-0 bg-black z-40 transition-opacity duration-300 bg-opacity-50"
+    (click)="closeSidebar()"
+  ></div>
+}
+
+@if (isSidebarOpen) {
+  <div
+    class="fixed top-0 right-0 h-full w-full sm:w-[450px] bg-white shadow-xl z-50 flex flex-col"
+    [class.translate-x-full]="!isSidebarOpen"
+  >
+    <div class="shrink-0 sticky top-0 pt-8 bg-white border-gray-200 py-0 z-10">
+      <div class="flex justify-between items-center px-4 sm:px-6">
+        <h2 class="text-lg font-semibold theme-text-secondary theme-text-dark">
+          {{ isEditMode ? "Edit Action Item" : "Add Action Item" }}
+        </h2>
+        <button
+          (click)="closeSidebar()"
+          class="rounded theme-text-secondary theme-text-dark"
+          aria-label="Close"
+          [appTooltip]="'Close Sidebar'"
+          tooltipPosition="left"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <hr class="theme-border mt-4" />
+    </div>
+    <div class="flex-1 overflow-y-auto px-4 pt-2 sm:px-7 pb-6">
+      <form
+        [formGroup]="actionForm"
+        (ngSubmit)="submitForm()"
+        class="space-y-4"
+      >
+        <div class="mb-4">
+          <label class="block mb-1 text-sm sm:text-base">
+            Task Name <span class="text-red-600 font-bold">*</span>
+          </label>
+          <input
+            type="text"
+            class="border p-2 w-full focus:outline-none rounded placeholder:text-sm placeholder:theme-text-secondary"
+            formControlName="task_name"
+            placeholder="Enter task name"
+            (input)="onTaskNameInput($event)"
+            [maxlength]="35"
+          />
+          @if (
+            actionForm.get("task_name")?.touched &&
+            actionForm.get("task_name")?.errors?.["required"]
+          ) {
+            <div class="text-red-600 font-semibold text-md">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Task name is required.</span>
+              </span>
+            </div>
+          }
+        </div>
+
+        <div class="mb-2">
+          <label class="block mb-1 text-sm sm:text-base">
+            Description <span class="text-red-600 font-bold">*</span>
+          </label>
+          <textarea
+            class="border rounded focus:outline-none px-3 resize-none w-full placeholder:text-sm placeholder:theme-text-secondary"
+            formControlName="description"
+            placeholder="Enter description"
+            rows="3"
+          ></textarea>
+          @if (
+            actionForm.get("description")?.touched &&
+            actionForm.get("description")?.errors?.["required"]
+          ) {
+            <div class="text-red-600 text-md font-semibold">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Description is required.</span>
+              </span>
+            </div>
+          }
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="w-full sm:w-1/2">
+            <label class="block mb-1 text-sm sm:text-base">
+              Total Score <span class="text-red-600 font-bold">*</span>
+            </label>
+            <input
+              type="text"
+              class="border p-2 w-full focus:outline-none rounded placeholder:text-sm placeholder:theme-text-secondary"
+              formControlName="total_score"
+              placeholder="Enter total score"
+              inputmode="numeric"
+              maxlength="3"
+              oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.value = this.value.replace(/^0+/, '');"
+            />
+            @if (
+              actionForm.get("total_score")?.touched &&
+              actionForm.get("total_score")?.invalid
+            ) {
+              <div class="text-red-600 font-semibold text-md">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>
+                    @if (actionForm.get("total_score")?.errors?.["required"]) {
+                      Total Score is required.
+                    } @else if (
+                      actionForm.get("total_score")?.errors?.["maxlength"]
+                    ) {
+                      Maximum 3 digits allowed.
+                    } @else if (
+                      actionForm.get("total_score")?.errors?.["pattern"]
+                    ) {
+                      Only numbers allowed.
+                    }
+                  </span>
+                </span>
+              </div>
+            }
+          </div>
+          <div class="w-full sm:w-1/2">
+            <label class="block mb-1 text-sm sm:text-base">
+              Level <span class="text-red-600 font-bold">*</span>
+            </label>
+
+            <div class="flex gap-2 text-sm lessons-page theme-placeholder">
+              <ng-select
+                [items]="allLevels()"
+                (open)="getLevels()"
+                bindLabel="level_name"
+                bindValue="level_name"
+                placeholder="Select  level"
+                formControlName="level"
+                class="flex-1 theme-placeholder"
+              >
+              </ng-select>
+            </div>
+
+            @if (
+              actionForm.get("level")?.touched &&
+              actionForm.get("level")?.errors?.["required"]
+            ) {
+              <div class="text-red-600 text-md font-semibold">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Level is required.</span>
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="block mb-1 text-sm sm:text-base">
+            Reviewer <span class="text-red-600 font-bold">*</span>
+          </label>
+          <div class="lessons-page theme-placeholder">
+            <ng-select
+              [items]="reviewIds"
+              bindLabel="id"
+              placeholder="Select a reviewer name"
+              formControlName="reviewer"
+              (change)="addSelectedReviewer($event)"
+              class="flex-1 theme-placeholder"
+            >
+            </ng-select>
+          </div>
+          @if (
+            actionForm.get("reviewer")?.touched &&
+            selectedReviewers.length === 0
+          ) {
+            <div class="text-red-600 font-semibold text-md">
+              <span class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>Reviewer Name is required.</span>
+              </span>
+            </div>
+          }
+          <div class="grid grid-cols-2 gap-3">
+            @for (
+              reviewer of selectedReviewers;
+              track reviewer;
+              let i = $index
+            ) {
+              <div
+                class="relative flex items-center justify-between gap-1 mt-1 p-2 theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark"
+              >
+                <div class="block">
+                  {{ reviewer?.id | titlecase }}
+                </div>
+                <button
+                  type="button"
+                  (click)="removeReviewer(i)"
+                  class="text-red-500 hover:text-red-700"
+                  aria-label="Delete"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="flex flex-col space-y-2">
+          <label for="attachment" class="block mb-1 text-sm sm:text-base">
+            Attachments File
+            <!-- <span class="text-red-600 font-bold">*</span> -->
+          </label>
+          <div
+            class="border-2 border-dashed border-gray-300 rounded-xl p-2 text-center cursor-pointer hover:border-blue-500 transition"
+            (click)="triggerFileInput()"
+          >
+            <span class="material-symbols-outlined mt-1"> cloud_upload </span>
+            @if (selectedFileName) {
+              <p class="text-gray-700 font-medium mb-1">
+                {{ selectedFileName }}
+              </p>
+            } @else {
+              <p class="text-gray-700 font-medium">
+                Click to upload or drag and drop
+              </p>
+            }
+            <p class="text-gray-500 text-sm">PDF, DOCX, ZIP (MAX. 10MB)</p>
+            <input
+              type="file"
+              id="attachment"
+              class="hidden"
+              (change)="onFileSelected($event)"
+              accept=".pdf,.doc,.docx,.zip"
+            />
+
+            @if (uploading) {
+              <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div
+                  class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  [style.width.%]="uploadProgress"
+                ></div>
+              </div>
+            }
+          </div>
+        </div>
+      </form>
+    </div>
+    <div
+      class="shrink-0 bg-white border-t theme-border p-1.5 px-4 flex flex-col sm:flex-row justify-between gap-3"
+    >
+      <button
+        type="button"
+        class="px-5 py-2 rounded-md transition-colors theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark theme-border w-full sm:w-auto"
+        (click)="closeSidebar()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="submit"
+        class="px-5 py-2 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark theme-border w-full sm:w-auto"
+        [disabled]="!actionForm.valid || isLoading"
+        (click)="submitForm()"
+      >
+        @if (isLoading) {
+          <span class="flex items-center gap-2">
+            <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Saving...
+          </span>
+        } @else {
+          {{ isEditMode ? "Update Action Item" : "Save Action Item" }}
+        }
+      </button>
+    </div>
+  </div>
+}

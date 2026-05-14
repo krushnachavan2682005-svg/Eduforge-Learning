@@ -1,0 +1,163 @@
+<div
+  class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 theme-text-secondary theme-text-dark flex flex-col min-h-[calc(100vh-110px)] pb-20 sm:pb-16"
+>
+  @for (head of headers; track head) {
+    <div class="header bg-white pt-2">
+      <app-header [name]="head?.title" [studentClass]="studentCount()">
+        <div class="relative flex items-center">
+          <input
+            type="text"
+            [ngModel]="searchKey()"
+            (ngModelChange)="searchKey.set($event)"
+            placeholder="Search Result..."
+            class="pl-10 pr-10 py-2 border rounded-full focus:outline-none focus:ring-1 focus:ring-slate-400  w-80 shadow-sm theme-border"
+          />
+
+          <span class="material-icons absolute left-3 text-gray-400 text-md">
+            search
+          </span>
+
+          @if (searchKey()) {
+            <span
+              class="material-icons absolute right-3 text-gray-400 text-md cursor-pointer hover:text-red-500"
+              (click)="searchKey.set('')"
+            >
+              close
+            </span>
+          }
+        </div>
+      </app-header>
+    </div>
+  }
+
+  <div class="mt-2 border-1 rounded-md overflow-hidden">
+    <div class="max-h-[620px] overflow-y-auto">
+      @if (isLoading()) {
+        <div class="mt-4">
+          <ngx-skeleton-loader
+            appearance="line"
+            count="10"
+            [theme]="skeletonService.lineTheme"
+          >
+          </ngx-skeleton-loader>
+        </div>
+      } @else if (filteredResults().length > 0) {
+        <table class="w-full border-collapse">
+          <thead
+            class="theme-bg-secondary theme-bg-gray font-bold sticky top-0 z-10"
+          >
+            <tr>
+              <th class="px-4 py-3 border-r border-gray-300 w-16 text-center">
+                Sr.no
+              </th>
+              <th class="px-6 py-3 border-r border-gray-300 text-left">
+                Student Name
+              </th>
+              <th class="px-6 py-3 border-r border-gray-300 text-left">
+                Test Name
+              </th>
+              <th class="px-4 py-3 border-r border-gray-300 text-center">
+                Achieved
+              </th>
+              <th class="px-4 py-3 border-r border-gray-300 text-center">
+                Total
+              </th>
+              <th class="px-4 py-3 border-r border-gray-300 text-center">
+                Exam Date
+              </th>
+              <th class="px-4 py-3 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white">
+            @for (item of filteredResults(); track $index) {
+              <tr class="border-b hover:bg-gray-50 transition-colors">
+                <td
+                  class="px-4 py-3 border-r border-gray-200 text-center font-medium text-gray-700"
+                >
+                  {{ $index + 1 }}
+                </td>
+                <td class="px-6 py-3 border-r border-gray-200 text-gray-800">
+                  {{ (item?.studentName | titlecase) || "--" }}
+                </td>
+                <td
+                  class="px-6 py-3 border-r border-gray-200 text-gray-800 font-medium"
+                >
+                  {{ item?.test_name || "--" }}
+                </td>
+                <td
+                  class="px-4 py-3 border-r border-gray-200 text-center font-semibold text-blue-600"
+                >
+                  {{ item?.achieved_marks || "--" }}
+                </td>
+                <td
+                  class="px-4 py-3 border-r border-gray-200 text-center font-semibold text-gray-700"
+                >
+                  {{ item?.total_marks || "--" }}
+                </td>
+                <td
+                  class="px-4 py-3 border-r border-gray-200 text-center text-gray-600"
+                >
+                  {{ item?.exam_date | date: "mediumDate" }}
+                </td>
+                <td
+                  class="px-4 py-3 text-center font-bold"
+                  [ngClass]="{
+                    'text-green-600':
+                      item?.status === 'Pass' &&
+                      item?.review_status !== 'pending_review',
+                    'text-red-600':
+                      item?.status === 'Fail' &&
+                      item?.review_status !== 'pending_review',
+                    'text-yellow-600': item?.review_status === 'pending_review',
+                  }"
+                >
+                  @if (item?.review_status === "pending_review") {
+                    Pending
+                  } @else {
+                    {{ item?.status }}
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div
+          class="flex flex-col items-center justify-center py-12 text-center text-gray-500 mt-20"
+        >
+          <div
+            class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
+          >
+            <svg
+              class="w-12 h-12 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              />
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">
+            No Results Found
+          </h3>
+          <p class="text-gray-500 max-w-sm">
+            No student results found matching your search.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+  <app-pagination
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    (pageChange)="goToPage($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+  ></app-pagination>
+</div>

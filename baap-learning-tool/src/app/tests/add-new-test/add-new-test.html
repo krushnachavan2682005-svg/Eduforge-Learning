@@ -1,0 +1,1948 @@
+<div
+  class="mx-2 sm:mx-3 md:mx-4 lg:mx-6 theme-text-dark theme-text min-h-screen"
+>
+  <div class="header bg-white">
+    <div class="flex justify-between items-center pt-2">
+      <div class="flex items-center gap-3 mt-3">
+        <button
+          (click)="goBack()"
+          class="flex items-center gap-2 text-gray-800 hover:text-indigo-600 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-6 h-6"
+          >
+            <path
+              d="M19 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H19v-2z"
+            />
+          </svg>
+        </button>
+        <div class="uppercase">
+          <p class="text-lg sm:text-xl font-bold">{{ headers[0].title }}</p>
+          <p class="text-sm">
+            {{ headers[0].subtitle }}
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button
+          type="button"
+          (click)="openAiSidebar()"
+          class="px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-white bg-indigo-600 hover:bg-indigo-700 font-medium"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09l2.846.813-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+          </svg>
+          Generate Ai
+        </button>
+        <button
+          type="submit"
+          (click)="onSubmit()"
+          class="px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark"
+          [disabled]="isLoading"
+        >
+          @if (isLoading) {
+            <div class="flex items-center gap-2">
+              <svg
+                class="animate-spin h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              @if (isEditMode) {
+                <span>Updating...</span>
+              } @else {
+                <span>Saving...</span>
+              }
+            </div>
+          } @else {
+            <span>
+              @if (isEditMode) {
+                Update Test
+              } @else {
+                Save Test
+              }
+            </span>
+          }
+        </button>
+      </div>
+    </div>
+    <hr class="my-2 theme-border" />
+  </div>
+
+  <ng-template #errorIcon>
+    <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+      <path
+        fill-rule="evenodd"
+        d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+        clip-rule="evenodd"
+      />
+    </svg>
+  </ng-template>
+
+  <form [formGroup]="form" class="theme-bg pt-1 pb-0">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      @if (!detailsSaved) {
+        <div class="flex flex-col">
+          <label
+            class="text-md font-medium theme-text-secondary theme-text-dark mb-1"
+          >
+            Test Name <span class="text-red-600">*</span>
+          </label>
+          <input
+            formControlName="title"
+            placeholder="Enter test name"
+            class="w-full p-2 border rounded outline-none placeholder:theme-text-secondary"
+            (input)="sanitizeText('title', $event)"
+          />
+          @if (
+            form.get("title")?.touched &&
+            form.get("title")?.hasError("required")
+          ) {
+            <span class="flex items-center gap-1 mt-1 text-red-600">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="text-md font-medium">Test name is required</span>
+            </span>
+          }
+        </div>
+        <div class="flex flex-col">
+          <label
+            class="text-md font-medium theme-text-secondary theme-text-dark mb-1"
+          >
+            Test Reviewer <span class="text-red-600">*</span>
+          </label>
+          <div class="theme-placeholder lessons-page">
+            <ng-select
+              [items]="reviewerOptions"
+              [multiple]="true"
+              [clearable]="true"
+              bindLabel="name"
+              [searchable]="true"
+              placeholder="Select test reviewers"
+              formControlName="reviewers"
+              class="text-md theme-text-secondary theme-text-dark"
+            >
+            </ng-select>
+          </div>
+          @if (
+            form.get("reviewers")?.touched &&
+            form.get("reviewers")?.hasError("required")
+          ) {
+            <span class="flex items-center gap-1 mt-1 text-red-600">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="text-md font-medium">Test reviewer is required</span>
+            </span>
+          }
+        </div>
+        <div class="flex flex-col">
+          <label
+            class="text-md font-medium theme-text-secondary theme-text-dark mb-1"
+          >
+            Subject Name
+          </label>
+          <input
+            formControlName="subject"
+            placeholder="Enter subject name"
+            class="w-full p-2 border rounded outline-none placeholder:theme-text-secondary"
+            (input)="sanitizeText('subject', $event)"
+          />
+
+          <!-- @if (
+            form.get("subject")?.touched &&
+            form.get("subject")?.hasError("required")
+          ) {
+            <span class="flex items-center gap-1 mt-1 text-red-600">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="text-md font-medium">Subject name is required</span>
+            </span>
+          } -->
+        </div>
+      } @else {
+        <div class="col-span-full theme-text-secondary theme-text-dark">
+          <div class="p-3 border rounded-lg">
+            <div class="flex justify-between items-start mb-2">
+              <div class="text-xl font-semibold">Test Details</div>
+              <button
+                type="button"
+                class="p-2 rounded transition-colors theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark"
+                (click)="editTestDetails()"
+                title="Edit Test Details"
+                aria-label="Edit Test Details"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div
+              class="grid grid-cols-2 gap-8 mt-2 border border-gray-200 rounded-lg p-4"
+            >
+              <div class="space-y-2">
+                <div
+                  class="text-base truncate max-w-[55ch]"
+                  appTooltip="{{
+                    (addedTestDetails?.title?.length || 0) > 55
+                      ? addedTestDetails?.title
+                      : ''
+                  }}"
+                >
+                  Test Name: {{ addedTestDetails?.title }}
+                </div>
+                <div
+                  class="text-base truncate max-w-[55ch]"
+                  appTooltip="{{
+                    (addedTestDetails?.subject?.length || 0) > 55
+                      ? addedTestDetails?.subject
+                      : ''
+                  }}"
+                >
+                  Subject: {{ addedTestDetails?.subject }}
+                </div>
+                <div class="text-base">
+                  Passing Marks: {{ addedTestDetails?.passing_marks }}
+                </div>
+                <div class="text-base">
+                  Exam Date: {{ addedTestDetails?.exam_date }}
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <div class="text-base">
+                  Test Reviewer:
+                  {{ getReviewerDisplay(addedTestDetails?.reviewers) }}
+                </div>
+                <div class="text-base">
+                  Total Marks: {{ addedTestDetails?.total_marks }}
+                </div>
+                <div class="text-base">
+                  Duration:
+                  {{ getDurationDisplay(addedTestDetails?.duration_minutes) }}
+                </div>
+                <div class="text-base">
+                  Exam Time:
+                  {{ getExamTimeDisplay(addedTestDetails?.exam_start_time) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (!detailsSaved) {
+        <div class="flex flex-col">
+          <label class="block text-md font-medium mb-1">
+            Total Marks <span class="text-red-600">*</span>
+          </label>
+          <input
+            class="w-full p-2 border rounded outline-none placeholder:theme-text-secondary"
+            formControlName="total_marks"
+            placeholder="Enter total marks"
+            type="text"
+            maxlength="3"
+            inputmode="numeric"
+            (input)="onOnlyNumbers($event)"
+          />
+
+          @if (form.get("total_marks")?.touched) {
+            @if (form.get("total_marks")?.hasError("required")) {
+              <span class="flex items-center gap-1 mt-1">
+                <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+                <span class="text-md font-medium text-red-600"
+                  >Total marks is required</span
+                >
+              </span>
+            }
+            @if (form.get("total_marks")?.hasError("max")) {
+              <span class="flex items-center gap-1 mt-1">
+                <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+                <span class="text-md font-medium text-red-600"
+                  >3 digits are allowed</span
+                >
+              </span>
+            }
+          }
+        </div>
+
+        <div class="flex flex-col">
+          <label class="block text-md font-medium mb-1">
+            Passing Marks <span class="text-red-600">*</span>
+          </label>
+
+          <input
+            class="w-full p-2 border rounded outline-none placeholder:theme-text-secondary"
+            formControlName="passing_marks"
+            placeholder="Enter passing marks"
+            type="text"
+            maxlength="3"
+            inputmode="numeric"
+            (input)="validatePassingMarks(); onOnlyNumbers($event)"
+          />
+
+          @if (form.get("passing_marks")?.touched) {
+            @if (form.get("passing_marks")?.hasError("required")) {
+              <span class="flex items-center gap-1 mt-1">
+                <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+                <span class="text-md font-medium text-red-600"
+                  >Passing marks is required</span
+                >
+              </span>
+            }
+            @if (form.get("passing_marks")?.hasError("max")) {
+              <span class="flex items-center gap-1 mt-1">
+                <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+                <span class="text-md font-medium text-red-600"
+                  >3 digits are allowed</span
+                >
+              </span>
+            }
+            @if (form.get("passing_marks")?.hasError("passingGreater")) {
+              <span class="flex items-center gap-1 mt-1">
+                <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+                <span class="text-md font-medium text-red-600"
+                  >Passing cannot exceed total marks</span
+                >
+              </span>
+            }
+          }
+        </div>
+
+        <div class="flex flex-col">
+          <label class="block text-md font-medium mb-1">
+            Duration (min) <span class="text-red-600">*</span>
+          </label>
+
+          <input
+            class="w-full p-2 border rounded outline-none placeholder:theme-text-secondary"
+            formControlName="duration_minutes"
+            placeholder="e.g., 30"
+            type="text"
+            maxlength="3"
+            inputmode="numeric"
+            (input)="onOnlyNumbers($event)"
+          />
+
+          @if (form.get("duration_minutes")?.touched) {
+            @if (form.get("duration_minutes")?.hasError("required")) {
+              <span class="flex items-center gap-1 mt-1">
+                <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+                <span class="text-md font-medium text-red-600"
+                  >Duration is required.</span
+                >
+              </span>
+            }
+            @if (form.get("duration_minutes")?.hasError("min")) {
+              <span class="flex items-center gap-1 mt-1">
+                <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+                <span class="text-md font-medium text-red-600"
+                  >Minimum 10 minutes required.</span
+                >
+              </span>
+            }
+            @if (form.get("duration_minutes")?.hasError("max")) {
+              <span class="flex items-center gap-1 mt-1">
+                <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+                <span class="text-md font-medium text-red-600"
+                  >Maximum 999 allowed.</span
+                >
+              </span>
+            }
+          }
+        </div>
+
+        <div class="flex flex-col">
+          <label class="block text-md font-medium mb-1">
+            Schedule Test <span class="text-red-600">*</span>
+          </label>
+          <app-calendar
+            [value]="form.get('exam_date')?.value"
+            [min]="minExamDate"
+            class="cursor-pointer"
+            (click)="markExamDateTouched()"
+            (dateSelected)="
+              form.get('exam_date')?.setValue($event);
+              form.get('exam_date')?.markAsTouched();
+              form.get('exam_date')?.updateValueAndValidity()
+            "
+          ></app-calendar>
+
+          @if (
+            form.get("exam_date")?.touched &&
+            form.get("exam_date")?.hasError("required")
+          ) {
+            <span class="flex items-center gap-1 mt-1">
+              <svg
+                class="w-4 h-4 text-red-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="text-md font-medium text-red-600"
+                >Date is required</span
+              >
+            </span>
+          }
+          @if (form.get("exam_date")?.hasError("dateTooEarly")) {
+            <span class="flex items-center gap-1 mt-1">
+              <svg
+                class="w-4 h-4 text-red-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="text-md font-medium text-red-600"
+                >Date cannot be before today</span
+              >
+            </span>
+          }
+          @if (form.get("exam_date")?.hasError("dateTooLate")) {
+            <span class="flex items-center gap-1 mt-1">
+              <svg
+                class="w-4 h-4 text-red-600"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <span class="text-md font-medium text-red-600"
+                >Date cannot be beyond 5 years from today</span
+              >
+            </span>
+          }
+        </div>
+
+        <div class="flex flex-col">
+          <label class="block text-md font-medium mb-1">
+            Exam Time <span class="text-red-600">*</span>
+          </label>
+          <div class="relative flex gap-2">
+            <div class="w-1/3">
+              <ng-select
+                [items]="hoursList"
+                [(ngModel)]="selectedHour"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="HH"
+                (change)="onHourChange($event)"
+                [searchable]="true"
+                [clearable]="false"
+                [addTag]="true"
+                class="w-full"
+              >
+              </ng-select>
+            </div>
+
+            <div class="flex items-center text-xl font-bold">:</div>
+
+            <div class="w-1/3">
+              <ng-select
+                [items]="minutesList"
+                [(ngModel)]="selectedMinute"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="MM"
+                (change)="onMinuteChange($event)"
+                [searchable]="true"
+                [clearable]="false"
+                [addTag]="true"
+                class="w-full"
+              >
+              </ng-select>
+            </div>
+
+            <div class="w-1/3">
+              <ng-select
+                [items]="ampmList"
+                [(ngModel)]="selectedAmPm"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="AM/PM"
+                (change)="updateTimeFromSelection()"
+                [searchable]="true"
+                [clearable]="false"
+                class="w-full"
+              >
+              </ng-select>
+            </div>
+          </div>
+
+          @if (
+            form.get("exam_start_time")?.touched &&
+            form.get("exam_start_time")?.hasError("required")
+          ) {
+            <span class="flex items-center gap-1 mt-1">
+              <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+              <span class="text-md font-medium text-red-600"
+                >Exam time is required</span
+              >
+            </span>
+          }
+          @if (
+            form.get("exam_start_time")?.touched &&
+            form.get("exam_start_time")?.errors?.["timeInPast"]
+          ) {
+            <span class="flex items-center gap-1 mt-1">
+              <ng-container *ngTemplateOutlet="errorIcon"></ng-container>
+              <span class="text-md font-medium text-red-600">
+                Exam time cannot be in the past
+              </span>
+            </span>
+          }
+        </div>
+
+        <div class="col-span-full flex justify-end">
+          <button
+            type="button"
+            class="mt-2 px-3 py-2 rounded-lg theme-bg-gray"
+            (click)="saveTestDetails()"
+            [disabled]="isLoading || detailsSaved"
+          >
+            {{ addedTestDetails ? "Update Test Details" : "Save Test Details" }}
+          </button>
+        </div>
+      }
+
+      @if (detailsSaved) {
+        <div class="flex flex-col">
+          <label
+            class="text-md mb-1 font-medium theme-text-secondary theme-text-dark"
+          >
+            Choose Question Type
+            <span class="text-red-600">*</span>
+          </label>
+
+          <nav class="flex items-center gap-2 mb-2 text-md">
+            @for (type of questionTypes; track type) {
+              <button
+                type="button"
+                class="px-4 py-2 border-b-2 transition-colors hover:bg-gray-100 theme-text-secondary theme-text-dark"
+                [ngClass]="
+                  form.get('type')?.value === type
+                    ? 'border-blue-600 text-blue-700'
+                    : 'border-transparent hover:text-blue-700'
+                "
+                (click)="selectType(type)"
+              >
+                {{ type | titlecase }}
+              </button>
+            }
+          </nav>
+          @if (
+            form.get("type")?.touched && form.get("type")?.hasError("required")
+          ) {
+            <span
+              class="flex items-center gap-1 mt-1 text-red-600 text-md font-medium"
+            >
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Type is required
+            </span>
+          }
+        </div>
+      }
+
+      @if (
+        detailsSaved &&
+        ($any(form.get("type")?.value) || "")?.toLowerCase() === "mcq"
+      ) {
+        <div class="col-span-full space-y-4">
+          @for (question of questions(); track question?.key) {
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="flex justify-between border-b items-center mb-4">
+                <div
+                  class="flex flex-col md:flex-row md:justify-between items-center gap-4 w-full pb-3"
+                >
+                  <div class="flex-1">
+                    <h4
+                      class="text-md block text-lg font-semibold theme-text-secondary theme-text-dark"
+                    >
+                      Question {{ question?.key }}
+                    </h4>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="flex-1 flex items-center gap-2 mb-3">
+                      <div>
+                        <label
+                          class="text-sm font-medium theme-text-secondary theme-text-dark whitespace-nowrap"
+                        >
+                          Marks
+                          @if (question?.is_mandatory === true) {
+                            <span class="text-red-600">*</span>
+                          }
+                        </label>
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          inputmode="numeric"
+                          class="relative flex-1 p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                          [value]="question?.marks ?? form.value?.marks"
+                          [max]="form.get('total_marks')?.value || 999"
+                          maxlength="3"
+                          oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.value = this.value.replace(/^0+/, '');"
+                          (input)="
+                            setQuestionMarks(
+                              question.key,
+                              $any($event.target)?.value
+                            )
+                          "
+                          placeholder="Enter marks"
+                        />
+                        @if (marksErrors["mcq_" + question?.key]) {
+                          <div
+                            class="absolute flex items-center gap-1 mt-1 text-sm text-red-600"
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                            <span>Marks is required</span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-3 pb-3">
+                      <label
+                        class="text-sm font-medium theme-text-secondary theme-text-dark"
+                      >
+                        {{
+                          question?.is_mandatory === false
+                            ? "Optional"
+                            : "Mandatory"
+                        }}
+                      </label>
+
+                      <label
+                        class="relative inline-flex items-center cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          class="sr-only peer"
+                          [checked]="question?.is_mandatory !== false"
+                          (change)="
+                            setQuestionMandatory(
+                              question.key,
+                              $any($event.target)?.checked
+                            )
+                          "
+                        />
+                        <div
+                          class="w-8 h-4 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 peer-focus:outline-none after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-3 after:h-3 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"
+                        ></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                @if (questions().length > 1) {
+                  <button
+                    type="button"
+                    (click)="removeQuestion(question.key)"
+                    class="px-3 py-1 text-red-500 rounded cursor-pointer"
+                    title="Remove question"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                }
+              </div>
+
+              <div class="mb-4">
+                <label
+                  class="block text-md font-medium theme-text-secondary theme-text-dark mb-1"
+                  >Question Text <span class="text-red-600">*</span></label
+                >
+                <input
+                  type="text"
+                  [value]="question.text"
+                  (input)="
+                    setQuestionText(question.key, $any($event.target)?.value)
+                  "
+                  (blur)="markQuestionTouched(question.key)"
+                  class="w-full p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                  placeholder="Enter quiz question"
+                />
+                @if (question?.touched && !question?.text?.trim()) {
+                  <span class="flex items-center gap-1 mt-1 text-red-600">
+                    <svg
+                      class="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span class="text-md font-medium"
+                      >Question text is required</span
+                    >
+                  </span>
+                }
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                  <label
+                    class="block text-lg font-semibold theme-text-secondary theme-text-dark"
+                    >Options</label
+                  >
+                </div>
+
+                <div class="grid grid-cols-12 gap-4 items-end">
+                  @for (
+                    option of question?.options;
+                    track option?.key;
+                    let i = $index
+                  ) {
+                    <div class="col-span-6">
+                      <label
+                        class="block text-md font-medium theme-text-secondary theme-text-dark mb-1"
+                        >{{ option?.label }}
+                        <span class="text-red-600">*</span></label
+                      >
+                      <div class="flex items-center gap-2">
+                        <input
+                          type="text"
+                          [value]="option?.value"
+                          (input)="
+                            setQuizOption(
+                              question.key,
+                              option.key,
+                              $any($event.target)?.value
+                            )
+                          "
+                          class="w-full p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                          [placeholder]="'Enter ' + option.label.toLowerCase()"
+                        />
+                        @if (question.options.length > 2) {
+                          <button
+                            type="button"
+                            (click)="removeQuizOption(question.key, option.key)"
+                            class="p-2 text-red-500 rounded"
+                            title="Remove option"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="w-5 h-5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                @if (question.options.length < 4) {
+                  <div class="flex">
+                    <button
+                      type="button"
+                      (click)="addQuizOption(question.key)"
+                      class="flex items-center gap-1 px-2 py-2 theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark rounded"
+                      title="Add Option"
+                    >
+                      <svg
+                        class="w-4 h-4 rounded-2xl cursor-pointer"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke="currentColor"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 12h14m-7 7V5"
+                        />
+                      </svg>
+                      Add Option
+                    </button>
+                  </div>
+                }
+
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-5">
+                    <label
+                      class="block text-md font-medium theme-text-secondary theme-text-dark mb-1"
+                      >Correct Answer <span class="text-red-600">*</span></label
+                    >
+                    <div
+                      class="lessons-page text-md lessons-page theme-placeholder"
+                    >
+                      <ng-select
+                        [items]="question?.options"
+                        [bindLabel]="'value'"
+                        [bindValue]="'key'"
+                        [clearable]="true"
+                        placeholder="Select correct answer"
+                        [ngModel]="question?.correct_answer"
+                        (ngModelChange)="
+                          setQuestionCorrectAnswer(question.key, $event)
+                        "
+                        [ngModelOptions]="{ standalone: true }"
+                      >
+                        <ng-template ng-label-tmp let-item="item">
+                          <span>
+                            {{
+                              item?.value
+                                ? item.value
+                                : item.key === "A"
+                                  ? "Please enter option"
+                                  : "Please enter option"
+                            }}
+                          </span>
+                        </ng-template>
+                        <ng-template ng-option-tmp let-item="item">
+                          <span>
+                            {{
+                              item?.value
+                                ? item.value
+                                : item.key === "A"
+                                  ? "Please enter option"
+                                  : "Please enter option"
+                            }}
+                          </span>
+                        </ng-template>
+                      </ng-select>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2">
+                  <button
+                    type="button"
+                    (click)="addMcqToList(question.key)"
+                    class="px-2 py-2 theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark rounded"
+                  >
+                    @if (editingMcqIndex !== null) {
+                      Update Question
+                    } @else {
+                      Save Question
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      @if (
+        detailsSaved &&
+        ($any(form.get("type")?.value) || "")?.toLowerCase() === "short"
+      ) {
+        <div class="col-span-full space-y-4">
+          @for (sq of shortQuestions(); track sq?.key) {
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="flex justify-between border-b items-center mb-4">
+                <div
+                  class="flex flex-col md:flex-row md:justify-between items-center gap-4 w-full pb-3"
+                >
+                  <div class="flex-1">
+                    <h4
+                      class="text-md block text-lg font-semibold theme-text-secondary theme-text-dark"
+                    >
+                      Question {{ sq?.key }}
+                    </h4>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="flex-1 flex items-center gap-2 mb-3">
+                      <div>
+                        <label
+                          class="text-sm font-medium theme-text-secondary theme-text-dark whitespace-nowrap"
+                        >
+                          Marks
+                          @if (sq?.is_mandatory === true) {
+                            <span class="text-red-600">*</span>
+                          }
+                        </label>
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          inputmode="numeric"
+                          class="relative flex-1 p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                          #shortMarks
+                          [value]="sq?.marks ?? ''"
+                          [max]="form.get('total_marks')?.value || 999"
+                          maxlength="3"
+                          oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.value = this.value.replace(/^0+/, '');"
+                          (input)="
+                            setShortMarks(sq.key, $any($event.target)?.value)
+                          "
+                          placeholder="Enter marks"
+                        />
+                        @if (marksErrors["short_" + sq?.key]) {
+                          <span
+                            class="absolute flex items-center gap-1 mt-1 text-sm text-red-600"
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                            <span>Marks is required</span>
+                          </span>
+                        }
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-3 pb-3">
+                      <label
+                        class="text-sm font-medium theme-text-secondary theme-text-dark"
+                      >
+                        {{
+                          sq?.is_mandatory === false ? "Optional" : "Mandatory"
+                        }}
+                      </label>
+
+                      <label
+                        class="relative inline-flex items-center cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          class="sr-only peer"
+                          [checked]="sq?.is_mandatory !== false"
+                          (change)="
+                            setShortMandatory(
+                              sq.key,
+                              $any($event.target)?.checked
+                            )
+                          "
+                        />
+                        <div
+                          class="w-8 h-4 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 peer-focus:outline-none after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-3 after:h-3 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"
+                        ></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                @if (shortQuestions().length > 1) {
+                  <button
+                    type="button"
+                    (click)="removeShortQuestion(sq.key)"
+                    class="px-3 py-1 text-red-500 rounded cursor-pointer"
+                    title="Remove question"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                }
+              </div>
+
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                  <label
+                    class="block text-md font-medium theme-text-secondary theme-text-dark mb-1"
+                    >Question <span class="text-red-600">*</span></label
+                  >
+                  <input
+                    type="text"
+                    [value]="sq.question"
+                    (input)="
+                      setShortQuestionText(sq.key, $any($event.target)?.value)
+                    "
+                    (blur)="markShortTouched(sq.key)"
+                    class="w-full p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                    placeholder="Enter question"
+                  />
+                  @if (sq?.touched && !sq?.question?.trim()) {
+                    <span class="flex items-center gap-1 mt-1 text-red-600">
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <span class="text-md font-medium"
+                        >Question text is required</span
+                      >
+                    </span>
+                  }
+                </div>
+              </div>
+              <div class="mt-2">
+                <button
+                  type="button"
+                  (click)="
+                    addShortToList(sq.key);
+                    setShortMarks(sq.key, '');
+                    shortMarks.value = ''
+                  "
+                  class="px-2 py-2 theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark rounded"
+                >
+                  @if (editingShortIndex !== null) {
+                    Update Question
+                  } @else {
+                    Save Question
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (
+        detailsSaved &&
+        ($any(form.get("type")?.value) || "")?.toLowerCase() === "long"
+      ) {
+        <div class="col-span-full space-y-4">
+          @for (lq of longQuestions(); track lq?.key) {
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="flex justify-between border-b items-center mb-4">
+                <div
+                  class="flex flex-col md:flex-row md:justify-between items-center gap-4 w-full pb-3"
+                >
+                  <div class="flex-1">
+                    <h4
+                      class="text-md block text-lg font-semibold theme-text-secondary theme-text-dark"
+                    >
+                      Question {{ lq?.key }}
+                    </h4>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="flex-1 flex items-center gap-2 mb-3">
+                      <div>
+                        <label
+                          class="text-sm font-medium theme-text-secondary theme-text-dark whitespace-nowrap"
+                        >
+                          Marks
+
+                          @if (lq?.is_mandatory === true) {
+                            <span class="text-red-600">*</span>
+                          }
+                        </label>
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          inputmode="numeric"
+                          class="relative flex-1 p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                          #longMarks
+                          [value]="lq?.marks ?? ''"
+                          [max]="form.get('total_marks')?.value || 999"
+                          maxlength="3"
+                          oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.value = this.value.replace(/^0+/, '');"
+                          (input)="
+                            setLongMarks(lq.key, $any($event.target)?.value)
+                          "
+                          placeholder="Enter marks"
+                        />
+                        @if (marksErrors["long_" + lq?.key]) {
+                          <span
+                            class="absolute flex items-center gap-1 mt-1 text-sm text-red-600"
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                            <span>Marks is required</span>
+                          </span>
+                        }
+                      </div>
+                    </div>
+                    <div class="pb-3 flex items-center gap-3">
+                      <label
+                        class="text-sm font-medium theme-text-secondary theme-text-dark"
+                      >
+                        {{
+                          lq?.is_mandatory === false ? "Optional" : "Mandatory"
+                        }}
+                      </label>
+
+                      <label
+                        class="relative inline-flex items-center cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          class="sr-only peer"
+                          [checked]="lq?.is_mandatory !== false"
+                          (change)="
+                            setLongMandatory(
+                              lq.key,
+                              $any($event.target)?.checked
+                            )
+                          "
+                        />
+                        <div
+                          class="w-8 h-4 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 peer-focus:outline-none after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-3 after:h-3 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"
+                        ></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                @if (longQuestions().length > 1) {
+                  <button
+                    type="button"
+                    (click)="removeLongQuestion(lq.key)"
+                    class="px-3 py-1 text-red-500 rounded cursor-pointer"
+                    title="Remove question"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                }
+              </div>
+
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12">
+                  <label
+                    class="block text-md font-medium theme-text-secondary theme-text-dark mb-1"
+                    >Question <span class="text-red-600">*</span></label
+                  >
+                  <input
+                    type="text"
+                    [value]="lq.question"
+                    (input)="
+                      setLongQuestionText(lq.key, $any($event.target)?.value)
+                    "
+                    (blur)="markLongTouched(lq.key)"
+                    class="w-full p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                    placeholder="Enter question"
+                  />
+                  @if (lq?.touched && !lq?.question?.trim()) {
+                    <span class="flex items-center gap-1 mt-1 text-red-600">
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <span class="text-md font-medium"
+                        >Question text is required</span
+                      >
+                    </span>
+                  }
+                </div>
+              </div>
+              <div class="mt-2">
+                <button
+                  type="button"
+                  (click)="
+                    addLongToList(lq.key);
+                    setLongMarks(lq.key, '');
+                    longMarks.value = ''
+                  "
+                  class="px-2 py-2 theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark rounded"
+                >
+                  @if (editingLongIndex !== null) {
+                    Update Question
+                  } @else {
+                    Save Question
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (
+        detailsSaved &&
+        ($any(form.get("type")?.value) || "")?.toLowerCase() === "practical"
+      ) {
+        <div class="col-span-full space-y-4">
+          @for (pq of practicalQuestions(); track pq?.key) {
+            <div class="border border-gray-200 rounded-lg p-4">
+              <div class="flex justify-between border-b items-center mb-4">
+                <div
+                  class="flex flex-col md:flex-row md:justify-between items-center gap-4 w-full pb-3"
+                >
+                  <div class="flex-1">
+                    <h4
+                      class="text-md block text-lg font-semibold theme-text-secondary theme-text-dark"
+                    >
+                      Question {{ pq?.key }}
+                    </h4>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="flex-1 flex items-center gap-2 mb-3">
+                      <div>
+                        <label
+                          class="text-sm font-medium theme-text-secondary theme-text-dark whitespace-nowrap"
+                        >
+                          Marks
+
+                          @if (pq?.is_mandatory === true) {
+                            <span class="text-red-600">*</span>
+                          }
+                        </label>
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          inputmode="numeric"
+                          class="relative flex-1 p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                          #practicalMarks
+                          [value]="pq?.marks ?? ''"
+                          [max]="form.get('total_marks')?.value || 999"
+                          maxlength="3"
+                          oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.value = this.value.replace(/^0+/, '');"
+                          (input)="
+                            setPracticalMarks(
+                              pq.key,
+                              $any($event.target)?.value
+                            )
+                          "
+                          placeholder="Enter marks"
+                        />
+                        @if (marksErrors["practical_" + pq?.key]) {
+                          <span
+                            class="absolute flex items-center gap-1 mt-1 text-sm text-red-600"
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fill-rule="evenodd"
+                                d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                                clip-rule="evenodd"
+                              />
+                            </svg>
+                            <span>Marks is required</span>
+                          </span>
+                        }
+                      </div>
+                    </div>
+                    <div class="pb-3 flex items-center gap-3">
+                      <label
+                        class="text-sm font-medium theme-text-secondary theme-text-dark"
+                      >
+                        {{
+                          pq?.is_mandatory === false ? "Optional" : "Mandatory"
+                        }}
+                      </label>
+
+                      <label
+                        class="relative inline-flex items-center cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          class="sr-only peer"
+                          [checked]="pq?.is_mandatory !== false"
+                          (change)="
+                            setPracticalMandatory(
+                              pq.key,
+                              $any($event.target)?.checked
+                            )
+                          "
+                        />
+                        <div
+                          class="w-8 h-4 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 peer-focus:outline-none after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-3 after:h-3 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"
+                        ></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                @if (practicalQuestions().length > 1) {
+                  <button
+                    type="button"
+                    (click)="removePracticalQuestion(pq.key)"
+                    class="px-3 py-1 text-red-500 rounded cursor-pointer"
+                    title="Remove question"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                }
+              </div>
+
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12">
+                  <label
+                    class="block text-md font-medium theme-text-secondary theme-text-dark mb-1"
+                    >Question <span class="text-red-600">*</span></label
+                  >
+                  <input
+                    type="text"
+                    [value]="pq.question"
+                    (input)="
+                      setPracticalQuestionText(
+                        pq.key,
+                        $any($event.target)?.value
+                      )
+                    "
+                    (blur)="markPracticalTouched(pq.key)"
+                    class="w-full p-2 border border-gray-300 rounded outline-none placeholder:theme-text-secondary"
+                    placeholder="Enter question"
+                  />
+                  @if (pq?.touched && !pq?.question?.trim()) {
+                    <span class="flex items-center gap-1 mt-1 text-red-600">
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M18 10A8 8 0 112 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <span class="text-md font-medium"
+                        >Question text is required</span
+                      >
+                    </span>
+                  }
+                </div>
+              </div>
+              <div class="mt-2">
+                <button
+                  type="button"
+                  (click)="
+                    addPracticalToList(pq.key);
+                    setPracticalMarks(pq.key, '');
+                    practicalMarks.value = ''
+                  "
+                  class="px-2 py-2 theme-bg-gray theme-bg-secondary theme-text-secondary theme-text-dark rounded"
+                >
+                  @if (editingPracticalIndex !== null) {
+                    Update Question
+                  } @else {
+                    Save Question
+                  }
+                </button>
+              </div>
+              <div class="col-span-12">
+                <label
+                  class="block text-md font-medium theme-text-secondary theme-text-dark mb-1"
+                  >Attach Image (optional)</label
+                >
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  [id]="'practical-image-' + pq.key"
+                  (change)="handlePracticalImageChange(pq.key, $event)"
+                />
+                <label
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 rounded cursor-pointer text-sm theme-text-secondary theme-text-dark bg-gray-50 hover:bg-gray-100"
+                  [attr.for]="'practical-image-' + pq.key"
+                >
+                  Upload Image
+                </label>
+                @if (pq.imageName) {
+                  <div
+                    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2 p-2 border rounded bg-gray-50"
+                  >
+                    <div class="text-sm theme-text-secondary theme-text-dark">
+                      Selected: {{ pq.imageName }}
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <button
+                        type="button"
+                        class="text-sm text-red-600 hover:text-red-800"
+                        (click)="removePracticalImage(pq.key)"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                  @if (pq.image) {
+                    <div class="mt-2">
+                      <img
+                        [src]="pq.image"
+                        alt="Practical question image preview"
+                        class="max-h-48 rounded border object-contain"
+                      />
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (
+        addedMcq().length ||
+        addedShort().length ||
+        addedLong().length ||
+        addedPractical().length
+      ) {
+        <div class="col-span-full mt-4 mb-6">
+          <label
+            class="block text-md font-medium theme-text-secondary theme-text-dark mb-2"
+            >Added Items</label
+          >
+          <div class="space-y-4">
+            @if (addedMcq().length) {
+              <div class="space-y-2">
+                <div
+                  class="text-xl font-semibold theme-text-secondary theme-text-dark"
+                >
+                  MCQ
+                </div>
+                @for (item of addedMcq(); track $index) {
+                  <div class="p-3 border rounded-lg bg-gray-50">
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                          <div>
+                            <div
+                              class="text-lg font-semibold theme-text-secondary theme-text-dark"
+                            >
+                              Question {{ $index + 1 }}
+                            </div>
+                            <div
+                              class="text-base theme-text-secondary theme-text-dark font-medium"
+                            >
+                              Question: {{ item.question }}
+                            </div>
+                          </div>
+                          <div
+                            class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded mb-5"
+                          >
+                            {{ item.marks }} marks
+                          </div>
+                        </div>
+                        <div class="text-sm mt-1 font-normal">
+                          <span>Options:</span>
+                          <span>
+                            @for (opt of item.options; track $index) {
+                              ({{ $index + 1 }}). {{ opt }}
+                              @if ($index < item.options.length - 1) {
+                                ,
+                              }
+                            }
+                          </span>
+                        </div>
+                        <div class="text-sm mt-1 font-normal">
+                          Answer: {{ item.correct_answer }}
+                        </div>
+                      </div>
+                      <div class="flex gap-2 ml-3">
+                        <button
+                          type="button"
+                          (click)="editAddedMcq($index)"
+                          class="p-1 text-blue-600 hover:text-blue-800 rounded"
+                          title="Edit MCQ"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="removeAddedMcq($index)"
+                          class="p-1 text-red-600 hover:text-red-800 rounded"
+                          title="Remove MCQ"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (addedShort().length) {
+              <div class="space-y-2">
+                <div
+                  class="text-xl font-semibold theme-text-secondary theme-text-dark"
+                >
+                  Short
+                </div>
+                @for (item of addedShort(); track $index) {
+                  <div class="p-3 border rounded-lg bg-gray-50">
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                          <div>
+                            <div
+                              class="text-lg font-semibold theme-text-secondary theme-text-dark"
+                            >
+                              Question {{ $index + 1 }}
+                            </div>
+                            <div
+                              class="text-base theme-text-secondary theme-text-dark font-medium"
+                            >
+                              Question: {{ item.question }}
+                            </div>
+                          </div>
+                          <div
+                            class="text-sm mb-6 bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                          >
+                            {{ item.marks }} marks
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex gap-2 ml-3">
+                        <button
+                          type="button"
+                          (click)="editAddedShort($index)"
+                          class="p-1 text-blue-600 hover:text-blue-800 rounded"
+                          title="Edit Short Answer"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="removeAddedShort($index)"
+                          class="p-1 text-red-600 hover:text-red-800 rounded"
+                          title="Remove Short Answer"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (addedLong().length) {
+              <div class="space-y-2">
+                <div
+                  class="text-xl font-semibold theme-text-secondary theme-text-dark"
+                >
+                  Long
+                </div>
+                @for (item of addedLong(); track $index) {
+                  <div class="p-3 border rounded-lg bg-gray-50">
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                          <div>
+                            <div
+                              class="text-lg font-semibold theme-text-secondary theme-text-dark"
+                            >
+                              Question {{ $index + 1 }}
+                            </div>
+                            <div
+                              class="text-base theme-text-secondary theme-text-dark font-medium"
+                            >
+                              Question: {{ item.question }}
+                            </div>
+                          </div>
+                          <div
+                            class="text-sm mb-2 bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                          >
+                            {{ item.marks }} marks
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex gap-2 ml-3">
+                        <button
+                          type="button"
+                          (click)="editAddedLong($index)"
+                          class="p-1 text-blue-600 hover:text-blue-800 rounded"
+                          title="Edit Long"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="removeAddedLong($index)"
+                          class="p-1 text-red-600 hover:text-red-800 rounded"
+                          title="Remove Long"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (addedPractical().length) {
+              <div class="space-y-2">
+                <div
+                  class="text-xl font-semibold theme-text-secondary theme-text-dark"
+                >
+                  Practical
+                </div>
+                @for (item of addedPractical(); track $index) {
+                  <div class="p-3 border rounded-lg bg-gray-50">
+                    <div class="flex justify-between items-start">
+                      <div class="flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                          <div>
+                            <div
+                              class="text-lg font-semibold theme-text-secondary theme-text-dark"
+                            >
+                              Question {{ $index + 1 }}
+                            </div>
+                            <div
+                              class="text-base theme-text-secondary theme-text-dark font-medium"
+                            >
+                              Question: {{ item.question }}
+                            </div>
+                          </div>
+                          <div
+                            class="text-sm mb-2 bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                          >
+                            {{ item.marks }} marks
+                          </div>
+                        </div>
+                        @if (item.imageName) {
+                          <div class="text-sm mt-1 font-medium">
+                            Image: {{ item.imageName }}
+                          </div>
+                        }
+                        @if (item.image) {
+                          <div class="mt-2">
+                            <img
+                              [src]="item.image"
+                              alt="Practical question reference"
+                              class="max-h-40 rounded border object-contain"
+                            />
+                          </div>
+                        }
+                      </div>
+                      <div class="flex gap-2 ml-3">
+                        <button
+                          type="button"
+                          (click)="editAddedPractical($index)"
+                          class="p-1 text-blue-600 hover:text-blue-800 rounded"
+                          title="Edit Practical"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          (click)="removeAddedPractical($index)"
+                          class="p-1 text-red-600 hover:text-red-800 rounded"
+                          title="Remove Practical"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </form>
+</div>
+
+@if (isAiSidebarOpen) {
+  <div class="fixed inset-0 z-50 flex justify-end">
+    <!-- Backdrop -->
+    <div
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity cursor-pointer"
+      (click)="closeAiSidebar()"
+    ></div>
+
+    <!-- Sidebar Panel -->
+    <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col transform transition-transform duration-300 translate-x-0">
+      <!-- Header -->
+      <div class="flex items-center justify-between p-4 border-b">
+        <div class="flex items-center gap-2 text-indigo-600">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09l2.846.813-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
+          </svg>
+          <h2 class="text-xl font-bold text-gray-800">Generate Test via AI</h2>
+        </div>
+        <button
+          (click)="closeAiSidebar()"
+          class="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 p-6 overflow-y-auto">
+        <label class="block text-md font-medium text-gray-700 mb-2">
+          What kind of test do you want to create?
+        </label>
+        <textarea
+          [(ngModel)]="aiPrompt"
+          class="w-full h-40 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none placeholder-gray-400"
+          placeholder="e.g., Create a 20 marks test for beginner Angular developers..."
+        ></textarea>
+
+        <div class="mt-4 bg-indigo-50 text-indigo-800 text-sm p-4 rounded-lg">
+          <strong>Tip:</strong> Be specific about the subject, difficulty, and number of questions to get the best results.
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-4 border-t bg-gray-50 flex gap-3 justify-end items-center">
+        <button
+          (click)="closeAiSidebar()"
+          class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="generateTestWithAi()"
+          [disabled]="isGeneratingAi || (aiPrompt.trim().length === 0)"
+          class="px-6 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        >
+          @if (isGeneratingAi) {
+            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            <span>Generating...</span>
+          } @else {
+            <span>Generate Test</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

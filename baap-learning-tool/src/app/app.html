@@ -1,0 +1,19 @@
+<div class="app-container">
+  <div
+    [ngClass]="{
+      'w-auto': isOpen(),
+      'w-0 overflow-hidden': !isOpen(),
+    }"
+  >
+    @if (isSidebarAllowed()) {
+      <app-sidebar></app-sidebar>
+    }
+  </div>
+
+  <div
+    class="main-content"
+    [class.full-width]="isSharedResumeRoute()"
+  >
+    <router-outlet />
+  </div>
+</div>

@@ -1,0 +1,14 @@
+input.autofill-block:-webkit-autofill,
+input.autofill-block:-webkit-autofill:hover,
+input.autofill-block:-webkit-autofill:focus {
+  -webkit-text-fill-color: inherit;
+  caret-color: inherit;
+  box-shadow: 0 0 0px 1000px transparent inset;
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset;
+  transition: background-color 9999s ease-in-out 0s, color 9999s ease-in-out 0s;
+}
+
+input.autofill-block:-webkit-autofill::first-line {
+  font-size: inherit;
+  font-family: inherit;
+}

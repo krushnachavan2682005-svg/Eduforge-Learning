@@ -1,0 +1,581 @@
+<div
+  class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 theme-text-secondary theme-text-dark flex flex-col min-h-[calc(100vh-110px)] pb-20 sm:pb-16"
+>
+  @for (head of headers; track head) {
+    <div class="header bg-white pt-2">
+      <app-header [name]="head?.title" [studentClass]="head?.subtitle">
+        <div class="flex gap-2" *authorize="'LMS_C'">
+          <app-add-level (closePopUp)="closeAddCourseModal()"> </app-add-level>
+          <app-add-action-items
+            [show]="openAssignMenubar()"
+            [data]="editData()"
+            (closePopUp)="closeAddCourseModal()"
+          >
+          </app-add-action-items>
+          <app-assign-action-items></app-assign-action-items>
+        </div>
+      </app-header>
+    </div>
+  }
+
+  <div class="overflow-y-auto max-h-[calc(110vh-180px)] pr-1 mt-3">
+    @if (ActionItems().length > 0) {
+      @for (card of ActionItems(); track card) {
+        <div class="theme-bg border rounded-md overflow-hidden mb-4">
+          <div
+            class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 p-2 theme-bg-secondary theme-bg-gray h-auto md:h-11 md:py-0 cursor-pointer"
+            (click)="toggleCard(card)"
+          >
+            <div class="flex items-center gap-2 w-full md:w-auto">
+              <span style="float: right">
+                @if (activeActionCardId !== card.id) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                }
+
+                @if (activeActionCardId === card?.id) {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M5 8l7 11 7-11z" />
+                  </svg>
+                }
+              </span>
+              <p class="mb-0 text-lg font-bold sm:text-lg break-words">
+                {{ card?.task_name || "--" }}
+              </p>
+            </div>
+
+            <div
+              class="flex flex-wrap md:flex-nowrap items-center gap-3 text-sm sm:text-base w-full md:w-auto"
+            >
+              @if (card?.status?.toUpperCase() === "APPROVED") {
+                <div class="flex items-center px-1 min-w-[70px]">
+                  <label
+                    class="mx-2 relative inline-flex items-center cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      class="sr-only peer"
+                      [checked]="card?.publish"
+                      (change)="onPublish($event, card)"
+                    />
+                    <div
+                      class="w-8 h-4 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-3 after:h-3 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"
+                    ></div>
+                  </label>
+                  <span
+                    class="w-16 "
+                    [ngClass]="
+                      card?.publish ? 'text-green-500 font-semibold' : 'text-gray-700 font-semibold'
+                    "
+                  >
+                    {{ card?.publish ? "Public" : "Private" }}
+                  </span>
+                </div>
+              }
+                 <!-- <div class="mr-5 flex items-center gap-2 min-w-[120px]">
+                <span class="whitespace-nowrap">{{
+                  card?.total_score || "--"
+                }}</span>
+                <div class="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    class="h-2 bg-[#3B82F6]"
+                    [ngStyle]="{
+                      width: getProgressPercentage(card?.total_score) + '%',
+                    }"
+                  ></div>
+                </div>
+              </div> -->
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-2 py-0.5 rounded-full text-xs sm:text-sm font-medium"
+                  [ngClass]="{
+                    'bg-blue-600': card?.status?.toUpperCase() === 'SUBMITTED',
+                    'bg-red-600': card?.status?.toUpperCase() === 'REJECTED',
+                    'bg-green-300 text-black':
+                      card?.status?.toUpperCase() === 'APPROVED',
+                    'bg-yellow-500': card?.status?.toUpperCase() === 'ASSIGNED',
+                  }"
+                  [style.color]="
+                    card?.status?.toUpperCase() === 'SUBMITTED' ||
+                    card?.status?.toUpperCase() === 'REJECTED' ||
+                    card?.status?.toUpperCase() === 'ASSIGNED'
+                      ? 'white'
+                      : ''
+                  "
+                >
+                  {{ (card?.status | titlecase) || "--" }}
+                </span>
+              </div>
+              <!-- <img src="images/medal-outline.svg" alt="icon1" class="w-5 h-5" />
+              <img src="images/solid-medal.svg" alt="icon2" class="w-5 h-5" /> -->
+            </div>
+          </div>
+          @if (activeActionCardId === card?.id) {
+            <div class="px-4 sm:px-8 py-3 bg-white">
+              <div class="text-sm text-dark sm:text-base leading-relaxed mb-5">
+                @if (!isExpanded(card)) {
+                  {{ getShortDescription(card?.description) }}
+                } @else {
+                  {{ card?.description || "--" }}
+                }
+
+                @if ((card?.description?.length || 0) > descriptionLimit) {
+                  <button
+                    (click)="toggleDescription(card)"
+                    class="text-primary underline cursor-pointer mb-4 ml-3"
+                  >
+                    {{ isExpanded(card) ? "Less" : "More" }}
+                  </button>
+                }
+              </div>
+              <div
+                class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 text-sm sm:text-base"
+              >
+                <div>
+                  <div>Level</div>
+                  <div class="font-semibold">
+                    {{ card?.level || "--" }}
+                  </div>
+                </div>
+
+                <div>
+                  <div>Reviewer</div>
+                  <div class="font-semibold">
+                    @if (card?.reviewer && card?.reviewer?.length > 0) {
+                      @for (
+                        person of card?.reviewer;
+                        track person;
+                        let i = $index
+                      ) {
+                        {{ person?.name }}
+                        @if (i < card?.reviewer?.length - 1) {
+                          ,
+                        }
+                      }
+                    } @else {
+                      --
+                    }
+                  </div>
+                </div>
+                <div>
+                  <div>Total Score</div>
+                   <span class="whitespace-nowrap font-semibold">{{
+                  card?.total_score || "--"
+                }}</span>
+                </div>
+               
+                <div>
+                  <div>
+                    <div>Attachment Guidline</div>
+
+                    <div class="font-semibold">
+                      @if (card?.tutorPdf) {
+                        <div
+                          class="p-2 flex justify-between items-center theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark rounded-md"
+                        >
+                          <div
+                            [appTooltip]="getFileName(card?.tutorPdf?.key)"
+                            tooltipPosition="top"
+                            class="px-1 truncate pr-2 font-medium"
+                          >
+                            {{ getFileName(card?.tutorPdf?.key) }}
+                          </div>
+                          <span
+                            [appTooltip]="'View & download'"
+                            tooltipPosition="left"
+                            class="flex justify-center text-blue-600 cursor-pointer"
+                            (click)="
+                              openPdf(card, card.tutorPdf);
+                              $event.stopPropagation()
+                            "
+                          >
+                            <p class="pt-1">
+                              <svg
+                                viewBox="0 0 24 24"
+                                class="w-4 h-4 mr-1"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                              >
+                                <path d="M15 3h6v6" />
+                                <path d="M10 14 21 3" />
+                                <path
+                                  d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                                />
+                              </svg>
+                            </p>
+                            <p>view</p>
+                          </span>
+                        </div>
+                      } @else {
+                        --
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  @if (card?.attachments?.length) {
+                    <div class="space-y-1">
+                      @for (
+                        file of card?.attachments || [];
+                        track file;
+                        let i = $index
+                      ) {
+                        @if (i < 1) {
+                          <div class="gap-3 cursor-pointer">
+                            <div
+                              class="px-2 flex items-center theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark p-2 rounded-md"
+                              [appTooltip]="file?.name"
+                              tooltipPosition="top"
+                            >
+                              <span class="truncate flex-1 min-w-0">
+                                {{ file?.name }}
+                              </span>
+
+                              <span
+                                class="material-symbols-outlined text-lg ml-2 flex-shrink-0 cursor-pointer"
+                                (click)="
+                                  downloadAttachment(file);
+                                  $event.stopPropagation()
+                                "
+                              >
+                                downloading
+                              </span>
+                            </div>
+                            <div class="flex pt-1 m gap-3 items-center">
+                              <span
+                                class="material-symbols-outlined text-lg cursor-pointer"
+                                (click)="
+                                  editAttachment(file, i, card);
+                                  $event.stopPropagation()
+                                "
+                              >
+                                edit
+                              </span>
+
+                              <span
+                                class="material-symbols-outlined text-lg cursor-pointer hover:text-red-600"
+                                (click)="
+                                  deleteAttachment(file, i, card);
+                                  $event.stopPropagation()
+                                "
+                              >
+                                delete
+                              </span>
+
+                              <div class="pt-1">
+                                <span
+                                  class="gap-2 font-medium theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark p-1 rounded-md cursor-pointer"
+                                  (click)="triggerFileInput(fileInput)"
+                                >
+                                  Upload
+                                </span>
+
+                                @if (card?.attachments?.length > 1) {
+                                  <button
+                                    (click)="openAttachmentsModal(card)"
+                                    class="text-blue-600 font-medium ml-2 gap-1 theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark p-1 rounded-md cursor-pointer"
+                                  >
+                                    View All
+                                  </button>
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      }
+                    </div>
+                  } @else {
+                    <div
+                      class="flex items-center gap-3 cursor-pointer select-none mt-1"
+                      (click)="triggerFileInput(fileInput)"
+                      [class.opacity-50]="isUploading(card)"
+                      [class.pointer-events-none]="isUploading(card)"
+                    >
+                      <div
+                        class="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-700 flex-shrink-0"
+                      >
+                        <span class="material-symbols-outlined text-xl">
+                          @if (isUploading(card)) {
+                            hourglass_empty
+                          } @else {
+                            upload
+                          }
+                        </span>
+                      </div>
+
+                      <div class="leading-tight flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-gray-800 mb-0">
+                          @if (isUploading(card)) {
+                            Uploading...
+                          } @else {
+                            Click to upload
+                          }
+                        </p>
+
+                        <p class="text-[11px] text-gray-400 mt-0.5 mb-0">
+                          PDF, DOCX, ZIP (MAX. 10MB)
+                        </p>
+                      </div>
+                    </div>
+                  }
+
+                  <div>
+                    @if (card?.attachment?.length > 0) {
+                      <div>
+                        <p class="pt-1">Submitted Assignments</p>
+                        @for (
+                          att of card?.attachment;
+                          let i = $index;
+                          track att
+                        ) {
+                          <div
+                            class="font-semibold theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark p-2 rounded-md flex items-center justify-between"
+                          >
+                            <div
+                              class="truncate pr-2"
+                              [appTooltip]="getAttachmentFolderName(att)"
+                              tooltipPosition="bottom"
+                            >
+                              {{ getAttachmentFolderName(att) }}
+                            </div>
+
+                            <span
+                              [appTooltip]="'View & download'"
+                              tooltipPosition="left"
+                              class="flex justify-center mx-1 text-blue-600 cursor-pointer"
+                              (click)="openPdfStudent(card?.signedUrls[i])"
+                            >
+                              <p class="pt-1">
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  class="w-4 h-4 mr-1"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  stroke-width="2"
+                                >
+                                  <path d="M15 3h6v6" />
+                                  <path d="M10 14 21 3" />
+                                  <path
+                                    d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                                  />
+                                </svg>
+                              </p>
+                              <p>view</p>
+                            </span>
+                            <div class="flex items-center gap-3">
+                              <span
+                                (click)="deleteAssignment(att, card)"
+                                class="material-symbols-outlined text-xl hover:text-red-400 text-gray-600 cursor-pointer"
+                              >
+                                delete</span
+                              >
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <input
+                    #fileInput
+                    type="file"
+                    class="hidden"
+                    accept=".pdf,.doc,.docx,.zip"
+                    multiple
+                    (change)="onFileSelected($event, card)"
+                  />
+                </div>
+                @if (card?.comment && card?.comment !== "Approved") {
+                  <div>
+                    <div>Comment</div>
+                    <div class="font-semibold text-red-600">
+                      {{ card?.comment || "--" }}
+                    </div>
+                  </div>
+                }
+                <div class="px-4 py-4 gap-3">
+                  <button
+                    (click)="submitActionItem(card, 'SUBMITTED')"
+                    [disabled]="isSubmitDisabled(card)"
+                    [class.opacity-50]="isSubmitDisabled(card)"
+                    [class.cursor-not-allowed]="isSubmitDisabled(card)"
+                    class="w-26 px-6 py-2 theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark rounded-md font-medium"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label>Notes</label>
+                <textarea
+                  [(ngModel)]="card.notes"
+                  (click)="$event.stopPropagation()"
+                  class="border rounded-md resize-none p-2 w-full outline-none"
+                  placeholder="Add notes..."
+                ></textarea>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    } @else if (isLoadingAction()) {
+      <div class="mt-4">
+        <ngx-skeleton-loader
+          appearance="line"
+          count="5"
+          [theme]="skeletonService.expanded"
+        >
+        </ngx-skeleton-loader>
+      </div>
+    } @else if (actionLoaded() && ActionItems().length === 0) {
+      <div
+        class="flex flex-col items-center justify-center py-12 mt-48 text-center"
+      >
+        <div
+          class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
+        >
+          <svg
+            class="w-12 h-12 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            ></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
+          Not Created Action Items
+        </h3>
+        <p class="mb-4 theme-text-secondary theme-text-dark">
+          You don't have Created any Action Items yet. Contact your
+          administrator to get started with Action Items.
+        </p>
+      </div>
+    }
+  </div>
+
+  <app-pagination
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    (pageChange)="goToPage($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+  ></app-pagination>
+
+  <app-modal [open]="showPdfModal" (close)="closePdfModal()">
+    @if (showPdfModal && pdfUrl) {
+      <div class="w-full min-w-[500px] md:min-w-[300px]">
+        <div
+          class="flex justify-between items-center px-4 py-3 border-b theme-bg-secondary theme-bg-gray"
+        >
+          <h2 class="text-lg font-semibold">Student Assignment</h2>
+        </div>
+
+        <div class="h-[75vh]">
+          <iframe
+            [src]="pdfUrl | safeUrl"
+            class="w-full h-full"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </div>
+    }
+  </app-modal>
+
+  <app-modal [open]="deleteExam" (close)="closeModal()">
+    @if (deleteExam) {
+      <div class="mb-6">
+        <div class="flex justify-center mb-6">
+          <i class="material-icons text-red-600 text-4xl p-2"> delete </i>
+        </div>
+        <div
+          class="text-2xl font-semibold mb-8 flex justify-center text-red-600"
+        >
+          Do you want to delete your action item ?
+        </div>
+      </div>
+    }
+  </app-modal>
+  <app-modal [open]="isAttachmentsModalOpen" (close)="closeAttachmentsModal()">
+    @if (isAttachmentsModalOpen) {
+      <div class="max-w-full">
+        <div class="mb-5 pb-3 border-b">
+          <h3 class="text-lg font-semibold text-gray-800">
+            Additional Attachments
+          </h3>
+        </div>
+        <div
+          class="space-y-3 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar"
+        >
+          @if (
+            !selectedCardForAttachments?.attachments ||
+            selectedCardForAttachments?.attachments?.length === 0
+          ) {
+            <div class="text-center text-gray-500 py-6">
+              No attachments found
+            </div>
+          }
+          @for (
+            file of selectedCardForAttachments?.attachments || [];
+            track file;
+            let i = $index
+          ) {
+            <div
+              class="flex items-center justify-between p-4 bg-white border rounded-lg shadow-sm hover:bg-gray-50 transition"
+            >
+              <div class="flex items-center gap-3 overflow-hidden">
+                <span class="material-symbols-outlined text-gray-500">
+                  description
+                </span>
+
+                <span
+                  class="truncate max-w-[260px] text-sm font-medium text-gray-700"
+                  title="{{ file.name }}"
+                >
+                  {{ file.name }}
+                </span>
+              </div>
+              <div class="flex items-center gap-3">
+                <button
+                  (click)="downloadAttachment(file)"
+                  class="text-blue-600 hover:text-blue-800"
+                >
+                  <span class="material-symbols-outlined text-xl">
+                    download
+                  </span>
+                </button>
+                <button
+                  (click)="removeAttachment(i)"
+                  class="text-red-500 hover:text-red-700"
+                >
+                  <span class="material-symbols-outlined text-xl"> close </span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </app-modal>
+</div>

@@ -1,0 +1,48 @@
+/* Blue Theme Variables and Styles */
+
+/* Default Theme (Blue) */
+:root {
+  --theme-primary: theme("colors.blue-theme.500");
+  --theme-primary-dark: theme("colors.blue-theme.700");
+  --theme-primary-light: theme("colors.blue-theme.300");
+  --theme-secondary: theme("colors.blue-theme.600");
+  --theme-accent: theme("colors.blue-theme.400");
+  --theme-bg: theme("colors.blue-theme.50");
+  --theme-bg-secondary: theme("colors.blue-theme.100");
+  --theme-text: theme("colors.blue-theme.900");
+  --theme-text-secondary: theme("colors.blue-theme.700");
+  --theme-btn-custom-bg: theme("colors.blue-theme.300");
+  --theme-btn-custom-text: #f8fafc;
+  --theme-active-menue-item: #1a1a1b;
+}
+
+/* Blue Theme */
+[data-theme="blue"] {
+  --theme-primary: theme("colors.blue-theme.500");
+  --theme-primary-dark: theme("colors.blue-theme.700");
+  --theme-primary-light: theme("colors.blue-theme.300");
+  --theme-secondary: theme("colors.blue-theme.600");
+  --theme-accent: theme("colors.blue-theme.400");
+  --theme-bg: theme("colors.blue-theme.50");
+  --theme-bg-secondary: theme("colors.blue-theme.100");
+  --theme-text: theme("colors.blue-theme.900");
+  --theme-text-secondary: theme("colors.blue-theme.700");
+  --theme-active-menue-item: #1a1a1b;
+}
+
+/* Blue Theme Specific Styling */
+[data-theme="blue"] {
+  .theme-gradient-bg {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  }
+
+  .theme-card-shadow {
+    box-shadow:
+      0 4px 6px -1px rgba(59, 130, 246, 0.1),
+      0 2px 4px -1px rgba(59, 130, 246, 0.06);
+  }
+
+  .theme-border-accent {
+    border-color: #3b82f6;
+  }
+}

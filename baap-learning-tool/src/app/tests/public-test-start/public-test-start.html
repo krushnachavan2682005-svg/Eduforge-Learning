@@ -1,0 +1,476 @@
+@if (showExamUI) {
+  <div class="flex w-full min-h-screen">
+    <div
+      class="flex-grow min-w-0 mx-20"
+      (contextmenu)="disableRightClick($event)"
+      (copy)="preventCopyPaste($event)"
+      (cut)="preventCopyPaste($event)"
+      (paste)="preventCopyPaste($event)"
+    >
+      <div
+        class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 select-none theme-text-secondary theme-text-dark"
+      >
+        <div class="header bg-white pt-4">
+          <div class="pt-2">
+            <div class="flex flex-wrap gap-2 sm:gap-2 justify-between">
+              <div
+                class="theme-bg-secondary theme-bg-gray px-2 sm:px-2 md:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[280px]"
+              >
+                <p>Exam Name</p>
+                <h2
+                  class="font-semibold text-xl truncate max-w-[40ch]"
+                  tooltipPosition="right"
+                  appTooltip="{{
+                    (examData()?.title?.length || 0) > 40
+                      ? examData()?.title
+                      : ''
+                  }}"
+                >
+                  {{ examData()?.title }}
+                </h2>
+              </div>
+              <div
+                class="theme-bg-secondary theme-bg-gray px-2 sm:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[60px]"
+              >
+                <p>Duration</p>
+                <span class="font-semibold text-xl"
+                  >{{ examData()?.duration_minutes }} Min</span
+                >
+              </div>
+
+              <div
+                class="theme-bg-secondary theme-bg-gray px-2 sm:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[100px]"
+              >
+                <p>Total Marks</p>
+                <span class="font-semibold text-xl"
+                  >{{ examData()?.total_marks }} Marks</span
+                >
+              </div>
+              <div
+                class="theme-bg-secondary theme-bg-gray px-2 sm:px-4 lg:px-6 py-2 rounded-lg flex-1 min-w-[140px]"
+              >
+                <p>Timing Remaining</p>
+                <span class="font-semibold text-xl">{{
+                  formatRemainingTime() + " min"
+                }}</span>
+              </div>
+            </div>
+          </div>
+
+          <hr class="mb-3 mt-4 theme-border" />
+        </div>
+        <div class="p-2 sm:mb-40 mt-3 border theme-border rounded-lg">
+          <div class="sm:p-3">
+            <div>
+              Que. Type :
+              <span class="font-semibold text-lg">
+                {{ questions()[currentQuestionIndex]?.type | titlecase }}
+              </span>
+            </div>
+            <div class="flex items-center font-semibold text-lg sm:text-xl">
+              <span class="text-lg p-1">
+                Q.no :- {{ currentQuestionIndex + 1 }}
+              </span>
+              <span class="break-words ml-2">
+                {{ questions()[currentQuestionIndex]?.text }}
+              </span>
+            </div>
+            <div class="mt-4">
+              @if (
+                questions()[currentQuestionIndex]?.type?.toLowerCase() === "mcq"
+              ) {
+                @for (
+                  option of questions()[currentQuestionIndex]?.options;
+                  track $index
+                ) {
+                  <div>
+                    <div
+                      class="p-2 sm:p-3 mt-4 sm:mt-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-1 bg-white"
+                    >
+                      <input
+                        type="radio"
+                        [id]="'option' + $index"
+                        [name]="'question' + currentQuestionIndex"
+                        [value]="option?.option_text"
+                        class="w-5 h-5 cursor-pointer"
+                        [(ngModel)]="selectedOptions()[currentQuestionIndex]"
+                        (paste)="preventCopyPaste($event)"
+                        (copy)="preventCopyPaste($event)"
+                        (cut)="preventCopyPaste($event)"
+                        (keydown)="preventKeyboardShortcuts($event)"
+                      />
+                      <label
+                        [for]="'option' + $index"
+                        class="ml-2 theme-text theme-text-dark text-base cursor-pointer sm:text-lg font-semibold"
+                      >
+                        {{ option?.option_text }}
+                      </label>
+                    </div>
+                  </div>
+                }
+              } @else if (
+                questions()[currentQuestionIndex]?.type?.toLowerCase() ===
+                "short"
+              ) {
+                <div class="mt-4 sm:mt-4 rounded-lg">
+                  <textarea
+                    type="text"
+                    class="p-2 border theme-border rounded-lg w-full resize-none outline-none placeholder:theme-text-secondary"
+                    placeholder="Enter your short answer..."
+                    [(ngModel)]="selectedOptions()[currentQuestionIndex]"
+                    (paste)="preventCopyPaste($event)"
+                    (copy)="preventCopyPaste($event)"
+                    (cut)="preventCopyPaste($event)"
+                    (keydown)="preventKeyboardShortcuts($event)"
+                  ></textarea>
+                </div>
+              } @else if (
+                questions()[currentQuestionIndex]?.type?.toLowerCase() ===
+                "long"
+              ) {
+                <div class="pt-3">
+                  <textarea
+                    type="text"
+                    class="p-3 border theme-border rounded-lg w-full h-[36vh] resize-none outline-none placeholder:theme-text-secondary"
+                    placeholder="Enter your long answer..."
+                    [(ngModel)]="selectedOptions()[currentQuestionIndex]"
+                    (paste)="preventCopyPaste($event)"
+                    (copy)="preventCopyPaste($event)"
+                    (cut)="preventCopyPaste($event)"
+                    (keydown)="preventKeyboardShortcuts($event)"
+                  ></textarea>
+                </div>
+              } @else if (
+                questions()[currentQuestionIndex]?.type?.toLowerCase() ===
+                "practical"
+              ) {
+                <div>
+                  <app-code-editor></app-code-editor>
+                </div>
+              }
+              <div
+                [ngClass]="{
+                  'text-green-500 font-semibold text-lg':
+                    message.includes('successfully'),
+                  'text-red-600 font-semibold text-lg':
+                    message.includes('failed'),
+                }"
+              >
+                {{ message }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="-mt-[145px] flex flex-col sm:flex-row justify-between gap-2 sm:gap-0"
+        >
+          <button
+            type="button"
+            class="px-3 py-2 rounded font-semibold disabled:opacity-50 bg-blue-600 text-white"
+            [disabled]="currentQuestionIndex === 0"
+            (click)="goToPreviousQuestion()"
+          >
+            <span class="flex items-center">
+              <i class="material-icons text-sm">arrow_back_ios</i>
+              Previous
+            </span>
+          </button>
+          @if (currentQuestionIndex === questions().length - 1) {
+            <div class="flex gap-3">
+              <button
+                type="button"
+                class="px-4 py-2 rounded bg-blue-600 text-white flex items-center gap-2"
+                (click)="goToNextQuestion()"
+              >
+                <span class="font-semibold text-md"> Save</span>
+              </button>
+
+              <button
+                type="button"
+                class="px-4 py-2 rounded bg-green-700 text-white flex items-center gap-2"
+                (click)="submitExam()"
+              >
+                <span class="font-semibold text-md"> Submit Exam </span>
+              </button>
+            </div>
+          } @else {
+            <button
+              type="button"
+              class="px-3 py-2 rounded font-semibold bg-blue-600 text-white"
+              (click)="goToNextQuestion()"
+            >
+              <span class="font-semibold text-md flex items-center">
+                Next
+                <i class="material-icons text-sm ml-1">arrow_forward_ios</i>
+              </span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (showTimeUpModal() || examSubmitted || cancelExam) {
+    <div class="fixed inset-0 flex items-center justify-center z-50">
+      <div class="absolute inset-0 bg-black/50"></div>
+      <div
+        class="relative bg-white rounded-lg p-8 shadow-lg z-10 w-[40%] max-w-3xl text-center"
+      >
+        @if (examSubmitted) {
+          <div class="mb-6 text-center">
+            <div class="flex justify-center mb-3">
+              <div
+                class="bg-green-100 rounded-full p-1 ml-6 flex items-center justify-center"
+              >
+                <i class="material-icons text-green-500 text-7xl"
+                  >check_circle</i
+                >
+              </div>
+            </div>
+
+            <span class="text-2xl text-green-600 font-semibold block mb-6 mr-1">
+              Exam submitted successfully !</span
+            >
+          </div>
+        } @else if (cancelExam) {
+          <div class="mb-6">
+            <div class="fex items-center mb-3">
+              <i class="material-icons text-red-600 text-4xl p-2"> cancel </i>
+            </div>
+            <span class="text-xl font-extrabold text-red-600"
+              >Are you sure you want to cancel your exam?</span
+            >
+          </div>
+        } @else {
+          <div class="mb-6">
+            <div class="fex items-center mb-3">
+              <i class="material-icons text-red-600 text-4xl p-2">
+                timer_off
+              </i>
+            </div>
+            <h3 class="text-xl font-semibold text-red-600">
+              Your Session Is Expired.
+            </h3>
+          </div>
+        }
+        <button
+          type="button"
+          class="mt-2 px-4 py-2 rounded bg-blue-600 text-white font-semibold"
+          (click)="onTimeUpOk()"
+        >
+          @if (cancelExam) {
+            <span class="text-lg fort-semibold">Yes</span>
+          } @else {
+            <span class="text-lg fort-semibold">Ok</span>
+          }
+        </button>
+        @if (cancelExam) {
+          <button
+            type="button"
+            class="mt-2 px-4 ml-10 py-2 rounded bg-blue-600 text-white font-semibold"
+            (click)="closePupUp()"
+          >
+            <span class="text-lg fort-semibold">No</span>
+          </button>
+        }
+      </div>
+    </div>
+  }
+} @else if (showResultUI) {
+  <div
+    class="max-w-xl mx-auto mt-20 bg-white p-6 rounded-lg shadow-md text-center"
+  >
+    <div
+      class="max-w-xl mx-auto mt-10 bg-white shadow-2xl rounded-2xl p-6 border border-gray-200"
+    >
+      <div class="text-center mb-6">
+        <h2 class="text-3xl font-extrabold text-green-600">Exam Result</h2>
+        <p class="text-gray-500 text-sm mt-1">Your performance summary</p>
+      </div>
+
+      <div class="flex justify-center mb-6">
+        <div
+          class="w-28 h-28 rounded-full flex items-center justify-center text-2xl font-bold text-white"
+          [ngClass]="resultData?.passed ? 'bg-green-500' : 'bg-red-500'"
+        >
+          {{ resultData?.percentage }}%
+        </div>
+      </div>
+
+      <div class="bg-gray-50 p-5 mx-12 rounded-xl space-y-3 text-md">
+        <div class="flex justify-between">
+          <span class="font-medium text-gray-600"> Student Name</span>
+          <span class="font-semibold text-gray-800">{{
+            resultData?.name | titlecase
+          }}</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span class="font-medium text-gray-600">Total Questions</span>
+          <span class="font-semibold text-gray-800">{{
+            resultData?.total_questions
+          }}</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span class="font-medium text-gray-600"> Correct Answers</span>
+          <span class="font-semibold text-gray-800">{{
+            resultData?.total_correct
+          }}</span>
+        </div>
+
+        <div class="flex justify-between">
+          <span class="font-medium text-gray-600">Obtained Marks</span>
+          <span class="font-semibold text-gray-800">{{
+            resultData?.score
+          }}</span>
+        </div>
+
+        <div class="flex justify-between items-center pt-2 border-t">
+          <span class="font-medium text-gray-600">Result</span>
+          <span
+            class="px-3 py-1 rounded-full text-md font-semibold"
+            [ngClass]="{
+              'bg-green-100 text-green-700': resultData?.passed,
+              'bg-red-100 text-red-700': !resultData?.passed,
+            }"
+          >
+            {{ resultData?.passed ? "Passed " : "Failed " }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+    <h2 class="text-xl font-bold mb-5 text-gray-800 border-b pb-2">
+      Candidate Information
+    </h2>
+
+    <form [formGroup]="candidateForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label class="block font-medium theme-text-secondary theme-text-dark"
+          >First Name <span class="text-red-600">*</span></label
+        >
+        <input
+          type="text"
+          formControlName="first_name"
+          class="mt-1 block w-full border-gray-300 rounded-md p-2 border focus:ring-blue-500 focus:border-blue-500"
+        />
+        @if (
+          candidateForm.get("first_name")?.invalid &&
+          candidateForm.get("first_name")?.touched
+        ) {
+          <div class="text-red-600 font-semibold text-md">
+            <span class="flex items-center gap-1">
+               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            Please fill required field
+            </span>
+          </div>
+        }
+      </div>
+
+      <div>
+        <label class="block font-medium theme-text-secondary theme-text-dark"
+          >Last Name <span class="text-red-600">*</span></label
+        >
+        <input
+          type="text"
+          formControlName="last_name"
+          class="mt-1 block w-full border-gray-300 rounded-md p-2 border focus:ring-blue-500 focus:border-blue-500"
+        />
+        @if (
+          candidateForm.get("last_name")?.invalid &&
+          candidateForm.get("last_name")?.touched
+        ) {
+          <div class="text-red-600 font-semibold text-md">
+            <span class="flex items-center gap-1">
+               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            Please fill required field
+            </span>
+          </div>
+        }
+      </div>
+
+      <div>
+        <label class="block font-medium theme-text-secondary theme-text-dark"
+          >Email <span class="text-red-600">*</span></label
+        >
+        <input
+          type="email"
+          formControlName="email"
+          class="mt-1 block w-full border-gray-300 rounded-md p-2 border focus:ring-blue-500 focus:border-blue-500"
+        />
+        @if (
+          candidateForm.get("email")?.invalid &&
+          candidateForm.get("email")?.touched
+        ) {
+          <div class="text-red-600 font-semibold text-md">
+            <span class="flex items-center gap-1">
+               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            Please fill required field
+            </span>
+          </div>
+        }
+      </div>
+
+      <div>
+        <label class="block font-medium theme-text-secondary theme-text-dark"
+          >Phone Number <span class="text-red-600">*</span></label
+        >
+        <input
+          type="text"
+          formControlName="phone"
+          placeholder="10 digit number"
+          class="mt-1 block w-full border-gray-300 rounded-md p-2 border focus:ring-blue-500 focus:border-blue-500"
+        />
+        @if (
+          candidateForm.get("phone")?.invalid &&
+          candidateForm.get("phone")?.touched
+        ) {
+          <div class="text-red-600 font-semibold text-md">
+            <span class="flex items-center gap-1">
+               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M18 10A8 8 0 11 2 10a8 8 0 0116 0zM9 9a1 1 0 012 0v4a1 1 0 01-2 0V9zm1-4a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            Please fill required field
+            </span>
+          </div>
+        }
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button
+          type="submit"
+          [disabled]="candidateForm.invalid"
+          (click)="startExam()"
+          class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Start Exam
+        </button>
+      </div>
+    </form>
+  </div>
+}
