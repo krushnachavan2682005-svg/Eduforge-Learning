@@ -1,4 +1,3 @@
-import { CommonHttpService } from './../../services/common-http.service';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -15,8 +14,6 @@ import { StorageService } from '../../services/storage-service';
 import { STORAGEENUMS } from '../../shared/enum';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs';
-import { EMPTY, catchError, concatMap, map, tap } from 'rxjs';
-import { PermissionStore } from '../../services/permission.service';
 
 @Component({
   selector: 'app-login',
@@ -41,8 +38,6 @@ export class Login implements OnInit {
   private str = inject(StorageService);
   private toastr = inject(ToastrService);
   private route = inject(ActivatedRoute);
-  private http = inject(CommonHttpService);
-  private permissionStore = inject(PermissionStore);
 
   constructor(private cd: ChangeDetectorRef) {
     this.router.events.subscribe((event) => {
@@ -61,10 +56,10 @@ export class Login implements OnInit {
   }
 
   ngOnInit(): void {
-    let isUser = this.str?.getItem(STORAGEENUMS?.USER_ID);
+    let token = this.str?.getItem(STORAGEENUMS?.AUTH_TOKEN);
     const noRedirect =
       this.route?.snapshot?.queryParamMap?.get('noRedirect') === '1';
-    if (isUser && !this.isBackNavigation && !noRedirect) {
+    if (token && !this.isBackNavigation && !noRedirect) {
       this.router?.navigate(['/dashboard']);
     } else {
       this.createForm();
@@ -116,38 +111,9 @@ export class Login implements OnInit {
     this.isLoading = true;
     const formData = this.loginForm.getRawValue();
     if (this.inputType === 'phone') {
-      const payload = {
-        phone: formData.email,
-        otp: formData.password,
-      };
-
-      this.authService
-        .verifyOtp(payload)
-        .pipe(finalize(() => (this.isLoading = false)))
-        .subscribe({
-          next: (response) => {
-            this.str.setItem(STORAGEENUMS.IS_AUTHENTICATED, 'true');
-            this.str.setItem(STORAGEENUMS.USER_PHONE, payload?.phone);
-            this.str.setItem(STORAGEENUMS.USER_ID, response?.user?.id);
-            if (response?.access_token) {
-              this.str.setItem(STORAGEENUMS.AUTH_TOKEN, response?.access_token);
-            }
-            this.fetchClients();
-            this.toastr.success('Logged in successfully', 'Success', {
-              // closeButton: false,
-              timeOut: 3000,
-              progressBar: true,
-            });
-          },
-          error: () => {
-            this.isLoading = false;
-            this.toastr.error('Invalid phone number or OTP', 'Login Failed', {
-              // closeButton: true,
-              timeOut: 2000,
-              progressBar: true,
-            });
-          },
-        });
+      this.isLoading = false;
+      console.warn('[Auth] local LMS auth currently supports email/password login only');
+      this.toastr.error('Phone OTP login is not available in local LMS auth yet', '');
     } else {
       const payload = {
         email: formData.email,
@@ -159,20 +125,18 @@ export class Login implements OnInit {
         .pipe(finalize(() => (this.isLoading = false)))
         .subscribe({
           next: (response) => {
-            this.str.setItem(STORAGEENUMS.IS_AUTHENTICATED, 'true');
-            this.str.setItem(STORAGEENUMS.USER_ID, response?.user?.id);
-            if (response?.access_token) {
-              this.str.setItem(STORAGEENUMS.AUTH_TOKEN, response?.access_token);
-            }
-            this.fetchClients();
+            this.authService.persistSession(response?.data);
+            console.log('[Auth] login success', response?.data?.user);
             this.toastr.success('Logged in successfully', '', {
               // closeButton: false,
               timeOut: 2000,
               progressBar: true,
             });
+            this.router?.navigate(['/dashboard'])?.then(() => {});
           },
-          error: () => {
+          error: (error) => {
             this.isLoading = false;
+            console.warn('[Auth] login failed', error);
             this.toastr.error('Invalid email or password', '', {
               // closeButton: true,
               timeOut: 2000,
@@ -181,106 +145,6 @@ export class Login implements OnInit {
           },
         });
     }
-  }
-
-  private fetchClients(): void {
-    this.http.getClient().subscribe({
-      next: (response) => {
-        this.clients = response?.clients;
-
-        const canSwitch =
-          Array.isArray(this.clients) && this.clients.length > 1;
-        this.str.setItem(STORAGEENUMS.CAN_SWITCH_ORG, canSwitch);
-
-        if (this.clients?.length === 1) {
-          this.str?.setItem(
-            STORAGEENUMS?.CLIENT,
-            JSON?.stringify(this.clients?.[0]),
-          );
-          this.str.setItem(STORAGEENUMS?.CLIENT_ID, this.clients?.[0]?.id);
-          const clientId = this.clients?.[0]?.id;
-          const userId = this.str?.getItem(STORAGEENUMS.USER_ID);
-          this.fetchAndStorePermissionsSafely(clientId, userId);
-          this.router?.navigate(['/dashboard'])?.then(() => {});
-        } else if (canSwitch) {
-          this.router.navigate([], {
-            queryParams: { noRedirect: '1' },
-            replaceUrl: true,
-            relativeTo: this.route,
-          });
-          this.router.navigate(['/organizations'], {
-            state: { fromLogin: true },
-          });
-        } else {
-          this.router.navigate(['/dashboard']);
-        }
-      },
-      error: () => {},
-    });
-  }
-
-  private fetchAndStorePermissionsSafely(
-    clientId?: string,
-    userId?: string | null,
-  ) {
-    if (!clientId || !userId) {
-      return;
-    }
-
-    this.http
-      .getUser(`/auth/api/users/client/${clientId}/user/${userId}`)
-      .pipe(
-        map((userRes: any) => {
-          const user = userRes?.user;
-          let roleId: string | undefined;
-
-          if (
-            Array.isArray(user?.user_mappings) &&
-            user.user_mappings.length > 0
-          ) {
-            roleId =
-              user.user_mappings[0]?.role_id || user.user_mappings[0]?.role?.id;
-          }
-          return roleId;
-        }),
-        concatMap((roleId: string | undefined) => {
-          if (!roleId) {
-            return EMPTY;
-          }
-          return this.http.getPermissions(
-            `/auth/api/permissions/client/${clientId}/role/${roleId}`,
-          );
-        }),
-        tap((permRes: any) => {
-          const raw = permRes?.permissions ?? permRes?.data ?? permRes ?? [];
-          const list = Array?.isArray(raw)
-            ? raw
-            : Array?.isArray(raw?.permissions)
-              ? raw?.permissions
-              : [];
-
-          const normalized: string[] = (list as any[]).flatMap((item: any) => {
-            const moduleName: string = item?.module?.name || '';
-            const code: string = item?.permission?.code || '';
-            const permName: string = item?.permission?.name || '';
-            const actions: string[] = Array?.isArray(item?.actions)
-              ? item.actions
-              : [];
-
-            const pairs = actions?.map((a) => `${moduleName}:${a}`);
-            const extras = [code, permName].filter(Boolean);
-
-            return [...pairs, ...extras];
-          });
-
-          const unique = Array.from(new Set(normalized)).filter(Boolean);
-
-          this.str?.setItem(STORAGEENUMS.PERMISSIONS, JSON.stringify(unique));
-          this.permissionStore?.setPermissions(unique);
-        }),
-        catchError(() => EMPTY),
-      )
-      .subscribe();
   }
 
   onInputAndHandleChange(event: Event): void {
@@ -344,19 +208,9 @@ export class Login implements OnInit {
     const value = this.loginForm.get('email')?.value;
     if (!value) return;
     if (this.inputType === 'email') {
-      this.authService.checkPassword({ username: value }).subscribe({
-        error: (err) => console.error(err),
-      });
+      console.log('[Auth] local email login selected');
     } else if (this.inputType === 'phone') {
-      const rawPhone = value;
-      const phoneOnly = rawPhone.split('+')[0];
-
-      this.authService.requestOtp({ phone: phoneOnly }).subscribe({
-        next: () => {
-          this.str.setItem(STORAGEENUMS.USER_PHONE, rawPhone);
-        },
-        error: (err) => console.error(err),
-      });
+      console.warn('[Auth] phone OTP remains on legacy ERP and is disabled for local auth migration');
     }
   }
   onPasswordInput(): void {

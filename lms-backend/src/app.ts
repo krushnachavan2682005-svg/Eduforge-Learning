@@ -5,6 +5,13 @@ import swaggerUi from "@fastify/swagger-ui";
 import fastifyMultipart from "@fastify/multipart";
 import s3Plugin from "./plugins/s3-upload-plugins";
 import publicExamRoutes from "./routes/publicExam.route";
+import jwtPlugin from "./plugins/jwt.plugin";
+import authRoutes from "./modules/auth/auth.routes";
+import userRoutes from "./modules/users/user.routes";
+import organizationRoutes from "./modules/organizations/organization.routes";
+import localDashboardRoutes from "./modules/dashboard/dashboard.routes";
+import "./modules/roles/role.model";
+import "./modules/sessions/session.model";
 
 export const buildApp = async () => {
   const app = Fastify({ logger: true });
@@ -14,6 +21,7 @@ export const buildApp = async () => {
   await sequelize.sync()
 
   await registerS3Plugin();
+  await app.register(jwtPlugin);
   // Swagger Docs
   await app.register(swagger, {
     openapi: {
@@ -54,6 +62,10 @@ export const buildApp = async () => {
   });
 
   const routes = (await import("./routes/index")).default;
+  app.register(authRoutes, { prefix: "/auth" });
+  app.register(userRoutes, { prefix: "/users" });
+  app.register(organizationRoutes, { prefix: "/organizations" });
+  app.register(localDashboardRoutes, { prefix: "/dashboard" });
   app.register(routes, { prefix: "/lms/v1/api" });
   app.register(publicExamRoutes,{prefix:"/lms/v1/api"})
   return app;

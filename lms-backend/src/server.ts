@@ -4,7 +4,8 @@ import cors from "@fastify/cors";
 import formBodyPlugin from "@fastify/formbody";
 
 import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const start = async () => {
   const app = await buildApp();
