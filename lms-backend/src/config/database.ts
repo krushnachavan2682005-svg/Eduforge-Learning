@@ -1,7 +1,8 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 // main database
 const sequelize = new Sequelize(
   process.env.DB_NAME ?? "baap_lms_dev",

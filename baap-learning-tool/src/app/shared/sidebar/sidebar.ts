@@ -117,27 +117,43 @@ export class Sidebar implements OnInit {
       this.refreshSwitchFlag();
       return;
     }
-    this.commonHttp.getClient()?.subscribe({
+    this.commonHttp.getCurrentOrganization()?.subscribe({
       next: (res: any) => {
-        const clients = res?.clients || [];
-        const can = clients?.length > 1;
-        this.canSwitchOrg?.set(can);
-        this.str?.setItem(STORAGEENUMS?.CAN_SWITCH_ORG, can);
+        console.log('[LocalSidebar] organization hydration success', res?.data);
+        const organization = res?.data;
+        this.canSwitchOrg?.set(false);
+        this.str?.setItem(STORAGEENUMS?.CAN_SWITCH_ORG, false);
+        if (organization?.id) {
+          this.str?.setItem(STORAGEENUMS?.CLIENT_ID, organization.id);
+          this.str?.setItem(STORAGEENUMS?.ORGANIZATION_ID, organization.id);
+          this.str?.setItem(STORAGEENUMS?.CLIENT, organization);
+        }
+        this.legalOrgName = organization?.name || 'Local LMS Organization';
         this.hasFetchedClients = true;
         this.cdr?.detectChanges();
       },
-      error: () => {
-        // keep existing flag on error
+      error: (error) => {
+        console.warn(
+          '[LocalSidebar] organization hydration failed; using local storage',
+          error,
+        );
+        const client = this.str?.getItem<any>(STORAGEENUMS.CLIENT);
+        this.legalOrgName = client?.name || client?.orgn_name || 'Local LMS Organization';
       },
     });
   }
   private fetchAndSetUser() {
     this.commonHttp
-      .getUser(`/auth/api/users/client/${this.clientId}/user/${this.user_id}`)
+      .getLocalUserMe()
       .subscribe({
         next: (res: any) => {
-          const user = res?.user || res;
+          console.log('[LocalSidebar] user hydration success', res?.data);
+          const user = res?.data || res;
           this.users.set(user);
+        },
+        error: (error) => {
+          console.warn('[LocalSidebar] user hydration failed', error);
+          this.users.set(this.str?.getItem(STORAGEENUMS.USER));
         },
       });
   }

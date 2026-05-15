@@ -1,23 +1,27 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject, PLATFORM_ID } from '@angular/core';
-import { catchError, finalize, throwError } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { StorageService } from './storage-service';
 import { STORAGEENUMS } from '../shared/enum';
+import { environment } from '../../environment/env';
 
 export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const str = inject(StorageService);
   const platformId = inject(PLATFORM_ID);
   const skipTokenUrls = [
-    'login',
     'doc-upload/signed-url',
     'baap-app-images.s3.ap-south-1.amazonaws.com',
   ];
+  const isAuthLogin = req.url.includes('/auth/login');
+  const isAuthMe = req.url === `${environment.AUTH_BASE_URL}/me`;
   const isSharedResumeRoute = router?.url?.includes('/resume/shared');
   const shouldSkipToken =
-    skipTokenUrls.some((url) => req.url.includes(url)) || isSharedResumeRoute;
+    isAuthLogin ||
+    skipTokenUrls.some((url) => req.url.includes(url)) ||
+    isSharedResumeRoute;
   let modifiedReq = req;
   modifiedReq = modifiedReq.clone({
     headers: modifiedReq.headers.delete('enableloading'),
@@ -36,10 +40,17 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(modifiedReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Don't redirect to login for shared resume routes or public endpoints
-      if (error.status === 401 && !shouldSkipToken && !isSharedResumeRoute) {
+      // Only local auth validation is allowed to clear the session.
+      // ERP profile/client/permission failures are handled by fallback code.
+      if (error.status === 401 && isAuthMe && !shouldSkipToken && !isSharedResumeRoute) {
+        console.warn('[Auth] request unauthorized; clearing session', error);
         router.navigate(['/auth/login']);
         str?.clear();
+      } else if (error.status === 401) {
+        console.warn('[AuthFallback] non-auth 401 preserved local session', {
+          url: req.url,
+          error,
+        });
       }
       return throwError(() => error);
     }),

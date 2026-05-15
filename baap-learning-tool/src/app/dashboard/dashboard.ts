@@ -60,23 +60,97 @@ export class DashboardComponent {
     this.client_Id = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
     this.user_Id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.getUserName();
-    this.getTutorData();
-    this.getStudentData();
-    this.getPublicTimeLines();
+    this.getLocalDashboardData();
   }
 
   getUserName() {
     this.commonHttp
-      .getUser(`/auth/api/users/client/${this.client_Id}/user/${this.user_Id}`)
+      .getLocalUserMe()
       .subscribe({
         next: (res: any) => {
-          const user = res?.user;
+          console.log('[LocalDashboard] user hydration success', res?.data);
+          const user = res?.data;
           this.userName?.set(user);
-          const roleName = user?.user_mappings?.[0]?.role?.name;
+          const roleName = user?.role;
           this.roleName?.set(roleName);
-          this.address?.set(user?.user_location_department?.[0]?.location);
+          this.address?.set({ name: user?.organization?.name || '--' });
+        },
+        error: (err) => {
+          console.warn(
+            '[LocalDashboard] user hydration failed; using local storage',
+            err,
+          );
+          this.userName?.set(this.str?.getItem(STORAGEENUMS.USER));
+          this.roleName?.set(this.str?.getItem(STORAGEENUMS.ROLE) || '');
+          this.address?.set('--');
         },
       });
+  }
+
+  getLocalDashboardData() {
+    this.timelineLoading.set(true);
+    this.commonHttp.getLocalDashboardMe().subscribe({
+      next: (res: any) => {
+        console.log('[LocalDashboard] dashboard hydration success', res?.data);
+        const data = res?.data || {};
+        const stats = data?.stats || {};
+
+        this.profileData.set(data?.profile || { profileViews: 0 });
+        this.timelineData.set(data?.timeline || []);
+        this.recentActivityData.set({
+          courses: [],
+          tests: [],
+          actionItems: [],
+        });
+        this.courseProgress.set({
+          created: stats?.courses_created || 0,
+          assigned: stats?.courses_assigned || 0,
+          totalStudentsAssigned: stats?.total_students || 0,
+          completedByStudents: stats?.completed_students || 0,
+          pendingCompletion: stats?.pending_students || 0,
+        });
+        this.examProgress.set({
+          created: 0,
+          assigned: 0,
+          totalStudentsAssigned: 0,
+          submittedByStudents: 0,
+          reviewedByTutor: 0,
+          pendingReview: 0,
+          pendingSubmission: 0,
+        });
+        this.actionProgress.set({
+          created: 0,
+          assigned: 0,
+          totalStudentsAssigned: 0,
+          submittedByStudents: 0,
+          reviewedByTutor: 0,
+          pendingReview: 0,
+          pendingSubmission: 0,
+        });
+        this.timelineLoading.set(false);
+      },
+      error: (err) => {
+        console.warn(
+          '[LocalDashboard] dashboard hydration failed; using safe defaults',
+          err,
+        );
+        this.profileData.set({ profileViews: 0 });
+        this.timelineData.set([]);
+        this.recentActivityData.set({
+          courses: [],
+          tests: [],
+          actionItems: [],
+        });
+        this.courseProgress.set({
+          created: 0,
+          assigned: 0,
+          totalStudentsAssigned: 0,
+          completedByStudents: 0,
+          pendingCompletion: 0,
+        });
+        this.timelineLoading.set(false);
+      },
+    });
   }
 
   getStudentData() {
@@ -92,6 +166,9 @@ export class DashboardComponent {
         },
         error: (err) => {
           console.error('Error fetching dashboard data:', err);
+          console.warn(
+            '[AuthFallback] dashboard data failed; keeping authenticated shell',
+          );
           this.timelineLoading.set(false);
         },
       });
@@ -108,6 +185,9 @@ export class DashboardComponent {
         },
         error: (err) => {
           console.error('Error fetching tutor dashboard data:', err);
+          console.warn(
+            '[AuthFallback] tutor dashboard data failed; keeping authenticated shell',
+          );
         },
       });
   }
@@ -121,6 +201,9 @@ export class DashboardComponent {
           },
           error: (err) => {
             console.error('Error fetching public timelines:', err);
+            console.warn(
+              '[AuthFallback] public timeline failed; keeping authenticated shell',
+            );
           },
         }));
   }

@@ -7,6 +7,7 @@ import { StorageService } from './services/storage-service';
 import { STORAGEENUMS } from './shared/enum';
 import { PermissionStore } from './services/permission.service';
 import { SidebarService } from './services/sidebar.service';
+import { Auth } from './auth/auth';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,7 @@ export class App implements OnInit {
   protected title = 'Credit Portal';
   private str = inject(StorageService);
   private sidebarService = inject(SidebarService);
+  private authService = inject(Auth);
   isOpen = this.sidebarService?.isOpen;
   private permissionStore = inject(PermissionStore);
   private readonly hiddenSidebarRoutes = [
@@ -33,6 +35,7 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.setupRouteListener();
     this.permissionStore?.loadFromStorage();
+    this.authService.restoreSession().subscribe();
   }
 
   get user() {
