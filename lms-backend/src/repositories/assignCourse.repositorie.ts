@@ -1,12 +1,26 @@
 import { externalDB, sequelize } from "../config/database";
 import { AssignedCourseModel } from "../models/assignCourse.model";
 import { QueryTypes } from "sequelize";
+import { StudentRepository } from "../modules/students/student.repository";
+
+const studentRepository = new StudentRepository();
+
 export class AssiginCourseRepositorie {
   async createAssignCourse(data: Partial<AssignedCourseModel>) {
     return AssignedCourseModel.create(data as any);
   }
 
   async getUsersByClassId(class_id: string, client_id: string) {
+    const localUserIds = await studentRepository.getUserIdsByClassId(
+      client_id,
+      class_id,
+    );
+
+    if (localUserIds.length) {
+      return localUserIds;
+    }
+
+    // Compatibility fallback while legacy ERP class/admission data still exists.
     const sql = `
     SELECT user_id
     FROM addmissions
@@ -20,6 +34,30 @@ export class AssiginCourseRepositorie {
     });
 
     return results.map((row: any) => row.user_id);
+  }
+
+  async createLocalEnrollmentsForUserCourses(
+    organizationId: string,
+    userId: string,
+    courseIds: string[],
+  ) {
+    const student = await studentRepository.findStudentByUserId(
+      organizationId,
+      userId,
+    );
+
+    if (!student) return;
+
+    await Promise.all(
+      courseIds.map((courseId) =>
+        studentRepository.createEnrollment({
+          organization_id: organizationId,
+          student_id: student.id,
+          course_id: courseId,
+          status: "assigned",
+        }),
+      ),
+    );
   }
 
   async getCourseByUserId(client_id: string, user_id: string) {

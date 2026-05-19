@@ -2,6 +2,11 @@ import { QueryTypes } from "sequelize";
 import { externalDB, sequelize } from "../config/database";
 import { AssignedActionItemsModel } from "../models/assignActionItems.model";
 import { AssignedActionItemsTimelineModel } from "../models/assignedActionItemsTimeline.model";
+import { StudentClass } from "../modules/students/class.model";
+import { Student } from "../modules/students/student.model";
+import { StudentRepository } from "../modules/students/student.repository";
+
+const studentRepository = new StudentRepository();
 
 export class AssiginActionItemsrepositorie {
   async createAssignCourse(data: Partial<AssignedActionItemsModel>) {
@@ -9,6 +14,16 @@ export class AssiginActionItemsrepositorie {
   }
 
   async getUsersByClassId(class_id: string, client_id: string) {
+    const localUserIds = await studentRepository.getUserIdsByClassId(
+      client_id,
+      class_id,
+    );
+
+    if (localUserIds.length) {
+      return localUserIds;
+    }
+
+    // Compatibility fallback while legacy ERP class/admission data still exists.
     const sql = `
     SELECT user_id
     FROM addmissions
@@ -24,6 +39,16 @@ export class AssiginActionItemsrepositorie {
   }
 
   async getUsersByClientId(client_id: string) {
+    const localStudents = await studentRepository.listStudents(client_id);
+    const localUserIds = localStudents
+      .map((student) => student.user_id)
+      .filter(Boolean);
+
+    if (localUserIds.length) {
+      return localUserIds;
+    }
+
+    // Compatibility fallback while legacy ERP admissions still exist.
     const sql = `
     SELECT user_id
     FROM addmissions
@@ -38,6 +63,12 @@ export class AssiginActionItemsrepositorie {
     return results.map((row: any) => row.user_id);
   }
   async getClientIdByClassId(class_id: string): Promise<string | null> {
+    const localClass = await StudentClass.findByPk(class_id);
+    if (localClass?.organization_id) {
+      return localClass.organization_id;
+    }
+
+    // Compatibility fallback while legacy ERP admissions still exist.
     const sql = `
     SELECT client_id
     FROM addmissions
@@ -53,6 +84,12 @@ export class AssiginActionItemsrepositorie {
     return result?.client_id ?? null;
   }
   async getClientIdByUserId(user_id: string): Promise<string | null> {
+    const localStudent = await Student.findOne({ where: { user_id } });
+    if (localStudent?.organization_id) {
+      return localStudent.organization_id;
+    }
+
+    // Compatibility fallback while legacy ERP admissions still exist.
     const sql = `
     SELECT client_id
     FROM addmissions
