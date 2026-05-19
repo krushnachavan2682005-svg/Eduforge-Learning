@@ -27,6 +27,9 @@ import {
   Reviewer,
 } from "../interfaces/exam.interface";
 import { QueryTypes } from "sequelize";
+import { StudentRepository } from "../modules/students/student.repository";
+
+const studentRepository = new StudentRepository();
 
 export class ExamRepository {
   private getTimestamps() {
@@ -344,6 +347,16 @@ async assignExamToUsers(
     class_id: string,
     client_id: string,
   ): Promise<string[]> {
+    const localUserIds = await studentRepository.getUserIdsByClassId(
+      client_id,
+      class_id,
+    );
+
+    if (localUserIds.length) {
+      return localUserIds;
+    }
+
+    // Compatibility fallback while legacy ERP class/admission data still exists.
     const sql = `
     SELECT user_id
     FROM addmissions
@@ -363,6 +376,16 @@ async assignExamToUsers(
     class_id: string,
     client_id: string,
   ): Promise<{ id: string; name: string } | null> {
+    const localClass = await studentRepository.getClassById(
+      client_id,
+      class_id,
+    );
+
+    if (localClass) {
+      return { id: localClass.id, name: localClass.name };
+    }
+
+    // Compatibility fallback while legacy ERP classes still exist.
     const sql = `
       SELECT id, class_name AS name
       FROM classes

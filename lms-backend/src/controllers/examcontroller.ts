@@ -652,7 +652,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const { exam_id, user_id, class_id } = req.body as {
         exam_id: string[];
         user_id?: string[];
-        class_id?: string;
+        class_id?: string | string[];
       };
 
       const validExamIds: string[] = [];
@@ -669,24 +669,29 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
 
       let finalUserIds: string[] = [];
       let classInfo: { id: string; name: string } | undefined;
+      const classIds = class_id
+        ? Array.isArray(class_id)
+          ? class_id
+          : [class_id]
+        : [];
 
       if (user_id?.length) {
         finalUserIds.push(...user_id);
       }
 
-      if (class_id) {
+      for (const selectedClassId of classIds) {
         const classUserIds = await repository.getUsersByClassId(
-          class_id,
+          selectedClassId,
           client_id,
         );
         const classDetails = await repository.getClassDetailsById(
-          class_id,
+          selectedClassId,
           client_id,
         );
 
         finalUserIds.push(...classUserIds);
 
-        if (classDetails) {
+        if (classDetails && !classInfo) {
           classInfo = {
             id: classDetails.id,
             name: classDetails.name,

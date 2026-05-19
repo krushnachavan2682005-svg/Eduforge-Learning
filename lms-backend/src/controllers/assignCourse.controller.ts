@@ -14,16 +14,26 @@ export class AssiginCourseController {
       const { course_id, user_id, class_id } = req.body as {
         course_id: string[];
         user_id?: string[];
-        class_id?: string;
+        class_id?: string | string[];
       };
       let finalUserIds: string[] = [];
+      const classIds = class_id
+        ? Array.isArray(class_id)
+          ? class_id
+          : [class_id]
+        : [];
+      const userClassMap = new Map<string, string>();
+
       if (user_id?.length) finalUserIds.push(...user_id);
-      if (class_id) {
+      for (const selectedClassId of classIds) {
         const classUserIds = await repositorie.getUsersByClassId(
-          class_id,
+          selectedClassId,
           client_id
         );
         finalUserIds.push(...classUserIds);
+        classUserIds.forEach((user) => {
+          if (!userClassMap.has(user)) userClassMap.set(user, selectedClassId);
+        });
       }
       finalUserIds = [...new Set(finalUserIds)];
       if (finalUserIds.length === 0) {
@@ -52,9 +62,17 @@ export class AssiginCourseController {
         await repositorie.createAssignCourse({
           course_id,
           user_id: [user],
-          class_id: class_id,
+          class_id: userClassMap.get(user),
           client_id,
         });
+
+        // Local SaaS compatibility: keep local student_enrollments in sync
+        // while the legacy course_user_mapping assignment table remains active.
+        await repositorie.createLocalEnrollmentsForUserCourses(
+          client_id,
+          user,
+          course_id,
+        );
       }
 
       return reply.code(201).send({

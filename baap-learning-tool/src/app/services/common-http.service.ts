@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { environment } from '../../environment/env';
 import { STORAGEENUMS } from '../shared/enum';
 import { StorageService } from './storage-service';
@@ -53,6 +53,36 @@ export class CommonHttpService {
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
+  getLocalStudents(): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/students`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  createLocalStudent(data: any): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/students`;
+    return this.http.post(url, data, { headers: this.getHeaders() });
+  }
+
+  getLocalClasses(): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/classes`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  createLocalClass(data: any): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/classes`;
+    return this.http.post(url, data, { headers: this.getHeaders() });
+  }
+
+  addLocalStudentToClass(classId: string, studentId: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/classes/${classId}/students/${studentId}`;
+    return this.http.post(url, {}, { headers: this.getHeaders() });
+  }
+
+  createLocalEnrollment(data: any): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/enrollments`;
+    return this.http.post(url, data, { headers: this.getHeaders() });
+  }
+
   postCourse(endpoint: string, data: any): Observable<any> {
     const url = `${environment?.LMS_BASE_URL}${endpoint}`;
     return this.http.post(url, data, { headers: this.getHeaders() });
@@ -91,12 +121,40 @@ export class CommonHttpService {
   }
 
   getClasses(endpoint: string) {
+    if (endpoint?.startsWith('/classes/client/')) {
+      return this.getLocalClasses().pipe(
+        map((res: any) => this.mapLocalClassesResponse(res)),
+        catchError((error) => {
+          console.warn(
+            '[LocalMigration] Local classes failed; falling back to ERP classes',
+            error,
+          );
+          const url = `${environment?.ERP_BASE_URL}/auth/api${endpoint}`;
+          return this.http.get(url, { headers: this.getHeaders() });
+        }),
+      );
+    }
+
     const url = `${environment?.ERP_BASE_URL}/auth/api${endpoint}`;
     return this.http.get(url, {
       headers: this.getHeaders(),
     });
   }
   getUser(endpoint: string) {
+    if (endpoint?.includes('/auth/api/addmissions/client/')) {
+      return this.getLocalStudents().pipe(
+        map((res: any) => this.mapLocalStudentsResponse(res)),
+        catchError((error) => {
+          console.warn(
+            '[LocalMigration] Local students failed; falling back to ERP admissions',
+            error,
+          );
+          const url = `${environment?.ERP_BASE_URL}${endpoint}`;
+          return this.http.get(url, { headers: this.getHeaders() });
+        }),
+      );
+    }
+
     const url = `${environment?.ERP_BASE_URL}${endpoint}`;
     return this.http.get(url, { headers: this.getHeaders() }).pipe(
       catchError((error) => {
@@ -184,6 +242,42 @@ export class CommonHttpService {
 
     this.str?.setItem(STORAGEENUMS.PERMISSIONS, TEMP_LOCAL_PERMISSIONS);
     return { permissions, data: permissions };
+  }
+
+  private mapLocalStudentsResponse(res: any) {
+    const students = (res?.data || []).map((student: any) => ({
+      ...student,
+      user_id: student?.user_id,
+      name: [student?.first_name, student?.last_name]
+        .filter(Boolean)
+        .join(' '),
+    }));
+
+    console.log('[LocalMigration] Students hydrated from local LMS', students);
+
+    return {
+      success: true,
+      addmission: students,
+      addmissions: students,
+      data: students,
+    };
+  }
+
+  private mapLocalClassesResponse(res: any) {
+    const classes = (res?.data || []).map((studentClass: any) => ({
+      ...studentClass,
+      class_name: studentClass?.name,
+      name: studentClass?.name,
+    }));
+
+    console.log('[LocalMigration] Classes hydrated from local LMS', classes);
+
+    return {
+      success: true,
+      classrooms: classes,
+      classes,
+      data: classes,
+    };
   }
 
   private getLocalClient() {

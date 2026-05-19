@@ -1,7 +1,9 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { AuthRepository } from "../auth/auth.repository";
+import { StudentRepository } from "../students/student.repository";
 
 const authRepository = new AuthRepository();
+const studentRepository = new StudentRepository();
 
 export class LocalDashboardController {
   async me(req: FastifyRequest, reply: FastifyReply) {
@@ -28,6 +30,9 @@ export class LocalDashboardController {
       const user = (membership as any).user;
       const organization = (membership as any).organization;
       const name = [user.first_name, user.last_name].filter(Boolean).join(" ");
+      const counts = await studentRepository.getDashboardCounts(
+        req.user.organization_id,
+      );
 
       return reply.code(200).send({
         success: true,
@@ -48,10 +53,13 @@ export class LocalDashboardController {
           },
           stats: {
             courses_created: 0,
-            courses_assigned: 0,
-            total_students: 0,
-            completed_students: 0,
-            pending_students: 0,
+            courses_assigned: counts.assigned_courses,
+            assigned_courses: counts.assigned_courses,
+            total_students: counts.total_students,
+            completed_students: counts.completed_courses,
+            completed_courses: counts.completed_courses,
+            pending_students: counts.pending_courses,
+            pending_courses: counts.pending_courses,
           },
           timeline: [],
         },
