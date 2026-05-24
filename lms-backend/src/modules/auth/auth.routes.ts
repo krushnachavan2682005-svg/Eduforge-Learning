@@ -17,4 +17,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
   fastify.get("/me", { preHandler: authenticate }, (req, reply) =>
     authController.me(req, reply),
   );
+
+  fastify.get("/permissions", { preHandler: authenticate }, (req, reply) =>
+    authController.permissions(req, reply),
+  );
 }

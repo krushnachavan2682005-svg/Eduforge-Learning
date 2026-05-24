@@ -13,7 +13,7 @@ import { Auth } from '../auth';
 import { StorageService } from '../../services/storage-service';
 import { STORAGEENUMS } from '../../shared/enum';
 import { ToastrService } from 'ngx-toastr';
-import { finalize } from 'rxjs';
+import { finalize, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -122,11 +122,16 @@ export class Login implements OnInit {
 
       this.authService
         .login(payload)
-        .pipe(finalize(() => (this.isLoading = false)))
-        .subscribe({
-          next: (response) => {
+        .pipe(
+          tap((response) => {
             this.authService.persistSession(response?.data);
             console.log('[Auth] login success', response?.data?.user);
+          }),
+          switchMap(() => this.authService.hydratePermissions()),
+          finalize(() => (this.isLoading = false)),
+        )
+        .subscribe({
+          next: () => {
             this.toastr.success('Logged in successfully', '', {
               // closeButton: false,
               timeOut: 2000,
@@ -210,7 +215,7 @@ export class Login implements OnInit {
     if (this.inputType === 'email') {
       console.log('[Auth] local email login selected');
     } else if (this.inputType === 'phone') {
-      console.warn('[Auth] phone OTP remains on legacy ERP and is disabled for local auth migration');
+      console.warn('[Auth] phone OTP is not supported by local LMS auth yet');
     }
   }
   onPasswordInput(): void {

@@ -1,4 +1,4 @@
-import { externalDB, sequelize } from "../config/database";
+import { sequelize } from "../config/database";
 import { AssignedCourseModel } from "../models/assignCourse.model";
 import { QueryTypes } from "sequelize";
 import { StudentRepository } from "../modules/students/student.repository";
@@ -16,24 +16,7 @@ export class AssiginCourseRepositorie {
       class_id,
     );
 
-    if (localUserIds.length) {
-      return localUserIds;
-    }
-
-    // Compatibility fallback while legacy ERP class/admission data still exists.
-    const sql = `
-    SELECT user_id
-    FROM addmissions
-    WHERE class = :classId
-      AND client_id = :clientId
-  `;
-
-    const results: any[] = await externalDB.query(sql, {
-      replacements: { classId: class_id, clientId: client_id },
-      type: QueryTypes.SELECT,
-    });
-
-    return results.map((row: any) => row.user_id);
+    return localUserIds;
   }
 
   async createLocalEnrollmentsForUserCourses(

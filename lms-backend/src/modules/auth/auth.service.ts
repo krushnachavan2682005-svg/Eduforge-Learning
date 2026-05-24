@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { randomUUID } from "crypto";
 import { AuthRepository } from "./auth.repository";
 import { comparePassword, hashPassword } from "../../utils/password";
+import { RbacService } from "../rbac/rbac.service";
 
 export interface RegisterInput {
   first_name: string;
@@ -23,6 +24,7 @@ export interface LoginInput {
 export class AuthService {
   constructor(
     private readonly authRepository = new AuthRepository(),
+    private readonly rbacService = new RbacService(),
   ) {}
 
   async register(input: RegisterInput, fastify: FastifyInstance) {
@@ -45,6 +47,12 @@ export class AuthService {
       email: input.email.trim().toLowerCase(),
       password_hash,
       organization_name,
+    });
+
+    await this.rbacService.assignRoleToUser({
+      user_id: account.user.id,
+      organization_id: account.organization.id,
+      role_code: "organization_admin",
     });
 
     return this.createAuthResponse(
@@ -113,11 +121,18 @@ export class AuthService {
     userAgent?: string | null,
     ipAddress?: string | null,
   ) {
+    const [roleIds, permissionsVersion] = await Promise.all([
+      this.rbacService.getUserRoleIds(user.id, organization.id),
+      this.rbacService.getPermissionsVersion(user.id, organization.id),
+    ]);
+
     const access_token = fastify.generateAccessToken({
       sub: user.id,
       email: user.email,
       organization_id: organization.id,
       role,
+      role_ids: roleIds,
+      permissions_version: permissionsVersion,
     });
 
     const refresh_token = randomUUID();
@@ -138,7 +153,8 @@ export class AuthService {
       token_type: "Bearer",
       user: this.serializeUser(user),
       organization: this.serializeOrganization(organization),
-      membership: { role },
+      membership: { role, role_ids: roleIds },
+      permissions_version: permissionsVersion,
     };
   }
 

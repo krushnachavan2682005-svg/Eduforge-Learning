@@ -1,11 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonHttpService } from '../services/common-http.service';
 import { StorageService } from '../services/storage-service';
 import { STORAGEENUMS } from '../shared/enum';
 import { Tooltip } from '../shared/tooltip';
-import { catchError, concatMap, EMPTY, map, tap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { PermissionStore } from '../services/permission.service';
 
@@ -77,32 +76,23 @@ export class SelectClient {
     this.str?.setItem(STORAGEENUMS?.CLIENT_ID, clientId);
 
     this.commonHttpService
-      .getUser(`/auth/api/users/client/${clientId}/user/${userId}`)
-      .pipe(
-        map((userRes: any) => {
-          const roleId =
-            userRes?.user?.user_mappings?.[0]?.role_id ||
-            userRes?.user?.user_mappings?.[0]?.role?.id;
-          return roleId;
-        }),
-        concatMap((roleId) =>
-          roleId
-            ? this.commonHttpService?.getPermissions(
-                `/auth/api/permissions/client/${data?.id}/role/${roleId}`,
-              )
-            : EMPTY,
-        ),
-        tap((permRes: any) => {
-          const raw = permRes?.permissions ?? permRes?.data ?? [];
+      .getPermissions('')
+      .subscribe({
+        next: (permRes: any) => {
+          const directCodes =
+            permRes?.data?.permission_codes ?? permRes?.permission_codes;
+          const raw = directCodes ?? permRes?.permissions ?? permRes?.data ?? [];
           const list = Array?.isArray(raw) ? raw : (raw?.permissions ?? []);
 
           const normalized = (list as any[])?.flatMap((item: any) => {
+            if (typeof item === 'string') return [item];
             const moduleName = item?.module?.name || '';
             const code = item?.permission?.code || '';
+            const localCode = item?.code || '';
             const actions = item?.actions ?? [];
 
             const pairs = actions?.map((a: string) => `${moduleName}:${a}`);
-            return [...pairs, code]?.filter(Boolean);
+            return [...pairs, code, localCode]?.filter(Boolean);
           });
 
           const finalList = Array?.from(new Set(normalized));
@@ -114,17 +104,11 @@ export class SelectClient {
           this.permissionStore?.setPermissions(
             Array?.from(new Set(normalized)),
           );
-        }),
-        catchError(() => {
+          this.route.navigate(['/dashboard']).then(() => {});
+        },
+        error: () => {
           this.toastr?.error('Failed to update permissions', 'Error');
-          return EMPTY;
-        }),
-      )
-      .subscribe(() => {
-        // this.route?.navigate(['/dashboard'], { replaceUrl: true });
-        this.route.navigate(['/dashboard']).then(() => {
-          // window.location.reload();
-        });
+        },
       });
   }
   private permissionStore = inject(PermissionStore);

@@ -159,33 +159,6 @@ export class Resume implements OnInit, OnDestroy {
       );
   }
 
-  // getUser() {
-  //   this.commoHttp
-  //     .getUser(`/auth/api/users/client/${this.clientId}/user/${this.userId}`)
-  //     .subscribe((res: any) => {
-  //       const user = res?.user;
-
-  //       this.profile?.set({
-  //         name: `${user?.first_name || ''} ${user?.last_name || ''}`,
-  //         title: user?.title,
-  //         creditScore: user?.credit_score || '',
-  //         description: '',
-  //       });
-
-  //       this.contact?.set({
-  //         email: user?.email,
-  //         phone: user?.phone,
-  //         url: user?.url || '',
-  //         address: user?.user_address?.[0]?.full_address || '',
-  //       });
-  //       this.hasResume?.set(true);
-  //       this.education?.set([]);
-  //       this.skills?.set([]);
-  //       this.experience?.set([]);
-  //       this.projects?.set([]);
-  //     });
-  // }
-
   async downloadResumeAsPDF() {
     if (!this.resumeContent) return;
     const element = this.resumeContent.nativeElement;

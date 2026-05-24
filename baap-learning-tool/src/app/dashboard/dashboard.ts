@@ -166,9 +166,7 @@ export class DashboardComponent {
         },
         error: (err) => {
           console.error('Error fetching dashboard data:', err);
-          console.warn(
-            '[AuthFallback] dashboard data failed; keeping authenticated shell',
-          );
+          console.warn('[Dashboard] dashboard data failed; keeping authenticated shell');
           this.timelineLoading.set(false);
         },
       });
@@ -185,9 +183,7 @@ export class DashboardComponent {
         },
         error: (err) => {
           console.error('Error fetching tutor dashboard data:', err);
-          console.warn(
-            '[AuthFallback] tutor dashboard data failed; keeping authenticated shell',
-          );
+          console.warn('[Dashboard] tutor dashboard data failed; keeping authenticated shell');
         },
       });
   }
@@ -201,9 +197,7 @@ export class DashboardComponent {
           },
           error: (err) => {
             console.error('Error fetching public timelines:', err);
-            console.warn(
-              '[AuthFallback] public timeline failed; keeping authenticated shell',
-            );
+            console.warn('[Dashboard] public timeline failed; keeping authenticated shell');
           },
         }));
   }

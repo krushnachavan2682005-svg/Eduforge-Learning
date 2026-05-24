@@ -3,7 +3,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { v4 as uuid } from "uuid";
 import { ExamRepository } from "../repositories/exam.repository";
 import { QueryTypes, UUID } from "sequelize";
-import { externalDB } from "../config/database";
+import { StudentRepository } from "../modules/students/student.repository";
 import {
   IExamCreateRequest,
   IExamUpdate,
@@ -21,6 +21,7 @@ import {
 } from "../models/exam.model";
 
 const repository = new ExamRepository();
+const studentRepository = new StudentRepository();
 
 export class ExamController {
   async createExam(req: FastifyRequest, reply: FastifyReply) {
@@ -799,34 +800,23 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
         publishOnly,
       );
 
-      const studentNameMap = new Map<string, string>();
+      let studentNameMap: Record<string, string> = {};
       if (raw.length) {
         const uniqueUserIds = [...new Set(raw.map((r: any) => r.user_id))];
-        try {
-          const studentQuery = `
-            SELECT user_id, first_name, middle_name, last_name
-            FROM addmissions
-            WHERE user_id IN (:user_ids)
-          `;
-          const students: any[] = await externalDB.query(studentQuery, {
-            replacements: { user_ids: uniqueUserIds },
-            type: QueryTypes.SELECT,
-          });
-          students.forEach((s: any) => {
-            const name = [s.first_name, s.middle_name, s.last_name]
-              .filter(Boolean)
-              .join(" ");
-            studentNameMap.set(s.user_id, name);
-          });
-        } catch (e: any) {
-          req.log.warn("could not fetch student names: ", e);
-        }
+        const orgId =
+          (req.user?.organization_id as string | undefined) ||
+          (raw[0] as any)?.client_id ||
+          "";
+        studentNameMap = await studentRepository.getStudentNamesByUserIds(
+          orgId,
+          uniqueUserIds,
+        );
       }
 
       const timeline = raw.map((item: any) => {
         const achievedExam = item.achieved_marks || "";
         return {
-          studentName: studentNameMap.get(item.user_id) || "",
+          studentName: studentNameMap[item.user_id] || "",
           type: "Exam",
           title: item.title || "",
           description: item.subject || "",

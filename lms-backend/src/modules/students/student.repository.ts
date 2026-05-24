@@ -1,8 +1,10 @@
+import { Op } from "sequelize";
 import { ClassStudent } from "./class-student.model";
 import { StudentClass } from "./class.model";
 import { LocalEnrollment, LocalEnrollmentStatus } from "./enrollment.model";
 import { Student } from "./student.model";
 import { OrganizationUser } from "../roles/role.model";
+import { User } from "../users/user.model";
 
 export class StudentRepository {
   async createStudent(data: {
@@ -139,5 +141,45 @@ export class StudentRepository {
       completed_courses: completedCourses,
       pending_courses: Math.max(assignedCourses - completedCourses, 0),
     };
+  }
+
+  async getStudentDisplayName(organizationId: string, userId: string) {
+    const student = await Student.findOne({
+      where: { organization_id: organizationId, user_id: userId },
+    });
+
+    if (student) {
+      return [student.first_name, student.last_name].filter(Boolean).join(" ");
+    }
+
+    const user = await User.findOne({ where: { id: userId } });
+    if (!user) return "";
+
+    return [user.first_name, user.last_name].filter(Boolean).join(" ");
+  }
+
+  async getStudentNamesByUserIds(organizationId: string, userIds: string[]) {
+    if (!userIds.length) return {};
+
+    const [students, users] = await Promise.all([
+      Student.findAll({
+        where: { organization_id: organizationId, user_id: { [Op.in]: userIds } },
+      }),
+      User.findAll({ where: { id: { [Op.in]: userIds } } }),
+    ]);
+
+    const names: Record<string, string> = {};
+
+    users.forEach((user) => {
+      names[user.id] = [user.first_name, user.last_name].filter(Boolean).join(" ");
+    });
+
+    students.forEach((student) => {
+      names[student.user_id] = [student.first_name, student.last_name]
+        .filter(Boolean)
+        .join(" ");
+    });
+
+    return names;
   }
 }

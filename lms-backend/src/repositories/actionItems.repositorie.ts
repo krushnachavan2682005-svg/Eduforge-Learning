@@ -2,8 +2,11 @@ import { ActionItems } from "../models/actionItems.model";
 import { paginate } from "../utils/pagination";
 import { ActionItemsInterface } from "../interfaces/actionItems.interface";
 import { QueryTypes, Op } from "sequelize";
-import { sequelize, externalDB } from "../config/database";
+import { sequelize } from "../config/database";
 import { AssignedActionItemsModel } from "../models/assignActionItems.model";
+import { StudentRepository } from "../modules/students/student.repository";
+
+const studentRepository = new StudentRepository();
 
 export class ActionItemRepository {
   async getActionItems(
@@ -125,34 +128,12 @@ export class ActionItemRepository {
       });
 
       if (allUserIds.size > 0) {
-        // Fetch student names from externalDB
         const userIdsArray = Array?.from(allUserIds);
-        const studentNamesQuery = `
-          SELECT user_id, first_name, middle_name, last_name
-          FROM addmissions
-          WHERE user_id IN (:userIdsArray) AND client_id = :clientId;
-        `;
-        const studentResults: any[] = await externalDB?.query(
-          studentNamesQuery,
-          {
-            replacements: { userIdsArray, clientId },
-            type: QueryTypes?.SELECT,
-          },
+        const nameMap = await studentRepository.getStudentNamesByUserIds(
+          clientId,
+          userIdsArray,
         );
 
-        // Create a map of user_id to name
-        const nameMap: Record<string, string> = {};
-        studentResults.forEach((row) => {
-          nameMap[row?.user_id] = [
-            row?.first_name,
-            row?.middle_name,
-            row?.last_name,
-          ]
-            .filter(Boolean)
-            .join(" ");
-        });
-
-        // Update results with student details
         results.forEach((item) => {
           item.student_assignments?.forEach((assignment: any) => {
             assignment.user_ids = (assignment?.user_ids || [])?.map(

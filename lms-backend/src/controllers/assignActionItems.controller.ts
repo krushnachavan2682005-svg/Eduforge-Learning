@@ -3,9 +3,11 @@ import { AssignedActionItemsModel } from "../models/assignActionItems.model";
 import { AssiginActionItemsrepositorie } from "../repositories/assignActionItems.repositorie";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Op, QueryTypes } from "sequelize";
-import { sequelize, externalDB } from "../config/database";
+import { sequelize } from "../config/database";
+import { StudentRepository } from "../modules/students/student.repository";
 
 const repositorie = new AssiginActionItemsrepositorie();
+const studentRepository = new StudentRepository();
 
 export class AssiginActionItemsController {
   async createAssiginCourse(req: FastifyRequest, reply: FastifyReply) {
@@ -553,42 +555,25 @@ export class AssiginActionItemsController {
       });
 
       // build a map of user_id -> student name by fetching all unique users
-      const studentNameMap = new Map<string, string>();
+      let studentNameMap: Record<string, string> = {};
       if (rawTimeline.length) {
         const uniqueUserIds = [
           ...new Set(rawTimeline.map((item: any) => item.user_id)),
         ];
-
-        try {
-          const studentQuery = `
-            SELECT user_id, first_name, middle_name, last_name
-            FROM addmissions
-            WHERE user_id IN (:user_ids)
-          `;
-          const students: any[] = await externalDB.query(studentQuery, {
-            replacements: { user_ids: uniqueUserIds },
-            type: QueryTypes.SELECT,
-          });
-
-          students.forEach((student: any) => {
-            const name = [
-              student.first_name,
-              student.middle_name,
-              student.last_name,
-            ]
-              .filter(Boolean)
-              .join(" ");
-            studentNameMap.set(student.user_id, name);
-          });
-        } catch (e: any) {
-          req.log.warn("could not fetch student names: ", e);
-        }
+        const orgId =
+          (req.user?.organization_id as string | undefined) ||
+          (rawTimeline[0] as any)?.client_id ||
+          "";
+        studentNameMap = await studentRepository.getStudentNamesByUserIds(
+          orgId,
+          uniqueUserIds,
+        );
       }
 
       const timeline = rawTimeline.map((item: any) => {
         if (item.task_name !== undefined) {
           return {
-            studentName: studentNameMap.get(item.user_id) || "",
+            studentName: studentNameMap[item.user_id] || "",
             type: "Action Item",
             title: item.task_name || "",
             description: item.description || "",
@@ -609,7 +594,7 @@ export class AssiginActionItemsController {
         } else {
           // exam entry
           return {
-            studentName: studentNameMap.get(item.user_id) || "",
+            studentName: studentNameMap[item.user_id] || "",
             type: "Exam",
             title: item.title || "",
             description: item.subject || "",

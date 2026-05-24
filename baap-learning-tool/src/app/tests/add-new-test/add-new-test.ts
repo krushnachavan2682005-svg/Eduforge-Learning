@@ -41,7 +41,7 @@ export class AddNewTest {
   isEditMode = false;
   examId: string | null = null;
   detailsSaved = false;
-  reviewerOptions: string[] = [];
+  reviewerOptions: any[] = [];
   addedTestDetails: {
     title: string;
     subject: string;
@@ -1983,10 +1983,10 @@ export class AddNewTest {
 
   loadReviewers() {
     this.commonservice
-      .getUser(`/auth/api/users/client/${this.clientId}/users?status=active`)
+      .getLocalUserMe()
       .subscribe({
         next: (res: any) => {
-          const users = res?.data ?? [];
+          const users = [res?.data].filter(Boolean);
 
           this.reviewerOptions = users
             ?.filter((u: any) => this.isTutorUser(u))
@@ -2000,6 +2000,9 @@ export class AddNewTest {
   }
 
   private isTutorUser(user: any): boolean {
+    if (['teacher', 'tutor', 'organization_admin', 'owner'].includes(user?.role)) {
+      return true;
+    }
     return (user?.user_mappings ?? []).some(
       (m: any) => m?.role?.name?.toLowerCase() === 'tutor',
     );

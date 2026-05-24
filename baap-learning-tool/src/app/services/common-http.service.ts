@@ -1,17 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, catchError, map, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../environment/env';
 import { STORAGEENUMS } from '../shared/enum';
 import { StorageService } from './storage-service';
-
-export const TEMP_LOCAL_PERMISSIONS = [
-  'LMS_R',
-  'LMS_C',
-  'LMS_U',
-  'LMS_D',
-  'LMS_AI',
-];
 
 @Injectable({
   providedIn: 'root',
@@ -99,70 +91,35 @@ export class CommonHttpService {
   }
 
   getClient(searchKey?: string): Observable<any> {
-    let params = new HttpParams();
-    if (searchKey) {
-      params = params?.set('k', searchKey);
-    }
-
-    return this.http
-      .get(`${environment?.ERP_BASE_URL}/auth/api/clients`, {
-        headers: this.getHeaders(),
-        params: params,
-      })
-      .pipe(
-        catchError((error) => {
-          console.warn(
-            '[AuthFallback] ERP clients failed; using local organization',
-            error,
-          );
-          return of(this.buildClientFallback());
-        }),
-      );
+    return this.getCurrentOrganization().pipe(
+      map((res: any) => {
+        const organization = res?.data || this.getLocalClient();
+        const normalized = this.normalizeLocalOrganization(organization);
+        const matches =
+          !searchKey ||
+          normalized?.name?.toLowerCase()?.includes(searchKey.toLowerCase());
+        const clients = normalized && matches ? [normalized] : [];
+        return { clients, data: clients };
+      }),
+    );
   }
 
   getClasses(endpoint: string) {
-    if (endpoint?.startsWith('/classes/client/')) {
-      return this.getLocalClasses().pipe(
-        map((res: any) => this.mapLocalClassesResponse(res)),
-        catchError((error) => {
-          console.warn(
-            '[LocalMigration] Local classes failed; falling back to ERP classes',
-            error,
-          );
-          const url = `${environment?.ERP_BASE_URL}/auth/api${endpoint}`;
-          return this.http.get(url, { headers: this.getHeaders() });
-        }),
-      );
-    }
-
-    const url = `${environment?.ERP_BASE_URL}/auth/api${endpoint}`;
-    return this.http.get(url, {
-      headers: this.getHeaders(),
-    });
+    return this.getLocalClasses().pipe(
+      map((res: any) => this.mapLocalClassesResponse(res)),
+    );
   }
   getUser(endpoint: string) {
-    if (endpoint?.includes('/auth/api/addmissions/client/')) {
+    if (endpoint?.includes('/users?')) {
       return this.getLocalStudents().pipe(
         map((res: any) => this.mapLocalStudentsResponse(res)),
-        catchError((error) => {
-          console.warn(
-            '[LocalMigration] Local students failed; falling back to ERP admissions',
-            error,
-          );
-          const url = `${environment?.ERP_BASE_URL}${endpoint}`;
-          return this.http.get(url, { headers: this.getHeaders() });
-        }),
       );
     }
 
-    const url = `${environment?.ERP_BASE_URL}${endpoint}`;
-    return this.http.get(url, { headers: this.getHeaders() }).pipe(
-      catchError((error) => {
-        console.warn('[AuthFallback] ERP user/profile failed; using local user', {
-          endpoint,
-          error,
-        });
-        return of(this.buildUserFallback(endpoint));
+    return this.getLocalUserMe().pipe(
+      map((res: any) => {
+        const user = res?.data || this.getLocalUser();
+        return { user, users: user ? [user] : [], data: user };
       }),
     );
   }
@@ -192,16 +149,8 @@ export class CommonHttpService {
   }
 
   getPermissions(endpoint: string) {
-    const url = `${environment?.ERP_BASE_URL}${endpoint}`;
-    return this.http.get(url, { headers: this.getHeaders() }).pipe(
-      catchError((error) => {
-        console.warn(
-          '[AuthFallback] ERP permissions failed; using temporary LMS permissions',
-          error,
-        );
-        return of(this.buildPermissionsFallback());
-      }),
-    );
+    const url = `${environment?.AUTH_BASE_URL}/permissions`;
+    return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getPublicCourse(endpoint: string): Observable<any> {
@@ -210,38 +159,6 @@ export class CommonHttpService {
       'Content-Type': 'application/json',
     });
     return this.http.get(url, { headers });
-  }
-
-  private buildClientFallback() {
-    const client = this.getLocalClient();
-    return {
-      clients: client ? [client] : [],
-      data: client ? [client] : [],
-    };
-  }
-
-  private buildUserFallback(endpoint: string) {
-    const user = this.getLocalUser();
-    if (endpoint?.includes('/users') || endpoint?.includes('/addmissions')) {
-      return {
-        users: user ? [user] : [],
-        addmissions: user ? [user] : [],
-        data: user ? [user] : [],
-      };
-    }
-
-    return { user, data: user };
-  }
-
-  private buildPermissionsFallback() {
-    const permissions = TEMP_LOCAL_PERMISSIONS.map((code) => ({
-      module: { name: 'LMS' },
-      permission: { code, name: code },
-      actions: [],
-    }));
-
-    this.str?.setItem(STORAGEENUMS.PERMISSIONS, TEMP_LOCAL_PERMISSIONS);
-    return { permissions, data: permissions };
   }
 
   private mapLocalStudentsResponse(res: any) {
@@ -253,12 +170,8 @@ export class CommonHttpService {
         .join(' '),
     }));
 
-    console.log('[LocalMigration] Students hydrated from local LMS', students);
-
     return {
       success: true,
-      addmission: students,
-      addmissions: students,
       data: students,
     };
   }
@@ -270,13 +183,28 @@ export class CommonHttpService {
       name: studentClass?.name,
     }));
 
-    console.log('[LocalMigration] Classes hydrated from local LMS', classes);
-
     return {
       success: true,
       classrooms: classes,
       classes,
       data: classes,
+    };
+  }
+
+  private normalizeLocalOrganization(organization: any) {
+    if (!organization) return null;
+    return {
+      ...organization,
+      id: organization?.id || organization?.client_id,
+      client_id: organization?.client_id || organization?.id,
+      name: organization?.name || 'Local LMS Organization',
+      slug: organization?.slug || 'local-lms-organization',
+      orgn_details: organization?.orgn_details || [
+        {
+          orgn_name: organization?.name || 'Local LMS Organization',
+          logo: '',
+        },
+      ],
     };
   }
 

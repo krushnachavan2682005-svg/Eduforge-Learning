@@ -84,7 +84,7 @@ export class LeaderView implements OnInit {
   }
 
   private loadUserProfile() {
-    this.commonHttp.getUser(`/auth/api/users/client/${this.clientId}/user/${this.userId}`)
+    this.commonHttp.getLocalUserMe()
       .subscribe({
         next: (res: any) => {
           const user = res?.user || res?.data || res;

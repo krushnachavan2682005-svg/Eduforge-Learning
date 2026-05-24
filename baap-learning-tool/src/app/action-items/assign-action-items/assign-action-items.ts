@@ -90,9 +90,7 @@ export class AssignActionItems implements OnInit {
 
   getClasses() {
     this.commonHttp
-      ?.getClasses(
-        `/classes/client/${this.clientId}?page=${this.currentPage()}&limit=${this.limit}`,
-      )
+      ?.getClasses('')
       .subscribe((res: any) => {
         this.classes = res?.classrooms ?? [];
       });
@@ -122,11 +120,9 @@ export class AssignActionItems implements OnInit {
     if (!this.hasMoreUsers() || this.isLoadingUsers()) return;
     this.isLoadingUsers.set(true);
 
-    const url = `/auth/api/addmissions/client/${this.clientId}?page=${this.currentPage()}&limit=${this.limit}&k=${searchTerm}`;
-
-    this.commonHttp.getUser(url).subscribe({
+    this.commonHttp.getLocalStudents().subscribe({
       next: (res: any) => {
-        const users = res?.addmission || [];
+        const users = res?.data || [];
         const mappedUsers = users?.map((u: any) => ({
           id: u?.user_id,
           name: `${u?.first_name} ${u?.last_name}`,
@@ -214,10 +210,9 @@ export class AssignActionItems implements OnInit {
   }
 
   getRoles() {
-    const url = `/auth/api/users/client/${this.clientId}?page=1&limit=10`;
-    this.commonHttp.getUser(url).subscribe({
+    this.commonHttp.getLocalUserMe().subscribe({
       next: (res: any) => {
-        const users = res?.users || [];
+        const users = [res?.data].filter(Boolean);
         const rolesMap = new Map<string, string>();
         
         users.forEach((user: any) => {

@@ -94,9 +94,7 @@ export class AssginCourse {
 
   getClasses() {
     this.commonHttp
-      ?.getClasses(
-        `/classes/client/${this.clientId}?page=${this.currentPage()}&limit=${this.limit}`,
-      )
+      ?.getClasses('')
       .subscribe((res: any) => {
         this.classes = res?.classrooms ?? [];
       });
@@ -138,11 +136,9 @@ export class AssginCourse {
 
     this.isLoadingUsers?.set(true);
 
-    const url = `/auth/api/addmissions/client/${this.clientId}?page=${this.currentPage()}&limit=${this.limit}&k=${searchTerm}`;
-
-    this.commonHttp.getUser(url).subscribe({
+    this.commonHttp.getLocalStudents().subscribe({
       next: (res: any) => {
-        const users = res?.addmission || [];
+        const users = res?.data || [];
         const mappedUsers = users?.map((user: any) => ({
           id: user?.user_id,
           name: `${user?.first_name} ${user?.last_name}`,

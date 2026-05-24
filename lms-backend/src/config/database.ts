@@ -16,28 +16,13 @@ const sequelize = new Sequelize(
   }
 );
 
-// external database
-const externalDB = new Sequelize(
-  process.env.EXT_DB_NAME ?? "platform_development",
-  process.env.EXT_DB_USER ?? "postgres",
-  process.env.EXT_DB_PASS ?? "krushna123",
-  {
-    host: process.env.EXT_DB_HOST ?? "localhost",
-    port: Number(process.env.EXT_DB_PORT) ?? 5432,
-    dialect: "postgres",
-    logging: false,
-  }
-);
-
 export const connectDB = async () => {
   try {
     await sequelize.authenticate();
     console.log(" Connected to main database");
-    await externalDB.authenticate();
-    console.log(" Connected to external database");
   } catch (error: any) {
     console.error(" Database connection failed:", error.message);
   }
 };
 
-export { sequelize, externalDB };
+export { sequelize };

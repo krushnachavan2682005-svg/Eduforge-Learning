@@ -7,6 +7,8 @@ export interface JwtPayload {
   email: string;
   organization_id: string;
   role: string;
+  role_ids?: string[];
+  permissions_version?: string;
 }
 
 export interface AuthenticatedUser extends JwtPayload {
