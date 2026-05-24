@@ -10,6 +10,7 @@ import {
 } from "../schemas/assignActionItems.schema";
 import { verifyToken } from "../utils/auth";
 import { FastifyInstance } from "fastify";
+import { requirePermission } from "../middleware/rbac.middleware";
 
 const assignActionItemsController = new AssiginActionItemsController();
 
@@ -18,7 +19,7 @@ export default async function assignActionItemsRoutes(
 ) {
   fastify.post(
     "/assign-action-items",
-    { schema: assignActionItems, preHandler: verifyToken },
+    { schema: assignActionItems, preHandler: requirePermission("ACTION_ITEM_ASSIGN") },
     (req, reply) => assignActionItemsController.createAssiginCourse(req, reply),
   );
   fastify.put(

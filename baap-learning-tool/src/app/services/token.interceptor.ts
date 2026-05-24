@@ -40,14 +40,12 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(modifiedReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Only local auth validation is allowed to clear the session.
-      // ERP profile/client/permission failures are handled by fallback code.
       if (error.status === 401 && isAuthMe && !shouldSkipToken && !isSharedResumeRoute) {
         console.warn('[Auth] request unauthorized; clearing session', error);
         router.navigate(['/auth/login']);
         str?.clear();
       } else if (error.status === 401) {
-        console.warn('[AuthFallback] non-auth 401 preserved local session', {
+        console.warn('[Auth] non-auth 401 preserved local session', {
           url: req.url,
           error,
         });

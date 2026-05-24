@@ -7,6 +7,7 @@ import {
 } from "../schemas/course.schema";
 import { Course } from "../models/course.model";
 import { verifyToken } from "../utils/auth";
+import { requirePermission } from "../middleware/rbac.middleware";
 
 const courseController = new CourseController();
 type ClientParams = { client_id: string };
@@ -17,7 +18,7 @@ export default async function courseRoutes(fastify: FastifyInstance) {
   // CourseRepository.initialize(fastify);
   fastify.post(
     "/course",
-    { schema: createCourseSchema, preHandler: verifyToken },
+    { schema: createCourseSchema, preHandler: requirePermission("COURSE_CREATE") },
     (req, reply) => courseController.createCourse(req, reply)
   );
 
@@ -31,11 +32,11 @@ export default async function courseRoutes(fastify: FastifyInstance) {
 
   fastify.put(
     "/course/:id",
-    { schema: updateCourseSchema, preHandler: verifyToken },
+    { schema: updateCourseSchema, preHandler: requirePermission("COURSE_UPDATE") },
     (req, reply) => courseController.updateCourse(req, reply)
   );
 
-  fastify.delete("/courses/:id", { preHandler: verifyToken }, (req, reply) =>
+  fastify.delete("/courses/:id", { preHandler: requirePermission("COURSE_DELETE") }, (req, reply) =>
     courseController.deleteCourse(req, reply)
   );
 

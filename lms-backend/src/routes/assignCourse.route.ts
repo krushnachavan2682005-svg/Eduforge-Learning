@@ -4,6 +4,7 @@ import { AssiginCourseController } from "../controllers/assignCourse.controller"
 import { assignCourse } from "../schemas/assignCourse.schema";
 import { AssignedCourseModel } from "../models/assignCourse.model";
 import { verifyToken } from "../utils/auth";
+import { requirePermission } from "../middleware/rbac.middleware";
 
 const assignCourseController = new AssiginCourseController();
 type ClientParams = { client_id: string };
@@ -13,7 +14,7 @@ type CreateCourseBody = Partial<AssignedCourseModel>;
 export default async function assignCourseRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/assign-course",
-    { schema: assignCourse, preHandler: verifyToken },
+    { schema: assignCourse, preHandler: requirePermission("COURSE_ASSIGN") },
     (req, reply) => assignCourseController.createAssiginCourse(req, reply)
   );
 

@@ -1,5 +1,5 @@
 import { QueryTypes } from "sequelize";
-import { externalDB, sequelize } from "../config/database";
+import { sequelize } from "../config/database";
 import { AssignedActionItemsModel } from "../models/assignActionItems.model";
 import { AssignedActionItemsTimelineModel } from "../models/assignedActionItemsTimeline.model";
 import { StudentClass } from "../modules/students/class.model";
@@ -19,23 +19,7 @@ export class AssiginActionItemsrepositorie {
       class_id,
     );
 
-    if (localUserIds.length) {
-      return localUserIds;
-    }
-
-    // Compatibility fallback while legacy ERP class/admission data still exists.
-    const sql = `
-    SELECT user_id
-    FROM addmissions
-    WHERE class = :classId
-      AND client_id = :clientId
-  `;
-    const results: any[] = await externalDB.query(sql, {
-      replacements: { classId: class_id, clientId: client_id },
-      type: QueryTypes.SELECT,
-    });
-
-    return results.map((row: any) => row.user_id);
+    return localUserIds;
   }
 
   async getUsersByClientId(client_id: string) {
@@ -44,65 +28,21 @@ export class AssiginActionItemsrepositorie {
       .map((student) => student.user_id)
       .filter(Boolean);
 
-    if (localUserIds.length) {
-      return localUserIds;
-    }
-
-    // Compatibility fallback while legacy ERP admissions still exist.
-    const sql = `
-    SELECT user_id
-    FROM addmissions
-    WHERE client_id = :clientId
-  `;
-
-    const results: any[] = await externalDB.query(sql, {
-      replacements: { clientId: client_id },
-      type: QueryTypes.SELECT,
-    });
-
-    return results.map((row: any) => row.user_id);
+    return localUserIds;
   }
   async getClientIdByClassId(class_id: string): Promise<string | null> {
     const localClass = await StudentClass.findByPk(class_id);
     if (localClass?.organization_id) {
       return localClass.organization_id;
     }
-
-    // Compatibility fallback while legacy ERP admissions still exist.
-    const sql = `
-    SELECT client_id
-    FROM addmissions
-    WHERE class = :classId
-    LIMIT 1
-  `;
-
-    const [result]: any[] = await externalDB.query(sql, {
-      replacements: { classId: class_id },
-      type: QueryTypes.SELECT,
-    });
-
-    return result?.client_id ?? null;
+    return null;
   }
   async getClientIdByUserId(user_id: string): Promise<string | null> {
     const localStudent = await Student.findOne({ where: { user_id } });
     if (localStudent?.organization_id) {
       return localStudent.organization_id;
     }
-
-    // Compatibility fallback while legacy ERP admissions still exist.
-    const sql = `
-    SELECT client_id
-    FROM addmissions
-    WHERE user_id = :userId
-    LIMIT 1
-  `;
-
-    const [result]: any[] = await externalDB.query(sql, {
-      replacements: { userId: user_id },
-      type: QueryTypes.SELECT,
-    });
-
-    return result?.client_id ?? null;
+    return null;
   }
 
   async getActionItemsByUserId(
@@ -350,27 +290,10 @@ export class AssiginActionItemsrepositorie {
 
     if (userIds.length === 0) return [];
 
-    const students = await externalDB.query(
-      `
-  SELECT user_id, first_name, last_name
-  FROM addmissions
-  WHERE client_id = :client_id
-    AND user_id IN (:user_ids)
-  `,
-      {
-        replacements: {
-          client_id,
-          user_ids: userIds,
-        },
-        type: QueryTypes.SELECT,
-      },
-    );
-
     const studentMap = new Map(
-      (students as any[]).map((s: any) => [
-        s.user_id,
-        `${s.first_name} ${s.last_name}`,
-      ]),
+      Object.entries(
+        await studentRepository.getStudentNamesByUserIds(client_id, userIds),
+      ),
     );
 
     return (actionItems as any[]).map((item) => ({

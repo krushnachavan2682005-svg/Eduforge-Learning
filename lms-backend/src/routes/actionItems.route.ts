@@ -2,13 +2,14 @@ import { FastifyInstance } from "fastify";
 import { verifyToken } from "../utils/auth";
 import { actionItemSchema } from "../schemas/actionItems.schema";
 import { ActionItemsController } from "../controllers/actionItemsController";
+import { requirePermission } from "../middleware/rbac.middleware";
 
 const Controller = new ActionItemsController();
 
 export default async function actionItemsRoute(fastify: FastifyInstance) {
   fastify.post(
     "/action-items",
-    { schema: actionItemSchema, preHandler: verifyToken },
+    { schema: actionItemSchema, preHandler: requirePermission("LMS_CREATE") },
     (req, reply) => Controller.createActionItem(req, reply)
   );
 
@@ -31,13 +32,13 @@ export default async function actionItemsRoute(fastify: FastifyInstance) {
 
   fastify.put(
     "/action-items/:id",
-    { schema: actionItemSchema, preHandler: verifyToken },
+    { schema: actionItemSchema, preHandler: requirePermission("LMS_UPDATE") },
     (req, reply) => Controller.updateActionItem(req, reply)
   );
 
   fastify.delete(
     "/action-items/:id",
-    { preHandler: verifyToken },
+    { preHandler: requirePermission("LMS_DELETE") },
     (req, reply) => Controller.deleteActionItem(req, reply)
   );
 }

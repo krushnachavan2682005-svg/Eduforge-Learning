@@ -13,13 +13,14 @@ import {
   startExamSchema,
 } from "../schemas/exam.schema";
 import { verifyToken } from "../utils/auth";
+import { requirePermission } from "../middleware/rbac.middleware";
 
 const Controller = new ExamController();
 
 export default async function examRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/exams",
-    { schema: createFullExamSchema, preHandler: verifyToken },
+    { schema: createFullExamSchema, preHandler: requirePermission("EXAM_CREATE") },
     (req, reply) => Controller.createExam(req, reply),
   );
 
@@ -42,11 +43,11 @@ export default async function examRoutes(fastify: FastifyInstance) {
 
   fastify.put(
     "/exam/:id",
-    { schema: updateFullExamSchema, preHandler: verifyToken },
+    { schema: updateFullExamSchema, preHandler: requirePermission("EXAM_UPDATE") },
     (req, reply) => Controller.updateExam(req, reply),
   );
 
-  fastify.delete("/exam/:id", { preHandler: verifyToken }, (req, reply) =>
+  fastify.delete("/exam/:id", { preHandler: requirePermission("EXAM_DELETE") }, (req, reply) =>
     Controller.deleteExam(req, reply),
   );
 
@@ -105,7 +106,7 @@ export default async function examRoutes(fastify: FastifyInstance) {
   // Assign an exam to a user
   fastify.post(
     "/exams/assign",
-    { schema: assignExamSchema, preHandler: verifyToken },
+    { schema: assignExamSchema, preHandler: requirePermission("EXAM_ASSIGN") },
     (req, reply) => Controller.assignExam(req, reply),
   );
 

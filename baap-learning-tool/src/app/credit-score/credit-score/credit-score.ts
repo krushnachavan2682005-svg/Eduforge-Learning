@@ -157,10 +157,10 @@ export class CreditScore {
 
   fetchAndSetUser() {
     this.commonHttp
-      .getUser(`/auth/api/users/client/${this.client_Id}/user/${this.user_Id}`)
+      .getLocalUserMe()
       .subscribe({
         next: (res: any) => {
-          const user = res?.user;
+          const user = res?.data || res?.user;
           this.student?.set(user);
         },
       });

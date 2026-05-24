@@ -11,6 +11,7 @@ import userRoutes from "./modules/users/user.routes";
 import organizationRoutes from "./modules/organizations/organization.routes";
 import localDashboardRoutes from "./modules/dashboard/dashboard.routes";
 import studentRoutes from "./modules/students/student.routes";
+import { seedRbac } from "./modules/rbac/rbac.seed";
 import "./modules/roles/role.model";
 import "./modules/sessions/session.model";
 
@@ -20,6 +21,7 @@ export const buildApp = async () => {
   await connectDB();
   // Sync Sequelize models with the database
   await sequelize.sync()
+  await seedRbac();
 
   await registerS3Plugin();
   await app.register(jwtPlugin);

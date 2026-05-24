@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../environment/env';
 import { STORAGEENUMS } from '../shared/enum';
 import { StorageService } from '../services/storage-service';
 import { PermissionStore } from '../services/permission.service';
-import { TEMP_LOCAL_PERMISSIONS } from '../services/common-http.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,12 +15,7 @@ export class Auth {
   private permissionStore = inject(PermissionStore);
   private loginUrl = `${environment.AUTH_BASE_URL}/login`;
   private meUrl = `${environment.AUTH_BASE_URL}/me`;
-
-  // Legacy ERP auth endpoints retained temporarily for rollback/OTP compatibility.
-  private legacyLoginUrl = `${environment.ERP_BASE_URL}/auth/api/auth/login`;
-  private checkPasswordUrl = `${environment.ERP_BASE_URL}/auth/api/auth/check-password`;
-  private requestOtpUrl = `${environment.ERP_BASE_URL}/auth/api/auth/request-otp`;
-  private verifyOtpUrl = `${environment.ERP_BASE_URL}/auth/api/auth/verify-otp`;
+  private permissionsUrl = `${environment.AUTH_BASE_URL}/permissions`;
 
   login(payload: any): Observable<any> {
     return this.http.post(this.loginUrl, payload);
@@ -39,6 +33,7 @@ export class Auth {
         this.persistSession(response?.data);
         console.log('[Auth] token restore success');
       }),
+      switchMap(() => this.hydratePermissions()),
       map(() => true),
       catchError((error) => {
         console.warn('[Auth] token restore failed', error);
@@ -74,32 +69,27 @@ export class Auth {
     if (role) {
       this.str.setItem(STORAGEENUMS.ROLE, role);
     }
-    if (!this.str?.getItem(STORAGEENUMS.PERMISSIONS)) {
-      console.warn('[AuthFallback] injecting temporary LMS permissions');
-      this.str.setItem(STORAGEENUMS.PERMISSIONS, TEMP_LOCAL_PERMISSIONS);
-      this.permissionStore?.setPermissions(TEMP_LOCAL_PERMISSIONS);
-    }
     this.str.setItem(STORAGEENUMS.IS_AUTHENTICATED, 'true');
+  }
+
+  hydratePermissions(): Observable<string[]> {
+    return this.http.get(this.permissionsUrl).pipe(
+      map((response: any) => {
+        const codes = response?.data?.permission_codes || [];
+        this.permissionStore?.setPermissions(codes);
+        console.log('[Auth] permissions hydrated', codes);
+        return codes;
+      }),
+      catchError((error) => {
+        console.warn('[Auth] permissions hydration failed', error);
+        this.permissionStore?.setPermissions([]);
+        return of([]);
+      }),
+    );
   }
 
   logout(): void {
     console.log('[Auth] logout and clear local session');
     this.str?.clear();
-  }
-
-  legacyLogin(payload: any): Observable<any> {
-    return this.http.post(this.legacyLoginUrl, payload);
-  }
-
-  checkPassword(payload: any): Observable<any> {
-    return this.http.post(this.checkPasswordUrl, payload);
-  }
-
-  requestOtp(payload: any): Observable<any> {
-    return this.http.post(this.requestOtpUrl, payload);
-  }
-
-  verifyOtp(payload: any): Observable<any> {
-    return this.http.post(this.verifyOtpUrl, payload);
   }
 }

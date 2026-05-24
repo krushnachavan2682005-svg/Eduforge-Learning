@@ -2,7 +2,7 @@ import { AssiginCourseRepositorie } from "./assignCourse.repositorie";
 import { AssiginActionItemsrepositorie } from "./assignActionItems.repositorie";
 import { StudentResultsRepository } from "./studentResults.repository";
 import { ResumeRepository } from "./resumes.repositorie";
-import { sequelize, externalDB } from "../config/database";
+import { sequelize } from "../config/database";
 import { QueryTypes } from "sequelize";
 
 export class DashboardRepository {
@@ -118,44 +118,7 @@ export class DashboardRepository {
   async getTutorCounts(client_id: string, user_id: string): Promise<any> {
     // profile section
     let profile: any = { name: "", role: "", location: "" };
-
-    const hasRoleCol: boolean =
-      (
-        await externalDB.query(
-          `SELECT 1 FROM information_schema.columns
-         WHERE table_name = 'addmissions'
-           AND column_name = 'role'
-           AND table_schema = current_schema()`,
-          { type: QueryTypes.SELECT },
-        )
-      ).length > 0;
-
-    const hasLocationCol: boolean =
-      (
-        await externalDB.query(
-          `SELECT 1 FROM information_schema.columns
-         WHERE table_name = 'addmissions'
-           AND column_name = 'location'
-           AND table_schema = current_schema()`,
-          { type: QueryTypes.SELECT },
-        )
-      ).length > 0;
-
-    const selectFields: string[] = ["first_name", "middle_name", "last_name"];
-    if (hasLocationCol) selectFields.push("location");
-    if (hasRoleCol) selectFields.push("role");
-
-    const row: any[] = await externalDB.query(
-      `SELECT ${selectFields.join(", ")}
-         FROM addmissions
-         WHERE user_id = :userId
-           AND client_id = :client_id
-         LIMIT 1`,
-      {
-        replacements: { userId: user_id, client_id },
-        type: QueryTypes.SELECT,
-      },
-    );
+    profile = await this.resultsRepo.getStudentName(user_id, client_id);
 
     if (!profile?.name) {
       const resumeRepo = new ResumeRepository();

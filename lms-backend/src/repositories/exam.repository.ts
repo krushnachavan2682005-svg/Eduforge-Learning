@@ -9,7 +9,6 @@ import {
 } from "../models/exam.model";
 import { AssignedActionItemsTimelineModel } from "../models/assignedActionItemsTimeline.model";
 import { sequelize } from "../config/database";
-import { externalDB } from "../config/database";
 import { paginate } from "../utils/pagination";
 import {
   IExam,
@@ -352,24 +351,7 @@ async assignExamToUsers(
       class_id,
     );
 
-    if (localUserIds.length) {
-      return localUserIds;
-    }
-
-    // Compatibility fallback while legacy ERP class/admission data still exists.
-    const sql = `
-    SELECT user_id
-    FROM addmissions
-    WHERE class = :classId
-      AND client_id = :clientId
-  `;
-
-    const results: any[] = await externalDB.query(sql, {
-      replacements: { classId: class_id, clientId: client_id },
-      type: QueryTypes.SELECT,
-    });
-
-    return results.map((row: any) => row.user_id);
+    return localUserIds;
   }
 
   async getClassDetailsById(
@@ -381,22 +363,7 @@ async assignExamToUsers(
       class_id,
     );
 
-    if (localClass) {
-      return { id: localClass.id, name: localClass.name };
-    }
-
-    // Compatibility fallback while legacy ERP classes still exist.
-    const sql = `
-      SELECT id, class_name AS name
-      FROM classes
-      WHERE id = :classId AND client_id = :clientId
-      LIMIT 1;
-    `;
-    const result: any[] = await externalDB.query(sql, {
-      replacements: { classId: class_id, clientId: client_id },
-      type: QueryTypes.SELECT,
-    });
-    return result.length > 0 ? result[0] : null;
+    return localClass ? { id: localClass.id, name: localClass.name } : null;
   }
 
   async assignExamToUser(data: IExamAssignment): Promise<IExamAssignment> {
@@ -1144,33 +1111,26 @@ async resumePublicExamSession(session_id:string){
       });
 
       if (results.length === 0) return [];
-      const userClientPairs = results.map((r) => ({
-        user_id: r?.user_id,
-        client_id: r?.client_id,
-      }));
-      const userIds = [...new Set(userClientPairs.map((p) => p?.user_id))];
-      const studentNamesQuery = `
-        SELECT user_id, first_name, middle_name, last_name, client_id
-        FROM addmissions
-        WHERE user_id IN (:userIds)
-      `;
-
-      const nameResults: any[] = await externalDB.query(studentNamesQuery, {
-        replacements: { userIds },
-        type: QueryTypes.SELECT,
-      });
-
-      const nameMap = new Map();
-      nameResults.forEach((r) => {
-        const fullName = [r?.first_name, r?.middle_name, r?.last_name]
-          .filter(Boolean)
-          .join(" ");
-        nameMap.set(`${r?.user_id}_${r?.client_id}`, fullName);
-      });
+      const namesByOrg = new Map<string, Record<string, string>>();
+      const orgIds = [...new Set(results.map((r) => r?.client_id).filter(Boolean))];
+      for (const organizationId of orgIds) {
+        const userIds = [
+          ...new Set(
+            results
+              .filter((r) => r?.client_id === organizationId)
+              .map((r) => r?.user_id)
+              .filter(Boolean),
+          ),
+        ];
+        namesByOrg.set(
+          organizationId,
+          await studentRepository.getStudentNamesByUserIds(organizationId, userIds),
+        );
+      }
 
       return results.map((r) => ({
         ...r,
-        student_name: nameMap.get(`${r?.user_id}_${r?.client_id}`),
+        student_name: namesByOrg.get(r?.client_id)?.[r?.user_id] || "",
       }));
     } catch (error) {
       console.error("Error fetching reviewer dashboard exams:", error);
@@ -1190,31 +1150,10 @@ async resumePublicExamSession(session_id:string){
         `Submission not found for session ${sessionId} and user ${userId}`,
       );
 
-    // Fetch student name from external DB
-    const studentNameQuery = `
-      SELECT first_name, middle_name, last_name
-      FROM addmissions
-      WHERE user_id = :userId AND client_id = :clientId
-      LIMIT 1;
-    `;
-    const studentNameResult: any[] = await externalDB.query(studentNameQuery, {
-      replacements: { userId: mapping.user_id, clientId: mapping.client_id },
-      type: QueryTypes.SELECT,
-    });
-
-    if (studentNameResult.length === 0) {
-      throw new Error(
-        `Data integrity error: The user with ID '${mapping.user_id}' is not associated with the client ID '${mapping.client_id}' in the admissions records.`,
-      );
-    }
-
-    let studentName = "";
-    if (studentNameResult.length > 0) {
-      const { first_name, middle_name, last_name } = studentNameResult[0];
-      studentName = [first_name, middle_name, last_name]
-        .filter(Boolean)
-        .join(" ");
-    }
+    const studentName = await studentRepository.getStudentDisplayName(
+      mapping.client_id || "",
+      mapping.user_id,
+    );
 
     const exam = await Exam.findByPk(mapping.exam_id, {
       attributes: ["title", "total_marks"],
@@ -1288,25 +1227,10 @@ async resumePublicExamSession(session_id:string){
       );
     }
 
-    // Fetch student name from external DB
-    const studentNameQuery = `
-      SELECT first_name, middle_name, last_name
-      FROM addmissions
-      WHERE user_id = :userId AND client_id = :clientId
-      LIMIT 1;
-    `;
-    const studentNameResult: any[] = await externalDB.query(studentNameQuery, {
-      replacements: { userId: mapping?.user_id, clientId: mapping?.client_id },
-      type: QueryTypes.SELECT,
-    });
-
-    let studentName = "";
-    if (studentNameResult.length > 0) {
-      const { first_name, middle_name, last_name } = studentNameResult[0];
-      studentName = [first_name, middle_name, last_name]
-        .filter(Boolean)
-        .join(" ");
-    }
+    const studentName = await studentRepository.getStudentDisplayName(
+      mapping?.client_id || client_id,
+      mapping?.user_id,
+    );
 
     // Get exam details
     const exam = await Exam.findByPk(mapping.exam_id, {
@@ -1368,39 +1292,10 @@ async resumePublicExamSession(session_id:string){
     let reviewerName = "";
     if (mapping?.reviewed_by) {
       try {
-        const reviewerQuery = `
-          SELECT first_name, middle_name, last_name
-          FROM addmissions
-          WHERE user_id = :userId AND client_id = :clientId
-          LIMIT 1;
-        `;
-        let reviewerResult: any[] = await externalDB.query(reviewerQuery, {
-          replacements: {
-            userId: mapping?.reviewed_by,
-            clientId: mapping?.client_id,
-          },
-          type: QueryTypes.SELECT,
-        });
-
-        if (reviewerResult.length === 0) {
-          const usersQuery = `
-            SELECT first_name, middle_name, last_name
-            FROM users
-            WHERE id = :userId
-            LIMIT 1;
-          `;
-          reviewerResult = await externalDB.query(usersQuery, {
-            replacements: { userId: mapping?.reviewed_by },
-            type: QueryTypes.SELECT,
-          });
-        }
-
-        if (reviewerResult.length > 0) {
-          const { first_name, middle_name, last_name } = reviewerResult[0];
-          reviewerName = [first_name, middle_name, last_name]
-            .filter(Boolean)
-            .join(" ");
-        }
+        reviewerName = await studentRepository.getStudentDisplayName(
+          mapping?.client_id || client_id,
+          mapping?.reviewed_by,
+        );
       } catch (e) {
         console.warn("Could not fetch reviewer name:", e);
       }

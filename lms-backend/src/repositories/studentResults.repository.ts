@@ -1,5 +1,8 @@
 import { QueryTypes } from "sequelize";
-import { externalDB, sequelize } from "../config/database";
+import { sequelize } from "../config/database";
+import { StudentRepository } from "../modules/students/student.repository";
+
+const studentRepository = new StudentRepository();
 
 export class StudentResultsRepository {
   async getResultsByUserId(
@@ -154,84 +157,8 @@ END AS achieved_marks,
   }
 
   async getStudentName(user_id: string, client_id: string): Promise<{ name: string; location: string; role: string }> {
-    const hasRoleCol = (
-      await externalDB.query(
-        `SELECT 1 FROM information_schema.columns
-         WHERE table_name = 'addmissions'
-           AND column_name = 'role'
-           AND table_schema = current_schema()`,
-        { type: QueryTypes.SELECT },
-      )
-    ).length > 0;
-    const hasCityCol = (
-      await externalDB.query(
-        `SELECT 1 FROM information_schema.columns
-         WHERE table_name = 'addmissions'
-           AND column_name = 'city'
-           AND table_schema = current_schema()`,
-        { type: QueryTypes.SELECT },
-      )
-    ).length > 0;
-    const hasLocationCol = (
-      await externalDB.query(
-        `SELECT 1 FROM information_schema.columns
-         WHERE table_name = 'addmissions'
-           AND column_name = 'location'
-           AND table_schema = current_schema()`,
-        { type: QueryTypes.SELECT },
-      )
-    ).length > 0;
-    const hasStateCol = (
-      await externalDB.query(
-        `SELECT 1 FROM information_schema.columns
-         WHERE table_name = 'addmissions'
-           AND column_name = 'state'
-           AND table_schema = current_schema()`,
-        { type: QueryTypes.SELECT },
-      )
-    ).length > 0;
-
-    let selectCols = [`first_name`, `middle_name`, `last_name`];
-    if (hasCityCol) selectCols.push(`city`);
-    if (hasLocationCol) selectCols.push(`location`);
-    if (hasStateCol) selectCols.push(`state`);
-    if (hasRoleCol) selectCols.push(`role`);
-
-    const studentNameQuery = `
-      SELECT ${selectCols.join(", ")}
-      FROM addmissions
-      WHERE user_id = :user_id AND client_id = :client_id
-      LIMIT 1;
-    `;
-    const [studentResult]: any[] = await externalDB.query(studentNameQuery, {
-      replacements: { user_id, client_id },
-      type: QueryTypes.SELECT,
-    });
-
-    const name = studentResult
-      ? [
-        studentResult.first_name,
-        studentResult.middle_name,
-        studentResult.last_name,
-      ]
-        .filter(Boolean)
-        .join(" ")
-      : "";
-
-    let location = "";
-    let role = "";
-    if (studentResult) {
-      if (hasCityCol && studentResult.city) location = studentResult.city;
-      if (!location && hasLocationCol && studentResult.location)
-        location = studentResult.location;
-      if (!location && hasStateCol && studentResult.state)
-        location = studentResult.state;
-      if (hasRoleCol && studentResult.role) {
-        role = studentResult.role;
-      }
-    }
-
-    return { name, location, role };
+    const name = await studentRepository.getStudentDisplayName(client_id, user_id);
+    return { name, location: "", role: "" };
   }
 
   async getStudentNamesBulk(
@@ -240,22 +167,6 @@ END AS achieved_marks,
   ): Promise<Record<string, string>> {
     if (!user_ids.length) return {};
 
-    const studentNamesQuery = `
-      SELECT user_id, first_name, middle_name, last_name
-      FROM addmissions
-      WHERE user_id IN (:user_ids) AND client_id = :client_id;
-    `;
-    const results: any[] = await externalDB.query(studentNamesQuery, {
-      replacements: { user_ids, client_id },
-      type: QueryTypes.SELECT,
-    });
-
-    const nameMap: Record<string, string> = {};
-    results.forEach((row) => {
-      nameMap[row.user_id] = [row.first_name, row.middle_name, row.last_name]
-        .filter(Boolean)
-        .join(" ");
-    });
-    return nameMap;
+    return studentRepository.getStudentNamesByUserIds(client_id, user_ids);
   }
 }

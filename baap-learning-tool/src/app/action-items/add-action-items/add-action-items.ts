@@ -81,10 +81,10 @@ export class AddActionItems implements OnInit {
 
   Reviewers() {
     this.commonhttp
-      .getUser(`/auth/api/users/client/${this.client_Id}/users?status=active`)
+      .getLocalUserMe()
       .subscribe({
         next: (res: any) => {
-          const users = res?.data ?? [];
+          const users = [res?.data].filter(Boolean);
           this.reviewIds = users
             ?.filter((u: any) => this.isTutorUser(u))
             ?.map((u: any) => ({
@@ -97,6 +97,9 @@ export class AddActionItems implements OnInit {
   }
 
   private isTutorUser(user: any): boolean {
+    if (['teacher', 'tutor', 'organization_admin', 'owner'].includes(user?.role)) {
+      return true;
+    }
     return (user?.user_mappings ?? [])?.some(
       (m: any) => m?.role?.name?.toLowerCase() === 'tutor',
     );

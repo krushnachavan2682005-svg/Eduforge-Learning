@@ -1,5 +1,4 @@
 export const environment = {
-  ERP_BASE_URL: 'https://platform-development-dev.157.20.214.214.nip.io',
   LOCAL_API_BASE_URL: 'http://localhost:3000',
   AUTH_BASE_URL: 'http://localhost:3000/auth',
   LMS_BASE_URL: 'http://localhost:3000/lms/v1/api',
