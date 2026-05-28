@@ -1,0 +1,17 @@
+type: object
+required:
+  - status
+  - message
+  - code
+properties:
+  status:
+    type: integer
+    description: Numeric error code (e.g., 409)
+    minimum: 100
+    maximum: 599
+  message:
+    type: string
+    description: Human-readable error message (e.g., "Invalid Email")
+  code: 
+    type: string
+    description: Machine-readable error code (e.g., AI_TIMEOUT)

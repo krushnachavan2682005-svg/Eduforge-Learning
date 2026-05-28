@@ -1,0 +1,9 @@
+openapi: 3.0.3
+info: 
+  title: The Ai Infrastructure Development
+  version: 1.0.0
+paths:
+   /assignments/{courseId}/submit:
+       $ref: ./modules/submission/submission.operation.yaml
+   /exams/{courseId}/status:
+       $ref: ./modules/ai evaluation/ai.evaluation.operation.yaml
