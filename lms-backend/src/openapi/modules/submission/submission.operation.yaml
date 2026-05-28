@@ -1,0 +1,69 @@
+post:
+  summary: The Submission of the course
+  parameters: 
+    - $ref: '../../parameters/path.parameters.yaml'
+
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - assignmentId
+            - answers
+          properties:
+            assignmentId:
+              type: string
+              format: uuid
+              description: The Id of assignment being submitted eg
+            answers:
+              type: array
+              description: It is the Array of the answers 
+              uniqueItems: true
+              minItems: 1
+              items:
+                type: object
+                required:
+                  - questionId
+                  - answerText
+                properties:
+                  questionId:
+                    type: string
+                    format: uuid
+                    nullable: false 
+                    description: The Id of particular Question eg:(id:3b241101-e2bb-4255-8caf-4136c566a962).
+                  answerText:
+                    type: string
+                    nullable: false 
+                    minLength: 1
+
+  responses:
+    '202':
+      description: Assignment Submitted Successfully
+      content: 
+        application/json:
+          schema:
+            type: object
+            properties:
+              submissionId:
+                type: string
+              operationId:
+                type: string
+              status:
+                type: string
+                enum: [QUEUED]
+
+    '404':
+      description: Course not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../shared/error.yaml'
+    '401':
+      description: Unauthorised Access
+      content:
+        application/json:
+          schema:
+            $ref: '../../shared/error.yaml'
+    

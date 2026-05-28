@@ -1,0 +1,33 @@
+type: object
+required:
+- assignmentId
+- answers
+properties:
+
+  assignmentId:
+      type: string
+      format: uuid
+      description: The Id of assignment being submitted eg:(id:3b241101-e2bb-4255-8caf-4136c566a962).
+  answers:
+      type: array
+      description: It is the Array of the answers 
+      uniqueItems: true
+      minItems: 1
+      items:
+         type: object
+         required:
+         - questionId
+         - answerText
+         properties:
+            questionId:
+               type: string
+               format: uuid
+               nullable: false 
+               description: The Id of perticular Question eg:(id:3b241101-e2bb-4255-8caf-4136c566a962).
+            answerText:
+               type: string
+               nullable: false 
+               minLength: 1
+   
+
+      

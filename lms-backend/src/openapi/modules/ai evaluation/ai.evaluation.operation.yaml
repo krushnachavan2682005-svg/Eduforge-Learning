@@ -1,0 +1,45 @@
+get:
+  summary: The status of the Exam
+  parameters:
+    $ref: '../../parameters/ai.evaluation.parameter.yaml'
+  responses:
+    '200':
+      description: Assignment Operation Fetched Successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              studentId:
+                type: string
+                format: uuid
+              courseId:
+                type: string
+                format: uuid
+              submissionId:
+                type: string
+              status:
+                type: string
+                enum: [PENDING,PROCESSING,COMPLETED,FAILED,PARTIAL_FAILURE,TIMED_OUT]
+                description: Current stage status
+              result:
+                type: object
+                properties:
+                  totalMarks:
+                    type: number
+                    description: Total Marks of Assignement
+                  obtainedMarks:
+                    type: number
+                    description: Total Marks Obtained
+              failure:
+                type: array
+                description: It includes the error when any problem happen
+                  
+    '404':
+      description: Assignment Not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../shared/error.yaml'
+    
+    

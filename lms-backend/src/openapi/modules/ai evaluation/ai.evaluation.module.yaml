@@ -1,0 +1,36 @@
+type: object
+required:
+- operationId
+- submissionId
+properties:
+  operationId:
+    type: string
+    format: uuid
+    description: The operation Id
+    
+  submissionId:
+    type: string
+    format: uuid
+    description: The submissionId
+
+  status:
+    type: string
+    enum: [PENDING,PROCESSING,COMPLETED,FAILED,PARTIAL_FAILURE,TIMED_OUT]
+    description: The current stage of the evaluation
+    minItems: 1
+
+  retryCount:
+    type: integer
+    description: The count of re-trying in integer
+  createdAt:
+    type: string
+    format: date-time
+    description: The date of creation record
+  startedAt:
+    type: string 
+    format: date-time
+    description: The date and time at which the evaluatuing started
+  completedAt:
+    type: string
+    format: date-time
+    description: The date and time at which the evaluation complete

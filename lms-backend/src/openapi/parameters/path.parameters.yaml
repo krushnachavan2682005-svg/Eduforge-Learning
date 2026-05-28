@@ -1,0 +1,27 @@
+parameters:
+- name: idempotencyKey
+  in: header
+  required: true
+  nullable: false
+  schema:
+    type: string
+    format: uuid
+    nullable: false
+
+  
+- name: courseId
+  in: path
+  required: true
+  nullable: false
+  schema:
+    type: string
+    format: uuid
+    nullable: false
+  
+- name: authorisation //consist the studentId in token
+  in: header
+  required: true
+  schema:
+    type: string
+    description: The authorisation token 
+    nullable: false
