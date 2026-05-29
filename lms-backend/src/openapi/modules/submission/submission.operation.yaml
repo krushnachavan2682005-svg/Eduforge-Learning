@@ -12,11 +12,17 @@ post:
           required:
             - assignmentId
             - answers
+            - hashValidation
           properties:
             assignmentId:
               type: string
               format: uuid
               description: The Id of assignment being submitted eg
+            hashValidation:
+              type: string
+              format: base64
+              description: If double request comes and body mismatch then throw Error
+              nullable: false
             answers:
               type: array
               description: It is the Array of the answers 
@@ -44,15 +50,7 @@ post:
       content: 
         application/json:
           schema:
-            type: object
-            properties:
-              submissionId:
-                type: string
-              operationId:
-                type: string
-              status:
-                type: string
-                enum: [QUEUED]
+            $ref: '../../event/submission.created.event.yaml'
 
     '404':
       description: Course not found
@@ -66,4 +64,10 @@ post:
         application/json:
           schema:
             $ref: '../../shared/error.yaml'
-    
+    '409':
+      description: Conflict Error
+      content:
+        application/json:
+          schema:
+            $ref: '../../shared/error.yaml'
+

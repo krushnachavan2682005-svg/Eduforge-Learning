@@ -1,0 +1,26 @@
+type: object
+required:
+  - answers
+  - version
+properties:
+
+  answers:
+    type: object
+    required:
+      - questionId
+      - answer
+    properties:
+      questionId:
+        type: string
+        format: uuid
+        description: The Unique Question Id (e.g. id:3b241101-e2bb-4255-8caf-4136c566a962)
+        nullable: false
+      answer:
+        type: string
+        description: The answer text for that particular questionId
+        nullable: false
+
+  version:
+    type: string
+    description: The Version Number
+    nullable: false

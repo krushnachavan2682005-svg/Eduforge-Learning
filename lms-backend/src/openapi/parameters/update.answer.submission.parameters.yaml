@@ -1,0 +1,22 @@
+  - name: courseId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+      description: The Unique Id of the assignment
+
+  - name: idempotencyKey
+    in: header
+    required: true
+    schema:
+      type: string
+      format: uuid
+      description: The Unique Idempotency key
+
+  - name: authorization
+    in: header
+    required: true
+    schema:
+      type: string
+      description: The authorization token

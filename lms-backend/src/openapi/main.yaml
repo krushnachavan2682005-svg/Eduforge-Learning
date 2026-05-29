@@ -7,3 +7,12 @@ paths:
        $ref: ./modules/submission/submission.operation.yaml
    /exams/{courseId}/status:
        $ref: ./modules/ai evaluation/ai.evaluation.operation.yaml
+   /exams/{courseId}/status/update:
+       $ref: ./modules/submission/update.answer.operation.yaml
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter JWT token to access protected LMS endpoints.
