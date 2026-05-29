@@ -1,0 +1,26 @@
+components:
+  schemas:
+    SubmissionCreatedEvent:
+      type: object
+      required:
+        - eventName
+        - submissionId
+        - assignmentId
+        - studentId
+        - timestamp
+      properties:
+        eventName:
+          type: string
+          enum: [SubmissionCreated]
+        submissionId:
+          type: string
+          format: uuid
+        assignmentId:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time

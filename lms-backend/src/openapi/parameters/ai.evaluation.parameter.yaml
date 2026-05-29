@@ -5,3 +5,8 @@ parameters:
   format: uuid
   nullable: false
   
+- idempotencyKey:
+  in: header
+  type: string
+  format: uuid
+  nullable: false

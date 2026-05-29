@@ -1,0 +1,50 @@
+patch:
+  summary: Updating the answers
+  parameters:
+    - $ref: '../../parameters/update.answer.submission.parameters.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - answers
+            - version
+          properties:
+      
+            status:
+              type: string
+              enum: [DRAFT, SUBMITTED, QUEUED, EVALUATING, EVALUATED, PARTIALLY_EVALUATED, FAILED, TIMED_OUT]
+              description: Updates allowed only when status is Draft or Submitted
+            answers:
+              type: object
+              required:
+                - questionId
+                - answer
+              properties:
+                questionId:
+                  type: string
+                  format: uuid
+                  description: The Unique Question Id
+                answer:
+                  type: string
+                  description: The answer text for that particular questionId
+            version:
+              type: string
+              description: The Version Number
+  responses:
+    '202':
+      description: Answer Updated Successfully
+    '404':
+      description: Question Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '../../shared/error.yaml'
+    '409':
+      description: Conflict Error
+      content:
+        application/json:
+          schema:
+            $ref: '../../shared/error.yaml'

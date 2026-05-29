@@ -34,6 +34,23 @@ get:
               failure:
                 type: array
                 description: It includes the error when any problem happen
+                items:
+                  type: object
+                  required:
+                    stage
+                    error
+                    retryable
+                  properties:
+                    stage:
+                      type: string
+                    error:
+                      type: string
+                    retryable:
+                      type: boolean
+                      
+                  
+                  
+
                   
     '404':
       description: Assignment Not found
@@ -41,5 +58,6 @@ get:
         application/json:
           schema:
             $ref: '../../shared/error.yaml'
+    
     
     
