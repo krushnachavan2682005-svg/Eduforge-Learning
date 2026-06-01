@@ -23,6 +23,7 @@ import { HttpEventType } from '@angular/common/http';
 import { StorageService } from '../../services/storage-service';
 import { STORAGEENUMS } from '../../shared/enum';
 import { ActivatedRoute, Router } from '@angular/router';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-add-courses',
@@ -64,6 +65,7 @@ export class AddCourses implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private userService = inject(UserLocalService);
   private CommonHttpService = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
 
   constructor() {
     this.courseForm = this?.fb?.group({
@@ -359,8 +361,8 @@ export class AddCourses implements OnInit {
         this.editCourseId = null;
         this.editCourseData = null;
 
-        if (this.router?.url?.includes('/courses/add-courses')) {
-          this.router?.navigate(['/courses']);
+        if (this.isStandaloneCreateRoute()) {
+          this.router?.navigate([this.workspaceNav.getCourseListRoute()]);
         }
       },
       error: (error) => {
@@ -445,13 +447,13 @@ export class AddCourses implements OnInit {
     this.showModal = false;
     this.isSidebarOpen = false;
 
-    if (this.router.url.includes('/courses/add-courses')) {
-      this.router.navigate(['/courses']);
+    if (this.isStandaloneCreateRoute()) {
+      this.router.navigate([this.workspaceNav.getCourseListRoute()]);
     }
   }
 
   goBackToCourses() {
-    this.router?.navigate(['/courses']);
+    this.router?.navigate([this.workspaceNav.getCourseListRoute()]);
   }
   onTitleInput(event: Event): void {
     const input = event?.target as HTMLInputElement;
@@ -485,5 +487,12 @@ export class AddCourses implements OnInit {
       return parts[1];
     }
     return parts.pop() || '';
+  }
+
+  private isStandaloneCreateRoute() {
+    return (
+      this.router.url.includes('/courses/add-courses') ||
+      this.router.url.includes('/teacher/courses/create')
+    );
   }
 }

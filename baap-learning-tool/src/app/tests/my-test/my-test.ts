@@ -12,6 +12,7 @@ import { Modal } from '../../modal/modal';
 import { Tooltip } from '../../shared/tooltip';
 import { PermissionDirective } from '../../services/permission-directive';
 import { PaginationComponent } from '../../pagination/pagination';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-my-test',
@@ -53,6 +54,7 @@ export class MyTest {
   private toastr = inject(ToastrService);
   private route = inject(ActivatedRoute);
   private http = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   public skeletonService = inject(SkeletonTheme);
 
   headers = [
@@ -86,6 +88,7 @@ export class MyTest {
           const data =
             items.map((test: any) => ({
               ...test,
+              availability_status: this.getAvailabilityStatus(test),
               isCollapsed: true,
             })) || [];
 
@@ -164,18 +167,7 @@ export class MyTest {
   }
 
 isStartAllowed(test: any): boolean {
-  if (!test?.exam_date || !this.getExamTime(test)) return false;
-  const date = new Date(test.exam_date);
-  const time = this.getExamTime(test);
-  const [timePart, modifier] = time.split(' ');
-  let [hours, minutes] = timePart.split(':').map(Number);
-  if (modifier === 'PM' && hours !== 12) hours += 12;
-  if (modifier === 'AM' && hours === 12) hours = 0;
-  date.setHours(hours, minutes, 0, 0);
-  const examTime = date.getTime();
-  const now = new Date().getTime();
-  const fiveMinBefore = examTime - (5 * 60 * 1000);
-  return now >= fiveMinBefore;
+  return this.getAvailabilityStatus(test) === 'available';
 }
 
   closeAddCourseModal() {
@@ -187,11 +179,10 @@ isStartAllowed(test: any): boolean {
   }
 
   ReviewExam(examId: string) {
-    this.router?.navigate(['/tests/reviewer', examId]);
+    this.router?.navigate([this.workspaceNav.getReviewerRoute(examId)]);
   }
   startExam(examId: string) {
-    this.markExamStarted(examId);
-    this.router?.navigate(['/tests/start-exam', examId]);
+    this.router?.navigate([this.workspaceNav.getTestStartRoute(examId)]);
   }
 
   isStarted(test: any): boolean {
@@ -236,30 +227,11 @@ isStartAllowed(test: any): boolean {
   }
 
   canStartExam(test: any): boolean {
-    if (!test?.exam_date || !test?.exam_start_time) return false;
-
-    const time = test.exam_start_time?.toString();
-    const date = new Date(test.exam_date)?.toISOString()?.split('T')[0];
-    const scheduled = new Date(time.includes('T') ? time : `${date}T${time}`);
-
-    return !isNaN(scheduled.getTime()) && new Date() >= scheduled;
+    return this.getAvailabilityStatus(test) === 'available';
   }
 
   isExamExpired(test: any): boolean {
-    if (!test?.exam_date) return false;
-    const examDate = new Date(test?.exam_date);
-    const today = new Date();
-    const examDateOnly = new Date(
-      examDate?.getFullYear(),
-      examDate?.getMonth(),
-      examDate?.getDate(),
-    );
-    const todayOnly = new Date(
-      today?.getFullYear(),
-      today?.getMonth(),
-      today?.getDate(),
-    );
-    return examDateOnly?.getTime() < todayOnly?.getTime();
+    return this.getAvailabilityStatus(test) === 'expired';
   }
 
   getExamTime(test: any): string {
@@ -282,6 +254,56 @@ isStartAllowed(test: any): boolean {
   }
 
   goToRechack(examId: string) {
-    this.router?.navigate(['/tests/student-review-test', examId]);
+    this.router?.navigate([this.workspaceNav.getStudentReviewRoute(examId)]);
+  }
+
+  getAvailabilityStatus(test: any): 'submitted' | 'expired' | 'not_started' | 'available' {
+    if (test?.is_completed === true || test?.availability_status === 'submitted') return 'submitted';
+    if (test?.availability_status === 'expired') return 'expired';
+    if (test?.availability_status === 'not_started') return 'not_started';
+    if (test?.availability_status === 'available') return 'available';
+
+    const startAt = this.parseStartAt(test);
+    const endAt = this.parseEndAt(test, startAt);
+    const now = new Date();
+    if (startAt && now < startAt) return 'not_started';
+    if (endAt && now > endAt) return 'expired';
+    return startAt ? 'available' : 'not_started';
+  }
+
+  getAvailabilityLabel(test: any): string {
+    const status = this.getAvailabilityStatus(test);
+    if (status === 'submitted') return 'Submitted';
+    if (status === 'expired') return 'Expired';
+    if (status === 'not_started') return `Starts ${this.getScheduleDisplay(test)}`;
+    return 'Available';
+  }
+
+  getScheduleDisplay(test: any): string {
+    const startAt = this.parseStartAt(test);
+    return startAt ? startAt.toLocaleString() : 'soon';
+  }
+
+  private parseStartAt(test: any): Date | null {
+    const raw = test?.start_time || test?.exam_start_time;
+    if (!raw) return null;
+    const direct = new Date(raw);
+    if (!isNaN(direct.getTime())) return direct;
+    if (test?.exam_date) {
+      const date = new Date(test.exam_date).toISOString().split('T')[0];
+      const combined = new Date(`${date}T${raw}`);
+      if (!isNaN(combined.getTime())) return combined;
+    }
+    return null;
+  }
+
+  private parseEndAt(test: any, startAt: Date | null): Date | null {
+    if (test?.end_time) {
+      const end = new Date(test.end_time);
+      if (!isNaN(end.getTime())) return end;
+    }
+    const duration = Number(test?.duration_minutes) || 0;
+    if (!startAt || duration <= 0) return null;
+    return new Date(startAt.getTime() + duration * 60 * 1000);
   }
 }

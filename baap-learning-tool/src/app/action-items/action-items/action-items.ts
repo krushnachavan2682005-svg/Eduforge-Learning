@@ -19,6 +19,7 @@ import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { AssignActionItems } from '../assign-action-items/assign-action-items';
 import { SafeUrlPipe } from '../../my-learning/student-view/student-view';
 import { PaginationComponent } from '../../pagination/pagination';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-action-items',
@@ -76,6 +77,7 @@ export class ActionItems {
   private cdr = inject(ChangeDetectorRef);
   public skeletonService = inject(SkeletonTheme);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   public sidebarService = inject(SidebarService);
 
   ngOnInit() {
@@ -297,7 +299,7 @@ export class ActionItems {
     this.getAllActionItem();
   }
   goToAddNewTest() {
-    this.router?.navigate(['action-items/add-action-items']);
+    this.router?.navigate([this.workspaceNav.getActionItemCreateRoute()]);
   }
   getProgressPercentage(score: string | undefined): number {
     if (!score) return 0;

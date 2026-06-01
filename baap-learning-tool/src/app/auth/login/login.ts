@@ -60,7 +60,7 @@ export class Login implements OnInit {
     const noRedirect =
       this.route?.snapshot?.queryParamMap?.get('noRedirect') === '1';
     if (token && !this.isBackNavigation && !noRedirect) {
-      this.router?.navigate(['/dashboard']);
+      this.router?.navigate(['/']);
     } else {
       this.createForm();
       setTimeout(() => this.cd.detectChanges());
@@ -137,7 +137,7 @@ export class Login implements OnInit {
               timeOut: 2000,
               progressBar: true,
             });
-            this.router?.navigate(['/dashboard'])?.then(() => {});
+            this.router?.navigate(['/'])?.then(() => {});
           },
           error: (error) => {
             this.isLoading = false;

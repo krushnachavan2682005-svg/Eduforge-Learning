@@ -169,12 +169,16 @@ export interface IExamUserMapping {
 export interface IFinalAnswer {
   question_id: string;
   question_type: "mcq" | "short" | "long" | "practical";
+  question_text?: string;
+  options?: any;
+  is_mandatory?: boolean;
   user_answer: string;
   is_correct: boolean;
   marks_obtained: number;
   correct_answer?: string;
   question_marks: number;
   reviewer_comment?: string;
+  snapshot_passing_marks?: number;
 }
 
 // ===========================================================

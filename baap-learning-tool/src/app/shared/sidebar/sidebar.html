@@ -1,9 +1,7 @@
-<div class="row h-screen">
-  <div class="col-12 col-md-3 h-full">
-    <div
-      class="sidebar theme-bg-secondary theme-text-secondary sidebar-text-white sidebar-bg-black flex flex-col h-full"
-      [class.collapsed]="isCollapsed"
-    >
+<div
+  class="sidebar theme-bg-secondary theme-text-secondary sidebar-text-white sidebar-bg-black flex flex-col h-full"
+  [class.collapsed]="isCollapsed"
+>
       @if (!isCollapsed) {
         <div class="pl-6 pt-3 flex gap-3 items-center shrink-0">
           <div
@@ -184,14 +182,13 @@
           }
         </div>
       </div>
-    </div>
-    @if (!sidebarConfig) {
-      <div class="sidebar-loading">
-        <div class="loading-spinner"></div>
-      </div>
-    }
-  </div>
 </div>
+
+@if (!sidebarConfig) {
+  <div class="sidebar-loading">
+    <div class="loading-spinner"></div>
+  </div>
+}
 
 @if (showLogoutConfirm) {
   <div

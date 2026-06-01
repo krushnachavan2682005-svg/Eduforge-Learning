@@ -18,6 +18,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Calendar } from '../../shared/calendar/calendar';
 import { CalendarService } from '../../services/calender-service';
 import { Tooltip } from '../../shared/tooltip';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-add-new-test',
@@ -133,6 +134,7 @@ export class AddNewTest {
     private route: ActivatedRoute,
     private commonservice: CommonHttpService,
     private calService: CalendarService,
+    private workspaceNav: WorkspaceNavigationService,
   ) {}
 
   ngOnInit() {
@@ -859,7 +861,7 @@ export class AddNewTest {
         undefined,
         this.toastOptions,
       );
-      this.router?.navigate(['/tests/test']);
+      this.router?.navigate([this.workspaceNav.getTestListRoute()]);
     });
   }
 
@@ -924,7 +926,7 @@ export class AddNewTest {
   }
 
   goBack() {
-    this.router?.navigate(['/tests/test']);
+    this.router?.navigate([this.workspaceNav.getTestListRoute()]);
   }
 
   editTestDetails() {

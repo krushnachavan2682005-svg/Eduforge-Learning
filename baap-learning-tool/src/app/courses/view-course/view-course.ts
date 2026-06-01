@@ -6,6 +6,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { STORAGEENUMS } from '../../shared/enum';
 import { StorageService } from '../../services/storage-service';
 import { AddLesson } from "../add-lesson/add-lesson";
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-view-course',
@@ -29,6 +30,7 @@ export class ViewCourse {
   private route = inject(ActivatedRoute);
   private sanitizer = inject(DomSanitizer);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   private getListQueryParams() {
     const qp = this.route?.snapshot?.queryParamMap;
     const page = qp?.get('page');
@@ -79,14 +81,14 @@ export class ViewCourse {
   goToLessonsByCourseId() {
     const id = this.course()?.id;
     if (id) {
-      this.router.navigate(['/courses/lessons', id], {
+      this.router.navigate([this.workspaceNav.getCourseViewSectionRoute(id)], {
         queryParams: { courseId: id },
       });
     }
   }
 
   goToBack() {
-    this.router.navigate(['/courses'], {
+    this.router.navigate([this.workspaceNav.getCourseListRoute()], {
       queryParams: this.getListQueryParams(),
     });
   }
@@ -96,7 +98,7 @@ export class ViewCourse {
   }
 
   goToCoursesList() {
-    this.router?.navigate(['/courses'], {
+    this.router?.navigate([this.workspaceNav.getCourseListRoute()], {
       queryParams: this.getListQueryParams(),
     });
   }

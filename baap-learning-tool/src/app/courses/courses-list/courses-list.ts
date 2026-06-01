@@ -13,6 +13,7 @@ import { SkeletonTheme } from '../../services/skeleton-theme';
 import { AssginCourse } from '../assgin-course/assgin-course';
 import { HeaderComponent } from "../../shared/header.component";
 import { SidebarService } from '../../services/sidebar.service';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 import { PaginationComponent } from '../../pagination/pagination';
 
@@ -49,6 +50,7 @@ export class CoursesList {
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   public skeletonService = inject(SkeletonTheme);
   private toastr = inject(ToastrService);
   public sidebarService = inject(SidebarService);
@@ -88,7 +90,7 @@ export class CoursesList {
 
   goToViewCourse(course: any) {
     if (course?.id) {
-      this.router?.navigate(['/courses/view-course', course?.id], {
+      this.router?.navigate([this.workspaceNav.getCourseDetailRoute(course?.id)], {
         queryParams: { page: this.currentPage, limit: this.pageSize },
       });
     }
@@ -103,7 +105,7 @@ export class CoursesList {
         this.addCoursesComponent?.startEdit(course?.id);
       } else {
         // Fallback to routing if child component reference is not available
-        this.router?.navigate(['/courses/add-courses'], {
+        this.router?.navigate([this.workspaceNav.getCourseCreateRoute()], {
           queryParams: { edit: course.id },
         });
       }

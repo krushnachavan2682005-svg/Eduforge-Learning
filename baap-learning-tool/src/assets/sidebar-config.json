@@ -12,6 +12,15 @@
       "permissions": "LMS_R"
     },
     {
+      "id": "members",
+      "label": "Members",
+      "icon": "group",
+      "route": "/admin/members",
+      "active": false,
+      "hide": false,
+      "permissions": "MEMBER_VIEW"
+    },
+    {
       "id": "my-learning",
       "label": "My Learning",
       "icon": "book",

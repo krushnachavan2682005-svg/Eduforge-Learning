@@ -15,6 +15,7 @@ import {
 } from "../interfaces/exam.interface";
 import {
   ExamAssignment,
+  ExamUserMapping,
   ExamSession,
   ExamUserMappingPublic,
   Question,
@@ -32,12 +33,23 @@ export class ExamController {
         exam_start_time: string;
       };
       const { client_id } = req.params as { client_id: string };
+      const organizationId = req.user?.organization_id || client_id;
+
+      if (client_id && organizationId && client_id !== organizationId) {
+        return reply.code(403).send({
+          success: false,
+          message: "Cross-organization access is forbidden",
+        });
+      }
 
       const examData = { ...body, client_id } as IExamCreateRequest & {
         client_id: string;
         created_by: string;
         updated_by: string;
       };
+      examData.client_id = organizationId;
+      examData.created_by = req.user?.sub || body.created_by;
+      examData.updated_by = req.user?.sub || body.updated_by || body.created_by;
 
       const createdExam = await repository.createFullExam(examData);
 
@@ -127,11 +139,22 @@ export class ExamController {
   async updateExam(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { client_id, id } = req.params as { client_id: string; id: string };
+      const organizationId = req.user?.organization_id || client_id;
+      if (client_id && organizationId && client_id !== organizationId) {
+        return reply.code(403).send({
+          success: false,
+          message: "Cross-organization access is forbidden",
+        });
+      }
       const body = req.body as IExamUpdate & {
         updated_by: string;
         exam_start_time?: string;
       };
-      const updated = await repository.updateExam(id, { ...body, client_id });
+      const updated = await repository.updateExam(id, {
+        ...body,
+        client_id: organizationId,
+        updated_by: req.user?.sub || body.updated_by,
+      });
       return reply.send({
         success: true,
         data: updated,
@@ -165,20 +188,84 @@ export class ExamController {
         user_id: string;
         exam_id: string;
       };
+      const organizationId = req.user?.organization_id || client_id;
+      if (!req.user) {
+        return reply.code(401).send({ success: false, message: "Authentication required" });
+      }
+      if (client_id && client_id !== organizationId) {
+        return reply.code(403).send({
+          success: false,
+          message: "Cross-organization access is forbidden",
+        });
+      }
+      if (req.user.sub !== user_id) {
+        return reply.code(403).send({
+          success: false,
+          message: "Students can only start their own assigned tests.",
+        });
+      }
       if (!user_id || !exam_id)
         throw new ValidationError("User ID and Exam ID are required in route parameters");
 
-      // Verify that the exam is assigned to the user
       const assignment = await ExamAssignment.findOne({
         where: {
-          exam_id: exam_id,
-          user_id: user_id,
+          exam_id,
+          user_id,
+          client_id: organizationId,
         },
       });
-      if (!assignment)
-        throw new ForbiddenError("Access denied. This exam is not assigned to the user.");
+      if (!assignment) {
+        return this.examRuleError(reply, 403, "TEST_NOT_ASSIGNED", "This test is not assigned to you.");
+      }
+
+      const submitted = await ExamUserMapping.findOne({
+        where: { exam_id, user_id, client_id: organizationId, is_completed: true },
+      });
+      if (submitted) {
+        return this.examRuleError(reply, 409, "TEST_ALREADY_SUBMITTED", "You have already submitted this test.");
+      }
+
+      const activeSession = await ExamSession.findOne({
+        where: { exam_id, user_id, client_id: organizationId, is_completed: false },
+      });
+      if (activeSession) {
+        let snapshot = repository.getSessionSnapshot(activeSession);
+        if (!snapshot) {
+          const legacyExam = await repository.getExamById(exam_id);
+          snapshot = repository.getSessionSnapshot(activeSession, legacyExam);
+        }
+        const safeExam = repository.toStudentExamSnapshot(snapshot);
+        const safeQuestions = safeExam.questions || [];
+        const response = {
+          session_id: activeSession.id!,
+          current_question_index: activeSession.current_question_index,
+          total_questions: safeQuestions.length,
+          current_question: safeQuestions[activeSession.current_question_index],
+          exam_details: safeExam,
+          saved_answers: repository.getSessionAnswers(activeSession),
+        };
+
+        return reply.send({
+          success: true,
+          data: response,
+          message: "Exam session resumed successfully",
+        });
+      }
 
       const exam = await repository.getExamById(exam_id);
+      if ((exam as any).client_id && (exam as any).client_id !== organizationId) {
+        return reply.code(404).send({ success: false, message: "Exam not found" });
+      }
+      const startAt = this.getExamStartAt(exam as any);
+      const endAt = this.getExamEndAt(exam as any);
+      const now = new Date();
+      if (startAt && now < startAt) {
+        return this.examRuleError(reply, 409, "TEST_NOT_STARTED", "This test has not started yet.");
+      }
+      if (endAt && now > endAt) {
+        return this.examRuleError(reply, 409, "TEST_EXPIRED", "This test has expired.");
+      }
+
       const questions = (exam as any).questions || [];
       if (questions.length === 0)
         throw new ValidationError("Exam has no questions");
@@ -186,19 +273,22 @@ export class ExamController {
       const session = await repository.startExamSession({
         exam_id,
         user_id,
-        client_id,
+        client_id: organizationId,
         current_question_index: 0,
         reviewers: (exam as any).reviewers || [],
       });
-      const currentQuestion = questions[session.current_question_index];
+      const snapshot = repository.getSessionSnapshot(session, exam);
+      const safeExam = repository.toStudentExamSnapshot(snapshot);
+      const safeQuestions = safeExam.questions || [];
+      const currentQuestion = safeQuestions[session.current_question_index];
 
       const response = {
         session_id: session.id!,
         current_question_index: session.current_question_index,
-        total_questions: questions.length,
+        total_questions: safeQuestions.length,
         current_question: currentQuestion,
-        exam_details: exam,
-        saved_answers: session?.answers_data || [],
+        exam_details: safeExam,
+        saved_answers: repository.getSessionAnswers(session),
       };
 
       return reply.send({
@@ -208,7 +298,11 @@ export class ExamController {
       });
     } catch (error) {
       req.log.error(error);
-      throw new InternalServerError("Failed to start exam");
+      return reply.code((error as any).statusCode || 500).send({
+        success: false,
+        error_code: (error as any).error_code || "TEST_START_FAILED",
+        message: (error as any).message || "Failed to start exam",
+      });
     }
   }
 
@@ -488,6 +582,14 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const params = req.params as { user_id: string };
       const user_id = params.user_id;
 
+      if (!req.user) return reply.code(401).send({ success: false, message: "Authentication required" });
+      if (req.user.sub !== user_id) {
+        return reply.code(403).send({
+          success: false,
+          message: "Students can only save answers for their own tests.",
+        });
+      }
+
       if (!user_id)
         throw new ValidationError("User ID is required in route parameters");
 
@@ -553,6 +655,14 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const body = req.body as ISubmitExamRequest;
       const params = req.params as { user_id: string };
       const user_id = params.user_id;
+
+      if (!req.user) return reply.code(401).send({ success: false, message: "Authentication required" });
+      if (req.user.sub !== user_id) {
+        return reply.code(403).send({
+          success: false,
+          message: "Students can only submit their own tests.",
+        });
+      }
 
       if (!body.session_id)
         throw new ValidationError("Session ID is required");
@@ -649,6 +759,13 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
   async assignExam(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { client_id } = req.params as { client_id: string };
+      const organizationId = req.user?.organization_id || client_id;
+      if (client_id && client_id !== organizationId) {
+        return reply.code(403).send({
+          success: false,
+          message: "Cross-organization access is forbidden",
+        });
+      }
 
       const { exam_id, user_id, class_id } = req.body as {
         exam_id: string[];
@@ -663,6 +780,9 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
 
         if (!exam) {
           throw new NotFoundError(`Exam with ID '${examId}' not found.`);
+        }
+        if ((exam as any).client_id && (exam as any).client_id !== organizationId) {
+          throw new ForbiddenError(`Exam with ID '${examId}' does not belong to this organization.`);
         }
 
         validExamIds.push(examId);
@@ -683,11 +803,11 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       for (const selectedClassId of classIds) {
         const classUserIds = await repository.getUsersByClassId(
           selectedClassId,
-          client_id,
+          organizationId,
         );
         const classDetails = await repository.getClassDetailsById(
           selectedClassId,
-          client_id,
+          organizationId,
         );
 
         finalUserIds.push(...classUserIds);
@@ -709,7 +829,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const assignments = await repository.assignExamToUsers(
         validExamIds,
         finalUserIds,
-        client_id,
+        organizationId,
         classInfo,
       );
 
@@ -732,6 +852,14 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
         page?: string;
         limit?: string;
       };
+
+      if (!req.user) return reply.code(401).send({ success: false, message: "Authentication required" });
+      if (req.user.sub !== user_id) {
+        return reply.code(403).send({
+          success: false,
+          message: "Students can only view their own assigned tests.",
+        });
+      }
 
       const pageNum = Number(page) > 0 ? Number(page) : 1;
       const limitNum = Number(limit) > 0 ? Number(limit) : 10;
@@ -897,6 +1025,13 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
 
       if (!user_id || !exam_id || !client_id)
         throw new ValidationError("User ID, Exam ID, and Client ID are required.");
+      if (!req.user) return reply.code(401).send({ success: false, message: "Authentication required" });
+      if (req.user.sub !== user_id) {
+        return reply.code(403).send({
+          success: false,
+          message: "Students can only view their own test review.",
+        });
+      }
 
       const review = await repository.getStudentExamReview(
         exam_id,
@@ -916,5 +1051,25 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const statusCode = message.includes("not found") ? 404 : 500;
       return reply.code(statusCode).send({ success: false, message });
     }
+  }
+
+  private examRuleError(reply: FastifyReply, statusCode: number, errorCode: string, message: string) {
+    return reply.code(statusCode).send({
+      success: false,
+      error_code: errorCode,
+      message,
+    });
+  }
+
+  private getExamStartAt(exam: any): Date | null {
+    const start = exam?.exam_start_time ? new Date(exam.exam_start_time) : null;
+    return start && !isNaN(start.getTime()) ? start : null;
+  }
+
+  private getExamEndAt(exam: any): Date | null {
+    const start = this.getExamStartAt(exam);
+    const duration = Number(exam?.duration_minutes) || 0;
+    if (!start || duration <= 0) return null;
+    return new Date(start.getTime() + duration * 60 * 1000);
   }
 }

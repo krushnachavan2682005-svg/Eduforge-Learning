@@ -7,6 +7,7 @@ import { STORAGEENUMS } from '../../shared/enum';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-reviewer',
@@ -32,6 +33,7 @@ export class Reviewer {
   private toastr = inject(ToastrService);
   private cdr = inject(ChangeDetectorRef);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
 
   reviewMarks = signal<number[]>([]);
   reviewIsCorrect = signal<boolean[]>([]);
@@ -162,7 +164,7 @@ export class Reviewer {
   }
 
   goBack() {
-    this.router?.navigate(['/tests/review-list']);
+    this.router?.navigate([this.workspaceNav.getReviewListRoute()]);
   }
   closePupUp() {
     this.cancelExam = false;

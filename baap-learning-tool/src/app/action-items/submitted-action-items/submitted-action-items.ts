@@ -12,6 +12,7 @@ import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
 import { CommonHttpService } from '../../services/common-http.service';
 import { PaginationComponent } from '../../pagination/pagination';
 import { Router } from '@angular/router';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-submitted-action-items',
@@ -45,6 +46,7 @@ export class SubmittedActionItems {
   private str = inject(StorageService);
   private toastr = inject(ToastrService);
   private http = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   public skeletonService = inject(SkeletonTheme);
   public sidebarService = inject(SidebarService);
 
@@ -129,7 +131,7 @@ export class SubmittedActionItems {
   }
 
   toggleItem(item: any) {
-    this.router.navigate(['/action-items/view-student-submissions', item.id], {
+    this.router.navigate([this.workspaceNav.getActionItemSubmissionsRoute(item.id)], {
       state: { assignment: item },
     });
   }

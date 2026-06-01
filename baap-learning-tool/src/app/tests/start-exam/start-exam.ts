@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Tooltip } from '../../shared/tooltip';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-start-exam',
@@ -34,6 +35,7 @@ export class StartExam {
   selectedOptions = signal<string[]>([]);
   answeredStatus = signal<boolean[]>([]);
   showTimeUpModal = signal<boolean>(false);
+  startError = signal<string>('');
 
   private countdown: any = null;
   private router = inject(Router);
@@ -42,12 +44,13 @@ export class StartExam {
   private toastr = inject(ToastrService);
   private cdr = inject(ChangeDetectorRef);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   private boundContextMenuHandler!: (e: MouseEvent) => void;
   private boundGlobalKeyHandler!: (e: KeyboardEvent) => void;
   private boundClipboardHandler!: (e: ClipboardEvent) => void;
 
   goBack() {
-    this.router?.navigate(['/tests/my-test']);
+    this.router?.navigate([this.workspaceNav.getTestListRoute()]);
   }
 
   ngOnInit() {
@@ -66,7 +69,9 @@ export class StartExam {
       .getCourse(
         `/client/${this.clientId}/exams/${this.examId}/start/${this.userId}`,
       )
-      .subscribe((response: any) => {
+      .subscribe({
+        next: (response: any) => {
+        this.startError.set('');
         this.session_id?.set(response?.data?.session_id || '');
         this.examData?.set(response?.data?.exam_details || {});
         this.questions?.set(this.examData()?.questions || []);
@@ -128,7 +133,23 @@ export class StartExam {
         } else {
           this?.startCountdown(totalSeconds);
         }
-      });
+      },
+      error: (error) => {
+        const code = error?.error?.error_code;
+        const message =
+          code === 'TEST_EXPIRED'
+            ? 'This test has expired.'
+            : code === 'TEST_NOT_STARTED'
+              ? 'This test has not started yet.'
+              : code === 'TEST_ALREADY_SUBMITTED'
+                ? 'You have already submitted this test.'
+                : code === 'TEST_NOT_ASSIGNED'
+                  ? 'This test is not assigned to you.'
+                  : error?.error?.message || 'Unable to start this test.';
+        this.startError.set(message);
+        this.toastr.error(message);
+      },
+    });
   }
 
   submitExam() {
@@ -275,7 +296,7 @@ export class StartExam {
   onTimeUpOk() {
     this.showTimeUpModal?.set(false);
 
-    this.router?.navigate(['/tests/test-result']);
+    this.router?.navigate([this.workspaceNav.getTestResultsRoute()]);
   }
   ngOnDestroy() {
     this.clearCountdown();
@@ -295,10 +316,10 @@ export class StartExam {
     }
   }
   copyPaste() {
-    document.addEventListener('cut', this.boundClipboardHandler);
     this.boundGlobalKeyHandler = this.globalKeyHandler.bind(this);
-    document.addEventListener('copy', this.boundClipboardHandler);
     this.boundClipboardHandler = this.onGlobalClipboard.bind(this);
+    document.addEventListener('cut', this.boundClipboardHandler);
+    document.addEventListener('copy', this.boundClipboardHandler);
     document.addEventListener('paste', this.boundClipboardHandler);
     document.addEventListener('keydown', this.boundGlobalKeyHandler);
     this.boundContextMenuHandler = this.onGlobalContextMenu.bind(this);

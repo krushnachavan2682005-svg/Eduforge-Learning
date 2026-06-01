@@ -54,8 +54,7 @@ export default async function examRoutes(fastify: FastifyInstance) {
   // Start a new exam session for an assigned user
   fastify.get(
     "/exams/:exam_id/start/:user_id",
-    // { schema: startExamSchema },
-    // { preHandler: verifyToken },
+    { schema: startExamSchema, preHandler: verifyToken },
     (req, reply) => Controller.startExam(req, reply),
   );
 
@@ -113,7 +112,7 @@ export default async function examRoutes(fastify: FastifyInstance) {
   // Get all exams assigned to a specific user
   fastify.get(
     "/assigned-exams/:user_id",
-    // { preHandler: verifyToken },
+    { preHandler: verifyToken },
     (req, reply) => Controller.getAssignedExams(req, reply),
   );
 

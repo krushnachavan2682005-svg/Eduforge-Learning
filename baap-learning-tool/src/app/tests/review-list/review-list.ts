@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { Tooltip } from '../../shared/tooltip';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../../pagination/pagination';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-review-list',
@@ -44,6 +45,7 @@ export class ReviewList {
   private toastr = inject(ToastrService);
   private route = inject(ActivatedRoute);
   private http = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   public skeletonService = inject(SkeletonTheme);
   headers = [
     {
@@ -129,7 +131,7 @@ export class ReviewList {
   }
 
   reviewExam(test: any) {
-    this.router?.navigate(['/tests/reviewer'], {
+    this.router?.navigate([this.workspaceNav.getReviewerRoute()], {
       queryParams: {
         examId: test?.exam_id,
         userId: test?.user_id,

@@ -3,7 +3,11 @@ import { sequelize } from "../../config/database";
 import { Organization } from "../organizations/organization.model";
 import { Student } from "./student.model";
 
-export type LocalEnrollmentStatus = "assigned" | "in_progress" | "completed";
+export type LocalEnrollmentStatus =
+  | "assigned"
+  | "in_progress"
+  | "completed"
+  | "cancelled";
 
 export interface LocalEnrollmentAttributes {
   id: string;
@@ -58,7 +62,7 @@ LocalEnrollment.init(
       references: { model: "courses", key: "id" },
     },
     status: {
-      type: DataTypes.ENUM("assigned", "in_progress", "completed"),
+      type: DataTypes.ENUM("assigned", "in_progress", "completed", "cancelled"),
       allowNull: false,
       defaultValue: "assigned",
     },

@@ -4,40 +4,18 @@ import {
   inject,
   ChangeDetectorRef,
   HostListener,
-  Signal,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { ThemeService, Theme } from '../../services/theme.service';
 import { StorageService } from '../../services/storage-service';
 import { STORAGEENUMS } from '../../shared/enum';
 import { CommonHttpService } from '../../services/common-http.service';
 import { PermissionDirective } from '../../services/permission-directive';
 import { Tooltip } from '../tooltip';
-interface MenuItem {
-  id: string;
-  label: string;
-  icon: string;
-  route?: string;
-  action?: string;
-  active: boolean;
-  hide?: boolean;
-  badge?: {
-    text: string;
-    class: string;
-  } | null;
-  permissions?: string;
-  subItems?: MenuItem[];
-}
-
-interface SidebarConfig {
-  title: string;
-  logo: string;
-  menuItems: MenuItem[];
-  footerItems: MenuItem[];
-}
+import { NavigationService } from '../../core/navigation/navigation.service';
+import { NavConfig, NavItem } from '../../core/navigation/navigation.types';
 
 @Component({
   selector: 'app-sidebar',
@@ -62,14 +40,14 @@ export class Sidebar implements OnInit {
   showLogoutConfirm: boolean = false;
   legalOrgName: string | null = null;
   activeSubMenuId: string | null = null;
-  sidebarConfig: SidebarConfig | null = null;
+  sidebarConfig: NavConfig | null = null;
 
   private router = inject(Router);
-  private http = inject(HttpClient);
   private str = inject(StorageService);
   private cdr = inject(ChangeDetectorRef);
   private themeService = inject(ThemeService);
   private commonHttp = inject(CommonHttpService);
+  private navigationService = inject(NavigationService);
   availableThemes = this.themeService?.getAvailableThemes();
 
   ngOnInit() {
@@ -85,6 +63,7 @@ export class Sidebar implements OnInit {
 
     this.router?.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
+        this.loadSidebarConfig();
         this.setActiveMenuItem();
         this.cdr?.detectChanges();
       }
@@ -171,16 +150,9 @@ export class Sidebar implements OnInit {
   }
 
   loadSidebarConfig() {
-    this.http.get<SidebarConfig>('/assets/sidebar-config.json').subscribe({
-      next: (config) => {
-        this.sidebarConfig = config;
-        this.setActiveMenuItem();
-        this.cdr?.detectChanges();
-      },
-      error: (error) => {
-        console.error('Error loading sidebar configuration:', error);
-      },
-    });
+    this.sidebarConfig = this.navigationService.getNavigationForCurrentRole();
+    this.setActiveMenuItem();
+    this.cdr?.detectChanges();
   }
 
   setActiveMenuItem() {
@@ -192,7 +164,7 @@ export class Sidebar implements OnInit {
 
       if (item.subItems && item.subItems.length) {
         item.subItems = item.subItems.map((sub) => {
-          const active = sub.route === currentRoute;
+          const active = this.isRouteActive(currentRoute, sub.route);
           if (active) {
             isSubActive = true;
             this.activeSubMenuId = sub.id;
@@ -204,9 +176,14 @@ export class Sidebar implements OnInit {
 
       return {
         ...item,
-        active: !isSubActive && item.route === currentRoute,
+        active: !isSubActive && this.isRouteActive(currentRoute, item.route),
       };
     });
+  }
+
+  private isRouteActive(currentRoute: string, route?: string | null) {
+    if (!route) return false;
+    return currentRoute === route || currentRoute.startsWith(`${route}/`);
   }
 
   
@@ -259,7 +236,7 @@ export class Sidebar implements OnInit {
     }
   }
 
-  onMenuItemClick(item: MenuItem) {
+  onMenuItemClick(item: NavItem) {
     if (item?.action === 'logout') {
       this.showLogoutConfirm = true;
       return;

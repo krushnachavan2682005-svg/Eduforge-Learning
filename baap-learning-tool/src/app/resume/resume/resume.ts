@@ -18,6 +18,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-resume',
@@ -41,6 +42,7 @@ export class Resume implements OnInit, OnDestroy {
   private downloadEventListener?: () => void;
   private commoHttp = inject(CommonHttpService);
   private toastr = inject(ToastrService);
+  private workspaceNav = inject(WorkspaceNavigationService);
 
   ngOnInit() {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
@@ -148,13 +150,13 @@ export class Resume implements OnInit, OnDestroy {
             this.hasResume?.set(true);
           } else {
             // this.getUser();
-            this.router?.navigate(['/resume/create']);
+            this.router?.navigate([this.workspaceNav.getResumeCreateRoute()]);
           }
         },
         (error) => {
           console.error('Resume API failed, fallback to User API:', error);
           // this.getUser();
-          this.router?.navigate(['/resume/create']);
+          this.router?.navigate([this.workspaceNav.getResumeCreateRoute()]);
         },
       );
   }
