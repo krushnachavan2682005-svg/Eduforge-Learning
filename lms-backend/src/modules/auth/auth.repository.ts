@@ -54,8 +54,11 @@ export class AuthRepository {
   }
 
   async findActiveUserByEmail(email: string) {
+    const normalizedEmail = String(email || "").trim().toLowerCase();
+    if (!normalizedEmail) return null;
+
     return User.findOne({
-      where: { email: email.trim().toLowerCase(), is_active: true },
+      where: { email: normalizedEmail, is_active: true },
     });
   }
 

@@ -66,6 +66,19 @@
 
         <hr class="mb-3 mt-4 theme-border" />
       </div>
+      @if (startError()) {
+        <div class="p-6 my-6 rounded-lg border border-red-200 bg-red-50 text-red-700">
+          <h2 class="text-xl font-semibold mb-2">Test unavailable</h2>
+          <p>{{ startError() }}</p>
+          <button
+            type="button"
+            class="mt-4 px-4 py-2 rounded bg-blue-600 text-white font-semibold"
+            (click)="goBack()"
+          >
+            Back to Tests
+          </button>
+        </div>
+      }
       <div class="p-2 sm:mb-40 mt-3 border theme-border rounded-lg">
         <div class="sm:p-3">
           <div class="flex justify-between">

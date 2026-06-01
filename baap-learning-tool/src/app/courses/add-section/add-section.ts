@@ -34,6 +34,7 @@ import {
   moveItemInArray,
   DragDropModule,
 } from '@angular/cdk/drag-drop';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Pipe({
   name: 'stripHtml',
@@ -170,6 +171,7 @@ export class AddSection implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private fb: FormBuilder = inject(FormBuilder);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   constructor() {
     this.editor = new Editor();
     this.sectionForm = this.fb?.group({
@@ -565,13 +567,13 @@ export class AddSection implements OnInit, OnDestroy {
 
   goBack() {
     if (this.lessonId) {
-      this.router?.navigate(['/courses/view-section', this.lessonId], {
+      this.router?.navigate([this.workspaceNav.getCourseViewSectionRoute(this.lessonId)], {
         queryParams: { courseId: this.courseId },
       });
     } else if (this?.courseId) {
-      this.router?.navigate(['/courses/view-course', this?.courseId]);
+      this.router?.navigate([this.workspaceNav.getCourseDetailRoute(this?.courseId)]);
     } else {
-      this?.router?.navigate(['/courses']);
+      this?.router?.navigate([this.workspaceNav.getCourseListRoute()]);
     }
   }
 
@@ -683,7 +685,7 @@ export class AddSection implements OnInit, OnDestroy {
           '',
           // { closeButton: false },
         );
-        this.router?.navigate(['/courses/view-section', this.lessonId], {
+        this.router?.navigate([this.workspaceNav.getCourseViewSectionRoute(this.lessonId)], {
           queryParams: { courseId: this.courseId },
         });
         this.sectionForm?.reset();

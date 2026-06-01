@@ -76,23 +76,29 @@
               </div>
             }
             <p>
-              @if (test?.is_completed === true && !test?.is_updated) {
+              @if (getAvailabilityStatus(test) === 'submitted') {
                 <p
                   class="inline-flex min-w-[96px] items-center justify-center font-medium text-white bg-green-600 px-5 py-1 rounded-full whitespace-nowrap"
                 >
                   Submitted
                 </p>
-              } @else if (isExamExpired(test)) {
+              } @else if (getAvailabilityStatus(test) === 'expired') {
                 <p
                   class="inline-flex min-w-[96px] items-center justify-center font-medium bg-red-600 text-white px-3 py-1 rounded-full whitespace-nowrap"
                 >
-                  Exam Expired
+                  Expired
+                </p>
+              } @else if (getAvailabilityStatus(test) === 'not_started') {
+                <p
+                  class="inline-flex min-w-[96px] items-center justify-center font-medium bg-blue-100 text-blue-700 px-3 py-1 rounded-full whitespace-nowrap"
+                >
+                  Not Started
                 </p>
               } @else {
                 <p
-                  class="inline-flex min-w-[96px] items-center justify-center font-medium bg-yellow-200 text-red-600 px-7 py-1 rounded-full whitespace-nowrap"
+                  class="inline-flex min-w-[96px] items-center justify-center font-medium bg-green-100 text-green-700 px-7 py-1 rounded-full whitespace-nowrap"
                 >
-                  Pending
+                  Available
                 </p>
               }
             </p>
@@ -172,16 +178,18 @@
             <button
               class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               (click)="openExamModal(test)"
-              [disabled]="test?.is_completed || !isStartAllowed(test)"
+              [disabled]="!isStartAllowed(test)"
               [appTooltip]="
-                test?.is_completed
+                getAvailabilityStatus(test) === 'submitted'
                   ? 'Test already completed'
-                  : !isStartAllowed(test)
-                    ? 'You can start only 5 minutes before exam time'
+                  : getAvailabilityStatus(test) === 'expired'
+                    ? 'This test has expired'
+                    : getAvailabilityStatus(test) === 'not_started'
+                      ? 'This test starts at ' + getScheduleDisplay(test)
                     : 'Start Test'
               "
             >
-              Get Started
+              Start Test
             </button>
 
             @if (test?.is_completed === true) {
@@ -287,23 +295,15 @@
             <button
               *authorize="'TSE'"
               (click)="
-                canStartExam(selectedTest) &&
-                  !isStarted(selectedTest) &&
-                  startExam(selectedTest?.id)
+                canStartExam(selectedTest) && startExam(selectedTest?.id)
               "
               [disabled]="
-                !canStartExam(selectedTest) || isStarted(selectedTest)
+                !canStartExam(selectedTest)
               "
               tooltipPosition="right"
               [appTooltip]="
                 !canStartExam(selectedTest)
-                  ? 'Exam can only be started at scheduled time (' +
-                    (selectedTest?.exam_date | date) +
-                    ' ' +
-                    (selectedTest?.exam_start_time | date: 'hh:mm a') +
-                    ')'
-                  : isStarted(selectedTest)
-                    ? 'You cannot start again.'
+                  ? getAvailabilityLabel(selectedTest)
                     : ''
               "
               class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"

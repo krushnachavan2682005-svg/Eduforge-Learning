@@ -76,6 +76,10 @@ export class Auth {
     return this.http.get(this.permissionsUrl).pipe(
       map((response: any) => {
         const codes = response?.data?.permission_codes || [];
+        const roleCode = this.pickWorkspaceRole(response?.data?.roles || []);
+        if (roleCode) {
+          this.str.setItem(STORAGEENUMS.ROLE, roleCode);
+        }
         this.permissionStore?.setPermissions(codes);
         console.log('[Auth] permissions hydrated', codes);
         return codes;
@@ -86,6 +90,18 @@ export class Auth {
         return of([]);
       }),
     );
+  }
+
+  private pickWorkspaceRole(roles: any[]): string {
+    const codes = roles.map((role) => role?.code).filter(Boolean);
+    const priority = [
+      'super_admin',
+      'organization_admin',
+      'teacher',
+      'student',
+      'reviewer',
+    ];
+    return priority.find((role) => codes.includes(role)) || codes[0] || '';
   }
 
   logout(): void {

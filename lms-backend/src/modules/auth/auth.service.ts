@@ -28,7 +28,8 @@ export class AuthService {
   ) {}
 
   async register(input: RegisterInput, fastify: FastifyInstance) {
-    const existing = await this.authRepository.findActiveUserByEmail(input.email);
+    const email = this.normalizeEmail(input.email);
+    const existing = await this.authRepository.findActiveUserByEmail(email);
     if (existing) {
       const error = new Error("User with this email already exists");
       (error as any).statusCode = 409;
@@ -44,7 +45,7 @@ export class AuthService {
     const account = await this.authRepository.createLocalAccount({
       first_name: input.first_name.trim(),
       last_name: input.last_name.trim(),
-      email: input.email.trim().toLowerCase(),
+      email,
       password_hash,
       organization_name,
     });
@@ -66,7 +67,8 @@ export class AuthService {
   }
 
   async login(input: LoginInput, fastify: FastifyInstance) {
-    const user = await this.authRepository.findActiveUserByEmail(input.email);
+    const email = this.normalizeEmail(input.email);
+    const user = await this.authRepository.findActiveUserByEmail(email);
     if (!user) {
       const error = new Error("Invalid email or password");
       (error as any).statusCode = 401;
@@ -185,5 +187,9 @@ export class AuthService {
       slug: organization.slug,
       is_active: organization.is_active,
     };
+  }
+
+  private normalizeEmail(email: string) {
+    return String(email || "").trim().toLowerCase();
   }
 }

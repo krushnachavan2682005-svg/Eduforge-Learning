@@ -11,6 +11,7 @@ import userRoutes from "./modules/users/user.routes";
 import organizationRoutes from "./modules/organizations/organization.routes";
 import localDashboardRoutes from "./modules/dashboard/dashboard.routes";
 import studentRoutes from "./modules/students/student.routes";
+import memberRoutes from "./modules/members/member.routes";
 import { seedRbac } from "./modules/rbac/rbac.seed";
 import "./modules/roles/role.model";
 import "./modules/sessions/session.model";
@@ -70,6 +71,7 @@ export const buildApp = async () => {
   app.register(organizationRoutes, { prefix: "/organizations" });
   app.register(localDashboardRoutes, { prefix: "/dashboard" });
   app.register(studentRoutes);
+  app.register(memberRoutes);
   app.register(routes, { prefix: "/lms/v1/api" });
   app.register(publicExamRoutes,{prefix:"/lms/v1/api"})
   return app;

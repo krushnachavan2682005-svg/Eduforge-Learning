@@ -14,6 +14,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { LessonsMenu } from '../lessons-menu/lessons-menu';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 @Pipe({ name: 'safeUrl', standalone: true })
 export class SafeUrlPipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) {}
@@ -56,6 +57,7 @@ export class StudentView {
   private destroy$ = new Subject<void>();
   private sanitizer = inject(DomSanitizer);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   selectedAnswers: { [key: number]: string } = {};
   videoUrls: Map<string, SafeResourceUrl> = new Map();
 
@@ -199,7 +201,7 @@ export class StudentView {
   }
 
   goToBack() {
-    this.router?.navigate(['/my-learning']);
+    this.router?.navigate([this.workspaceNav.getMyLearningRoute()]);
   }
 
   areAllQuizzesAnswered(): boolean {
@@ -247,7 +249,7 @@ export class StudentView {
             quizAnswersArray,
           );
           if (!this.lessonsMenu?.navigateToNextSection()) {
-            this.router.navigate(['/my-learning']);
+            this.router.navigate([this.workspaceNav.getMyLearningRoute()]);
           }
         },
         error: () => {

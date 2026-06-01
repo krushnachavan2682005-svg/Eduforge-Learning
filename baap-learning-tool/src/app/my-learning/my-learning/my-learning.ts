@@ -17,6 +17,7 @@ import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
 import { SkeletonTheme } from '../../services/skeleton-theme';
 import { HeaderComponent } from '../../shared/header.component';
 import { ToastrService } from 'ngx-toastr';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 export interface Task {
   name: string;
@@ -75,6 +76,7 @@ export class MyLearning {
   private str = inject(StorageService);
   private toastr = inject(ToastrService);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   public skeletonService = inject(SkeletonTheme);
   usersList = signal<{ id: string; name: string }[]>([]);
 
@@ -99,7 +101,7 @@ export class MyLearning {
 
   navigateTOCources(course: any) {
     if (course?.course_id) {
-      this.router?.navigate(['my-learning/student-view', course?.course_id]);
+      this.router?.navigate([this.workspaceNav.getStudentCourseRoute(course?.course_id)]);
     }
   }
 

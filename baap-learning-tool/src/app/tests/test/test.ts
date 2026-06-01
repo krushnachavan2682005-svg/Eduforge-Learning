@@ -13,6 +13,7 @@ import { Tooltip } from '../../shared/tooltip';
 import { Modal } from '../../modal/modal';
 import { IndividualConfig, ToastrService } from 'ngx-toastr';
 import { PaginationComponent } from '../../pagination/pagination';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-test',
@@ -52,6 +53,7 @@ export class Test {
   private toastr = inject(ToastrService);
   private route = inject(ActivatedRoute);
   private http = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   public skeletonService = inject(SkeletonTheme);
 
   headers = [
@@ -170,12 +172,12 @@ export class Test {
   }
 
   editTest(examId: string) {
-    this.router?.navigate(['/tests/add-new-test'], {
+    this.router?.navigate([this.workspaceNav.getTestCreateRoute()], {
       queryParams: { id: examId },
     });
   }
   goToAddNewTest() {
-    this.router?.navigate(['/tests/add-new-test']);
+    this.router?.navigate([this.workspaceNav.getTestCreateRoute()]);
   }
 
   isExamExpired(test: any): boolean {

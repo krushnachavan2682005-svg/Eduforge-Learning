@@ -36,6 +36,85 @@ export class ExamRepository {
     return { created_on: now, updated_on: now };
   }
 
+  private getSessionContainer(raw: any) {
+    if (raw && !Array.isArray(raw) && typeof raw === "object") {
+      return {
+        answers: Array.isArray(raw.answers) ? raw.answers : [],
+        exam_snapshot: raw.exam_snapshot || null,
+      };
+    }
+
+    return {
+      answers: Array.isArray(raw) ? raw : [],
+      exam_snapshot: null,
+    };
+  }
+
+  public getSessionAnswers(session: any): IAnswerData[] {
+    return this.getSessionContainer(session?.answers_data).answers;
+  }
+
+  public getSessionSnapshot(session: any, fallbackExam?: any) {
+    const container = this.getSessionContainer(session?.answers_data);
+    if (container.exam_snapshot) return container.exam_snapshot;
+    if (fallbackExam) return this.buildExamSnapshot(fallbackExam);
+    return null;
+  }
+
+  public toStudentExamSnapshot(snapshot: any) {
+    if (!snapshot) return {};
+    return {
+      ...snapshot,
+      questions: (snapshot.questions || []).map((question: any) => {
+        const { correct_answer, expected_answer, rubric, ...safeQuestion } = question;
+        return safeQuestion;
+      }),
+    };
+  }
+
+  private buildExamSnapshot(examInstance: any) {
+    const exam = examInstance?.toJSON ? examInstance.toJSON() : examInstance;
+    const startTime = exam?.exam_start_time ? new Date(exam.exam_start_time) : null;
+    const endTime =
+      startTime && !isNaN(startTime.getTime())
+        ? new Date(startTime.getTime() + (Number(exam?.duration_minutes) || 0) * 60 * 1000)
+        : null;
+
+    return {
+      exam_id: exam?.id,
+      title: exam?.title,
+      subject: exam?.subject,
+      duration_minutes: Number(exam?.duration_minutes) || 0,
+      start_time: startTime ? startTime.toISOString() : null,
+      end_time: endTime ? endTime.toISOString() : null,
+      exam_date: exam?.exam_date,
+      exam_start_time: exam?.exam_start_time,
+      total_marks: Number(exam?.total_marks) || 0,
+      passing_marks: Number(exam?.passing_marks) || 0,
+      reviewer_type: "teacher",
+      reviewers: exam?.reviewers || [],
+      client_id: exam?.client_id,
+      questions: (exam?.questions || []).map((question: any) => {
+        const q = question?.toJSON ? question.toJSON() : question;
+        return {
+          question_id: q?.id,
+          id: q?.id,
+          question_text: q?.text,
+          text: q?.text,
+          question_type: q?.type,
+          type: q?.type,
+          options: q?.options || null,
+          correct_option: q?.correct_answer || null,
+          correct_answer: q?.correct_answer || null,
+          expected_answer: q?.correct_answer || null,
+          rubric: q?.rubric || null,
+          marks: Number(q?.marks) || 0,
+          is_mandatory: q?.is_mandatory !== false,
+        };
+      }),
+    };
+  }
+
   async createFullExam(data: IExam & { questions: IQuestion[] }) {
     const transaction = await sequelize.transaction();
     let isTransactionCommitted = false;
@@ -471,7 +550,7 @@ async assignExamToUsers(
 
     const mappings = await ExamUserMapping.findAll({
       where: { user_id: userId, exam_id: examIds, is_completed: true },
-      attributes: ["exam_id", "is_completed", "review_status"],
+      attributes: ["exam_id", "is_completed", "review_status", "submitted_at"],
     });
 
     const completedExamIds = new Set(mappings.map((m) => m?.exam_id));
@@ -499,6 +578,7 @@ async assignExamToUsers(
 
     const processed = exams.map((exam) => {
       const examJson = exam.toJSON() as IExam;
+      const snapshot = this.buildExamSnapshot(examJson);
       const questions = (examJson.questions || []).map((q) => {
         const { correct_answer, ...rest } = q as any;
         return rest as any;
@@ -522,6 +602,16 @@ async assignExamToUsers(
       const base: any = { ...examJson };
       delete base.is_completed;
       delete base.questions;
+      const now = new Date();
+      const startAt = snapshot.start_time ? new Date(snapshot.start_time) : null;
+      const endAt = snapshot.end_time ? new Date(snapshot.end_time) : null;
+      const availability_status = is_completed
+        ? "submitted"
+        : startAt && now < startAt
+          ? "not_started"
+          : endAt && now > endAt
+            ? "expired"
+            : "available";
 
       return {
         ...base,
@@ -529,6 +619,9 @@ async assignExamToUsers(
         is_published,
         is_completed,
         review_status,
+        start_time: snapshot.start_time,
+        end_time: snapshot.end_time,
+        availability_status,
         questions,
       };
     });
@@ -549,12 +642,15 @@ async assignExamToUsers(
       });
 
       if (existingSession) {
-        throw new Error("Exam already running in another tab");
+        return existingSession.toJSON() as IExamSession;
       }
 
-      // Read reviewers from exam and pass to session
-      const exam = await Exam.findByPk(data.exam_id, { transaction });
+      const exam = await Exam.findByPk(data.exam_id, {
+        include: [{ model: Question, as: "questions" }],
+        transaction,
+      });
       if (!exam) throw new Error(`Exam with id ${data.exam_id} not found`);
+      const snapshot = this.buildExamSnapshot(exam);
 
       const session = await ExamSession.create(
         {
@@ -562,10 +658,13 @@ async assignExamToUsers(
           user_id: data?.user_id,
           current_question_index: data?.current_question_index || 0,
           client_id: data?.client_id,
-          answers_data: data?.answers_data || [],
+          answers_data: {
+            answers: data?.answers_data || [],
+            exam_snapshot: snapshot,
+          },
           started_at: new Date(),
           is_completed: false,
-          reviewers: exam.reviewers || [],
+          reviewers: snapshot.reviewers || [],
           ...this.getTimestamps(),
         } as any,
         { transaction },
@@ -642,26 +741,29 @@ async resumePublicExamSession(session_id:string){
           {
             model: Question,
             as: "questions",
-            attributes: ["id"],
             order: [["created_on", "ASC"]],
           },
         ],
         transaction,
       });
 
-      if (!exam || !exam.questions || exam.questions.length === 0) {
+      const container = this.getSessionContainer(session.answers_data);
+      const snapshot = container.exam_snapshot || (exam ? this.buildExamSnapshot(exam) : null);
+      const snapshotQuestions = snapshot?.questions || [];
+
+      if (!snapshot || snapshotQuestions.length === 0) {
         throw new Error("Exam or questions not found");
       }
 
-      const totalQuestions = exam.questions.length;
+      const totalQuestions = snapshotQuestions.length;
       if (data.question_index < 0 || data.question_index >= totalQuestions) {
         throw new Error(
           `Invalid question index: ${data.question_index}. Total questions: ${totalQuestions}`,
         );
       }
 
-      const questionExists = exam.questions.some(
-        (q) => q.id === data.question_id,
+      const questionExists = snapshotQuestions.some(
+        (q: any) => q.id === data.question_id || q.question_id === data.question_id,
       );
       if (!questionExists)
         throw new Error(
@@ -669,9 +771,7 @@ async resumePublicExamSession(session_id:string){
         );
 
       const isExamComplete = data.question_index === totalQuestions - 1;
-      const answersData: IAnswerData[] = Array.isArray(session.answers_data)
-        ? session.answers_data
-        : [];
+      const answersData: IAnswerData[] = container.answers;
 
       const filteredAnswers = answersData.filter(
         (answer) => answer.question_id !== data.question_id,
@@ -687,7 +787,10 @@ async resumePublicExamSession(session_id:string){
       const updatedAnswers = [...filteredAnswers, newAnswer];
 
       const updateData: any = {
-        answers_data: updatedAnswers,
+        answers_data: {
+          answers: updatedAnswers,
+          exam_snapshot: snapshot,
+        },
         updated_on: new Date(),
       };
       updateData.current_question_index = data.question_index + 1;
@@ -757,16 +860,16 @@ async resumePublicExamSession(session_id:string){
 
       const exam = session.exam;
       if (!exam) throw new Error("Exam not found for this session");
-      if (!exam.questions)
+      const container = this.getSessionContainer(session.answers_data);
+      const snapshot = container.exam_snapshot || this.buildExamSnapshot(exam);
+      const snapshotQuestions = snapshot?.questions || [];
+      if (!snapshotQuestions.length)
         throw new Error("Questions not found for this exam.");
 
-      const answersData: IAnswerData[] = Array.isArray(session.answers_data)
-        ? session.answers_data
-        : [];
       const results = this.calculateExamResults(
-        exam.questions,
-        answersData,
-        exam.passing_marks,
+        snapshotQuestions,
+        container.answers,
+        Number(snapshot.passing_marks) || Number(exam.passing_marks) || 0,
       );
 
       const timeTakenMinutes = session.started_at
@@ -784,7 +887,7 @@ async resumePublicExamSession(session_id:string){
         { transaction },
       );
 
-      const hasManualReviewQuestions = exam.questions.some((q) =>
+      const hasManualReviewQuestions = snapshotQuestions.some((q: any) =>
         ["short", "long", "practical"].includes(q.type),
       );
 
@@ -806,7 +909,7 @@ async resumePublicExamSession(session_id:string){
             ? "pending_review"
             : "completed",
           client_id: session.client_id,
-          reviewers: exam.reviewers || [],
+          reviewers: snapshot.reviewers || exam.reviewers || [],
           created_on: new Date(),
         } as any,
         { transaction },
@@ -897,16 +1000,17 @@ async resumePublicExamSession(session_id:string){
         totalPossibleMarks > 0
           ? (totalMarksObtained / totalPossibleMarks) * 100
           : 0;
-      const passed =
-        totalPossibleMarks > 0
-          ? percentage >= (exam.passing_marks / totalPossibleMarks) * 100
-          : false;
+      const snapshotPassingMarks =
+        Number((originalFinalAnswers[0] as any)?.snapshot_passing_marks) ||
+        Number(exam?.passing_marks) ||
+        0;
+      const passed = totalMarksObtained >= snapshotPassingMarks;
       const manualQuestionIds = new Set<string>(
-        exam.questions
-          .filter((q: IQuestion) =>
-            ["short", "long", "practical"].includes(q.type),
+        originalFinalAnswers
+          .filter((answer: any) =>
+            ["short", "long", "practical"].includes(answer.question_type),
           )
-          .map((q: IQuestion) => q.id),
+          .map((answer: any) => answer.question_id),
       );
 
       const isReviewComplete = Array.from(manualQuestionIds).every((qid) =>
@@ -1010,8 +1114,8 @@ async resumePublicExamSession(session_id:string){
     }
 
     const isCorrect =
-      question.correct_answer.trim().toLowerCase() ===
-      userAnswer.trim().toLowerCase();
+      String(question.correct_answer).trim().toLowerCase() ===
+      String(userAnswer || "").trim().toLowerCase();
     return { isCorrect, marksObtained: isCorrect ? question.marks : 0 };
   }
 
@@ -1024,21 +1128,26 @@ async resumePublicExamSession(session_id:string){
     let totalMarksObtained = 0;
     const totalPossibleMarks = questions.reduce((sum, q) => sum + q.marks, 0);
 
-    questions.forEach((question) => {
-      const userAnswer = answers.find((a) => a.question_id === question.id);
+    questions.forEach((question: any) => {
+      const questionId = question.id || question.question_id;
+      const userAnswer = answers.find((a) => a.question_id === questionId);
       const validation = userAnswer
         ? this.validateAnswer(question, userAnswer.user_answer)
         : { isCorrect: false, marksObtained: 0 };
 
       const finalAnswer: IFinalAnswer = {
-        question_id: question.id!,
+        question_id: questionId!,
         question_type: question.type,
+        question_text: question.text || question.question_text,
+        options: question.options || null,
+        is_mandatory: question.is_mandatory !== false,
         user_answer: userAnswer?.user_answer || "",
         is_correct: validation.isCorrect,
         marks_obtained: validation.marksObtained,
         correct_answer: question.correct_answer,
         question_marks: question.marks,
         reviewer_comment: "",
+        snapshot_passing_marks: examPassingMarks,
       };
 
       finalAnswers.push(finalAnswer);
@@ -1158,36 +1267,22 @@ async resumePublicExamSession(session_id:string){
     const exam = await Exam.findByPk(mapping.exam_id, {
       attributes: ["title", "total_marks"],
     });
-
-    if (!exam) {
-      throw new Error(
-        `Exam with id ${mapping.exam_id} not found for submission`,
-      );
-    }
-    const questionInstances = await Question.findAll({
-      where: { exam_id: mapping.exam_id },
-      order: [["created_on", "ASC"]],
-    });
-    const questions: IQuestion[] = questionInstances.map((q) => q.toJSON());
-    const finalAnswersMap = new Map<string, IFinalAnswer>(
-      mapping.final_answers.map((ans: IFinalAnswer) => [ans.question_id, ans]),
-    );
-    const submissionDetails = questions.map((question) => {
-      const answer: IFinalAnswer | undefined = finalAnswersMap.get(
-        question.id!,
-      );
+    const finalAnswers: IFinalAnswer[] = Array.isArray(mapping.final_answers)
+      ? mapping.final_answers
+      : [];
+    const submissionDetails = finalAnswers.map((answer: any) => {
       return {
-        question_id: question?.id,
-        question_text: question?.text,
-        question_type: question?.type,
-        question_marks: question?.marks,
-        options: question?.options,
-        is_mandatory: question?.is_mandatory,
-        user_answer: answer ? answer?.user_answer : null,
-        is_correct: answer ? answer?.is_correct : null,
-        marks_obtained: answer ? answer.marks_obtained : null,
-        correct_answer: question?.correct_answer,
-        reviewer_comment: answer ? answer?.reviewer_comment : null,
+        question_id: answer?.question_id,
+        question_text: answer?.question_text,
+        question_type: answer?.question_type,
+        question_marks: answer?.question_marks,
+        options: answer?.options,
+        is_mandatory: answer?.is_mandatory,
+        user_answer: answer?.user_answer ?? null,
+        is_correct: answer?.is_correct ?? null,
+        marks_obtained: answer?.marks_obtained ?? null,
+        correct_answer: answer?.correct_answer,
+        reviewer_comment: answer?.reviewer_comment ?? null,
       };
     });
     //reviewer checking
@@ -1200,8 +1295,8 @@ async resumePublicExamSession(session_id:string){
       user_id: mapping.user_id,
       student_name: studentName,
       reviewed_by: reviewerName,
-      test_name: exam.title,
-      total_marks: exam.total_marks,
+      test_name: exam?.title || "",
+      total_marks: mapping.total_possible_marks || exam?.total_marks || 0,
       submission_details: submissionDetails,
     };
   }
@@ -1232,63 +1327,49 @@ async resumePublicExamSession(session_id:string){
       mapping?.user_id,
     );
 
-    // Get exam details
     const exam = await Exam.findByPk(mapping.exam_id, {
       attributes: ["title", "total_marks", "passing_marks", "duration_minutes"],
     });
 
-    if (!exam) {
-      throw new Error(`Exam with id ${mapping.exam_id} not found`);
-    }
+    const finalAnswers: IFinalAnswer[] = Array.isArray(mapping.final_answers)
+      ? mapping.final_answers
+      : [];
 
-    // Get all questions for this exam
-    const questionInstances = await Question.findAll({
-      where: { exam_id: mapping.exam_id },
-      order: [["created_on", "ASC"]],
-    });
-    const questions: IQuestion[] = questionInstances.map((q) => q.toJSON());
-
-    // Get final answers from the mapping
-    const finalAnswersMap = new Map<string, IFinalAnswer>(
-      mapping.final_answers.map((ans: IFinalAnswer) => [ans.question_id, ans]),
-    );
-
-    // Create review details with all information
-    const reviewDetails = questions.map((question) => {
-      const answer: IFinalAnswer | undefined = finalAnswersMap.get(
-        question.id!,
-      );
+    const reviewDetails = finalAnswers.map((answer: any) => {
       return {
-        question_id: question.id,
-        question_text: question.text,
-        question_type: question.type,
-        question_marks: question.marks,
-        options: question.options,
-        is_mandatory: question.is_mandatory,
-        user_answer: answer ? answer.user_answer : null,
-        is_correct: answer ? answer.is_correct : false,
-        marks_obtained: answer ? answer.marks_obtained : 0,
-        correct_answer: question.correct_answer,
-        reviewer_comment: answer ? answer.reviewer_comment : null,
+        question_id: answer?.question_id,
+        question_text: answer?.question_text,
+        question_type: answer?.question_type,
+        question_marks: answer?.question_marks,
+        options: answer?.options,
+        is_mandatory: answer?.is_mandatory,
+        user_answer: answer?.user_answer ?? null,
+        is_correct: answer?.is_correct ?? false,
+        marks_obtained: answer?.marks_obtained ?? 0,
+        correct_answer: answer?.correct_answer,
+        reviewer_comment: answer?.reviewer_comment ?? null,
       };
     });
 
-    // Calculate summary stats
-    const totalQuestions = questions?.length;
+    const totalQuestions = reviewDetails?.length;
     const correctAnswers = reviewDetails?.filter((q) => q?.is_correct).length;
     const totalMarksObtained = reviewDetails?.reduce(
       (sum, q) => sum + (q?.marks_obtained || 0),
       0,
     );
-    const totalPossibleMarks = questions?.reduce(
-      (sum, q) => sum + (q?.marks || 0),
+    const totalPossibleMarks = reviewDetails?.reduce(
+      (sum, q) => sum + (q?.question_marks || 0),
       0,
     );
     const percentage =
       totalPossibleMarks > 0
         ? (totalMarksObtained / totalPossibleMarks) * 100
         : 0;
-    const passed = totalMarksObtained >= (exam?.passing_marks || 0);
+    const snapshotPassingMarks =
+      Number((finalAnswers[0] as any)?.snapshot_passing_marks) ||
+      Number(exam?.passing_marks) ||
+      0;
+    const passed = totalMarksObtained >= snapshotPassingMarks;
     let reviewerName = "";
     if (mapping?.reviewed_by) {
       try {
@@ -1307,9 +1388,9 @@ async resumePublicExamSession(session_id:string){
       user_id: mapping?.user_id,
       student_name: studentName,
       reviewer_name: reviewerName,
-      test_name: exam?.title,
-      total_marks: exam?.total_marks,
-      passing_marks: exam?.passing_marks,
+      test_name: exam?.title || "",
+      total_marks: mapping.total_possible_marks || exam?.total_marks,
+      passing_marks: snapshotPassingMarks,
       duration_minutes: exam?.duration_minutes,
       submitted_at: mapping?.submitted_at,
       review_status: mapping?.review_status,

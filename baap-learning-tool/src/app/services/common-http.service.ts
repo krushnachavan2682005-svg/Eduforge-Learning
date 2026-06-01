@@ -50,9 +50,22 @@ export class CommonHttpService {
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
+  getStudents(): Observable<any> {
+    return this.getLocalStudents();
+  }
+
   createLocalStudent(data: any): Observable<any> {
     const url = `${environment.LOCAL_API_BASE_URL}/students`;
     return this.http.post(url, data, { headers: this.getHeaders() });
+  }
+
+  createStudent(data: any): Observable<any> {
+    return this.createLocalStudent(data);
+  }
+
+  getStudentById(id: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/students/${id}`;
+    return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getLocalClasses(): Observable<any> {
@@ -60,9 +73,22 @@ export class CommonHttpService {
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
+  getClassesList(): Observable<any> {
+    return this.getLocalClasses();
+  }
+
   createLocalClass(data: any): Observable<any> {
     const url = `${environment.LOCAL_API_BASE_URL}/classes`;
     return this.http.post(url, data, { headers: this.getHeaders() });
+  }
+
+  createClass(data: any): Observable<any> {
+    return this.createLocalClass(data);
+  }
+
+  getClassById(id: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/classes/${id}`;
+    return this.http.get(url, { headers: this.getHeaders() });
   }
 
   addLocalStudentToClass(classId: string, studentId: string): Observable<any> {
@@ -70,9 +96,132 @@ export class CommonHttpService {
     return this.http.post(url, {}, { headers: this.getHeaders() });
   }
 
+  addStudentToClass(classId: string, studentId: string): Observable<any> {
+    return this.addLocalStudentToClass(classId, studentId);
+  }
+
+  getClassStudents(classId: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/classes/${classId}/students`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  removeStudentFromClass(classId: string, studentId: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/classes/${classId}/students/${studentId}`;
+    return this.http.delete(url, { headers: this.getHeaders() });
+  }
+
   createLocalEnrollment(data: any): Observable<any> {
     const url = `${environment.LOCAL_API_BASE_URL}/enrollments`;
     return this.http.post(url, data, { headers: this.getHeaders() });
+  }
+
+  createEnrollment(data: any): Observable<any> {
+    return this.createLocalEnrollment(data);
+  }
+
+  getEnrollmentsByStudent(studentId: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/enrollments/student/${studentId}`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  getEnrollments(params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+    student_id?: string;
+  } = {}): Observable<any> {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        query.set(key, String(value));
+      }
+    });
+    const qs = query.toString();
+    const url = `${environment.LOCAL_API_BASE_URL}/enrollments${qs ? `?${qs}` : ''}`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  getEnrollmentById(id: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/enrollments/${id}`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  updateEnrollmentStatus(id: string, status: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/enrollments/${id}/status`;
+    return this.http.patch(url, { status }, { headers: this.getHeaders() });
+  }
+
+  getMembers(params: {
+    search?: string;
+    role?: string;
+    active?: string;
+    page?: number;
+    limit?: number;
+  } = {}): Observable<any> {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        query.set(key, String(value));
+      }
+    });
+    const qs = query.toString();
+    const url = `${environment.LOCAL_API_BASE_URL}/members${qs ? `?${qs}` : ''}`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  getMember(id: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  getMemberById(id: string): Observable<any> {
+    return this.getMember(id);
+  }
+
+  createMember(data: any): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/members`;
+    return this.http.post(url, data, { headers: this.getHeaders() });
+  }
+
+  updateMember(id: string, data: any): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}`;
+    return this.http.patch(url, data, { headers: this.getHeaders() });
+  }
+
+  resetMemberPassword(id: string, data: any): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}/password`;
+    return this.http.patch(url, data, { headers: this.getHeaders() });
+  }
+
+  deactivateMember(id: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}`;
+    return this.http.delete(url, { headers: this.getHeaders() });
+  }
+
+  assignMemberRole(id: string, roleCode: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}/roles`;
+    return this.http.post(url, { role_code: roleCode }, { headers: this.getHeaders() });
+  }
+
+  removeMemberRole(id: string, roleId: string): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}/roles/${roleId}`;
+    return this.http.delete(url, { headers: this.getHeaders() });
+  }
+
+  getRoles(): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/roles`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  getAllPermissions(): Observable<any> {
+    const url = `${environment.LOCAL_API_BASE_URL}/permissions`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
+  getCoursesForEnrollment(page = 1, limit = 100): Observable<any> {
+    const clientId = this.str?.getItem<string>(STORAGEENUMS.CLIENT_ID) || '';
+    return this.getCourse(`/client/${clientId}/all-courses?page=${page}&limit=${limit}`);
   }
 
   postCourse(endpoint: string, data: any): Observable<any> {

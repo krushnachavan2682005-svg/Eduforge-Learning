@@ -26,6 +26,7 @@ import {
   distinctUntilChanged,
 } from 'rxjs/operators';
 import { Subject } from 'rxjs';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-create-resume',
@@ -58,6 +59,7 @@ export class CreateResume implements OnInit {
   private addressSubject = new Subject<string>();
   private commonService = inject(CommonHttpService);
   private geocodingService = inject(GeocodingService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   skillLevels = [
     { level: 'Beginner' },
     { level: 'Intermediate' },
@@ -267,7 +269,7 @@ export class CreateResume implements OnInit {
             ? 'Resume updated successfully'
             : 'Resume created successfully',
         );
-        this.router?.navigate(['/resume']);
+        this.router?.navigate([this.workspaceNav.getResumeRoute()]);
       },
       error: () => {
         this.isLoading = false;
@@ -407,6 +409,6 @@ export class CreateResume implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['/resume']);
+    this.router.navigate([this.workspaceNav.getResumeRoute()]);
   }
 }

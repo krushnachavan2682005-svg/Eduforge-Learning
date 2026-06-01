@@ -21,6 +21,7 @@ import { StorageService } from '../../services/storage-service';
 import { ToastrService } from 'ngx-toastr';
 import { STORAGEENUMS } from '../../shared/enum';
 import { Tooltip } from '../../shared/tooltip';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Pipe({ name: 'safeUrl', standalone: true })
 export class SafeUrlPipe implements PipeTransform {
@@ -68,6 +69,7 @@ export class ViewSection implements OnInit {
   private route = inject(ActivatedRoute);
   private sanitizer = inject(DomSanitizer);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
 
   ngOnInit() {
     this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
@@ -177,7 +179,7 @@ export class ViewSection implements OnInit {
   addSection() {
     const currentLesson = this.lesson();
     if (currentLesson && currentLesson?.id) {
-      const navigationPath = ['/courses/add-section', currentLesson?.id];
+      const navigationPath = [this.workspaceNav.getCourseAddSectionRoute(currentLesson?.id)];
       const queryParams = {
         courseId: this.courseId,
         lessonId: currentLesson?.id,
@@ -188,7 +190,7 @@ export class ViewSection implements OnInit {
 
   editSection(section: any) {
     if (section && section?.id) {
-      const navigationPath = ['/courses/add-section', section?.id];
+      const navigationPath = [this.workspaceNav.getCourseAddSectionRoute(section?.id)];
       const queryParams = {
         courseId: this.courseId,
         lessonId: section?.lessons_id,
@@ -247,6 +249,6 @@ export class ViewSection implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['/courses/view-course', this.courseId]);
+    this.router.navigate([this.workspaceNav.getCourseDetailRoute(this.courseId)]);
   }
 }

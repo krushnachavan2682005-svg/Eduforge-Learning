@@ -27,6 +27,7 @@ import { STORAGEENUMS } from '../../shared/enum';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { SkeletonTheme } from '../../services/skeleton-theme';
 import { StorageService } from '../../services/storage-service';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 @Pipe({ name: 'safeUrl', standalone: true })
 export class SafeUrlPipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) {}
@@ -72,6 +73,7 @@ export class AddLesson implements OnChanges {
   private toastr = inject(ToastrService);
   private route = inject(ActivatedRoute);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   public skeletonService = inject(SkeletonTheme);
   ngOnInit() {
     this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
@@ -176,7 +178,7 @@ export class AddLesson implements OnChanges {
 
   navigateToLesson(lesson: any) {
     if (lesson && lesson.id) {
-      this.router.navigate(['/courses/view-section', lesson.id], {
+      this.router.navigate([this.workspaceNav.getCourseViewSectionRoute(lesson.id)], {
         queryParams: { courseId: this.course_data?.id || this.courseId },
       });
     }

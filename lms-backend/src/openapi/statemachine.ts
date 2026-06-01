@@ -8,7 +8,7 @@ const states = [
   "FAILED",
   "TIMED_OUT"
 ];
-const transitions = {
+const transitions: Record<string, string[]> = {
   DRAFT: ["SUBMITTED"],
   SUBMITTED: ["QUEUED"],
   QUEUED: ["EVALUATING", "FAILED"],

@@ -14,6 +14,7 @@ import { StorageService } from '../../services/storage-service';
 import { ToastrService } from 'ngx-toastr';
 import { CommonHttpService } from '../../services/common-http.service';
 import { STORAGEENUMS } from '../../shared/enum';
+import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
   selector: 'app-public-test-start',
@@ -58,12 +59,13 @@ export class PublicTestStart {
   private toastr = inject(ToastrService);
   private cdr = inject(ChangeDetectorRef);
   private commonHttp = inject(CommonHttpService);
+  private workspaceNav = inject(WorkspaceNavigationService);
   private boundContextMenuHandler!: (e: MouseEvent) => void;
   private boundGlobalKeyHandler!: (e: KeyboardEvent) => void;
   private boundClipboardHandler!: (e: ClipboardEvent) => void;
 
   goBack() {
-    this.router?.navigate(['/tests/my-test']);
+    this.router?.navigate([this.workspaceNav.getTestListRoute()]);
   }
 
   initForm() {
