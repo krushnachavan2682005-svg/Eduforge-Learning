@@ -389,6 +389,16 @@ export const startExamSchema = {
             total_questions: { type: "integer" },
             current_question: { type: ["object", "null"] },
             exam_details: { type: "object" },
+            exam: { type: "object", additionalProperties: true },
+            questions: {
+              type: "array",
+              items: { type: "object", additionalProperties: true },
+            },
+            remaining_seconds: { type: "integer" },
+            saved_answers: {
+              type: "array",
+              items: { type: "object", additionalProperties: true },
+            },
           },
           required: [
             "session_id",

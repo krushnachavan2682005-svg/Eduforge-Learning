@@ -66,7 +66,11 @@
 
         <hr class="mb-3 mt-4 theme-border" />
       </div>
-      @if (startError()) {
+      @if (isLoading()) {
+        <div class="p-6 my-6 rounded-lg border theme-border theme-bg-secondary">
+          Loading test...
+        </div>
+      } @else if (startError()) {
         <div class="p-6 my-6 rounded-lg border border-red-200 bg-red-50 text-red-700">
           <h2 class="text-xl font-semibold mb-2">Test unavailable</h2>
           <p>{{ startError() }}</p>
@@ -78,7 +82,7 @@
             Back to Tests
           </button>
         </div>
-      }
+      } @else {
       <div class="p-2 sm:mb-40 mt-3 border theme-border rounded-lg">
         <div class="sm:p-3">
           <div class="flex justify-between">
@@ -228,9 +232,11 @@
           </button>
         }
       </div>
+      }
     </div>
   </div>
 
+  @if (!isLoading() && !startError()) {
   <div class="shadow-lg border-l theme-border">
     <app-exam-menubar
       [questions]="questions()"
@@ -239,6 +245,7 @@
       [currentQuestionIndex]="currentQuestionIndex"
     ></app-exam-menubar>
   </div>
+  }
 </div>
 
 @if (showTimeUpModal() || examSubmitted || cancelExam) {

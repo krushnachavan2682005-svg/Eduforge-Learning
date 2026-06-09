@@ -10,7 +10,6 @@ import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
 import { CommonModule } from '@angular/common';
 import { Modal } from '../../modal/modal';
 import { Tooltip } from '../../shared/tooltip';
-import { PermissionDirective } from '../../services/permission-directive';
 import { PaginationComponent } from '../../pagination/pagination';
 import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
@@ -22,7 +21,6 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
     Tooltip,
     NgxSkeletonLoaderComponent,
     HeaderComponent,
-    PermissionDirective,
     PaginationComponent,
   ],
   templateUrl: './my-test.html',

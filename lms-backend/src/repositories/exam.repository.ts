@@ -66,7 +66,7 @@ export class ExamRepository {
     return {
       ...snapshot,
       questions: (snapshot.questions || []).map((question: any) => {
-        const { correct_answer, expected_answer, rubric, ...safeQuestion } = question;
+        const { correct_answer, correct_option, expected_answer, rubric, ...safeQuestion } = question;
         return safeQuestion;
       }),
     };

@@ -234,16 +234,11 @@ export class ExamController {
           const legacyExam = await repository.getExamById(exam_id);
           snapshot = repository.getSessionSnapshot(activeSession, legacyExam);
         }
-        const safeExam = repository.toStudentExamSnapshot(snapshot);
-        const safeQuestions = safeExam.questions || [];
-        const response = {
-          session_id: activeSession.id!,
-          current_question_index: activeSession.current_question_index,
-          total_questions: safeQuestions.length,
-          current_question: safeQuestions[activeSession.current_question_index],
-          exam_details: safeExam,
-          saved_answers: repository.getSessionAnswers(activeSession),
-        };
+        const response = this.buildStartExamResponse(
+          activeSession,
+          snapshot,
+          repository.getSessionAnswers(activeSession),
+        );
 
         return reply.send({
           success: true,
@@ -278,18 +273,11 @@ export class ExamController {
         reviewers: (exam as any).reviewers || [],
       });
       const snapshot = repository.getSessionSnapshot(session, exam);
-      const safeExam = repository.toStudentExamSnapshot(snapshot);
-      const safeQuestions = safeExam.questions || [];
-      const currentQuestion = safeQuestions[session.current_question_index];
-
-      const response = {
-        session_id: session.id!,
-        current_question_index: session.current_question_index,
-        total_questions: safeQuestions.length,
-        current_question: currentQuestion,
-        exam_details: safeExam,
-        saved_answers: repository.getSessionAnswers(session),
-      };
+      const response = this.buildStartExamResponse(
+        session,
+        snapshot,
+        repository.getSessionAnswers(session),
+      );
 
       return reply.send({
         success: true,
@@ -1071,5 +1059,76 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
     const duration = Number(exam?.duration_minutes) || 0;
     if (!start || duration <= 0) return null;
     return new Date(start.getTime() + duration * 60 * 1000);
+  }
+
+  private buildStartExamResponse(session: any, snapshot: any, savedAnswers: any[]) {
+    const safeExam = repository.toStudentExamSnapshot(snapshot);
+    const safeQuestions = (safeExam.questions || []).map((question: any) => {
+      const rawType = String(
+        question?.question_type || question?.type || "",
+      ).toLowerCase();
+      const normalizedType = rawType === "mcq" ? "mcq" : "theory";
+      const options = Array.isArray(question?.options)
+        ? question.options
+        : Array.isArray(question?.choices)
+          ? question.choices
+          : Array.isArray(question?.answer_options)
+            ? question.answer_options
+            : [];
+
+      return {
+        ...question,
+        id: question?.id || question?.question_id,
+        question_id: question?.question_id || question?.id,
+        question_text:
+          question?.question_text || question?.question || question?.title || question?.text || "",
+        text: question?.text || question?.question_text || question?.question || question?.title || "",
+        question_type: normalizedType,
+        type: rawType || normalizedType,
+        options,
+        marks: Number(question?.marks) || 0,
+      };
+    });
+    const now = new Date();
+    let expiresAt = safeExam.end_time ? new Date(safeExam.end_time) : null;
+    if (!expiresAt || isNaN(expiresAt.getTime())) {
+      const duration = Number(safeExam.duration_minutes) || 0;
+      const startedAt = session?.started_at ? new Date(session.started_at) : now;
+      expiresAt =
+        duration > 0 ? new Date(startedAt.getTime() + duration * 60 * 1000) : null;
+    }
+    const remainingSeconds =
+      expiresAt && !isNaN(expiresAt.getTime())
+        ? Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000))
+        : Math.max(0, (Number(safeExam.duration_minutes) || 0) * 60);
+
+    const exam = {
+      id: safeExam.exam_id,
+      title: safeExam.title,
+      subject: safeExam.subject,
+      duration_minutes: Number(safeExam.duration_minutes) || 0,
+      total_marks: Number(safeExam.total_marks) || 0,
+      passing_marks: Number(safeExam.passing_marks) || 0,
+      started_at: session?.started_at || null,
+      expires_at: expiresAt ? expiresAt.toISOString() : null,
+      start_time: safeExam.start_time || safeExam.exam_start_time || null,
+      end_time: safeExam.end_time || (expiresAt ? expiresAt.toISOString() : null),
+      exam_date: safeExam.exam_date || null,
+      exam_start_time: safeExam.exam_start_time || safeExam.start_time || null,
+      reviewer_type: safeExam.reviewer_type || "teacher",
+      questions: safeQuestions,
+    };
+
+    return {
+      session_id: session.id!,
+      current_question_index: session.current_question_index || 0,
+      total_questions: safeQuestions.length,
+      current_question: safeQuestions[session.current_question_index || 0] || null,
+      exam,
+      questions: safeQuestions,
+      remaining_seconds: remainingSeconds,
+      exam_details: exam,
+      saved_answers: savedAnswers || [],
+    };
   }
 }
