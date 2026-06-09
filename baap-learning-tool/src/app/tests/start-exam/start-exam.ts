@@ -36,6 +36,7 @@ export class StartExam {
   answeredStatus = signal<boolean[]>([]);
   showTimeUpModal = signal<boolean>(false);
   startError = signal<string>('');
+  isLoading = signal(false);
 
   private countdown: any = null;
   private router = inject(Router);
@@ -65,19 +66,28 @@ export class StartExam {
 
   getExam() {
     this.actualStartTime = new Date();
+    this.clearCountdown();
+    this.isLoading.set(true);
+    this.startError.set('');
     this.commonHttp
       .getCourse(
         `/client/${this.clientId}/exams/${this.examId}/start/${this.userId}`,
       )
       .subscribe({
         next: (response: any) => {
-        this.startError.set('');
-        this.session_id?.set(response?.data?.session_id || '');
-        this.examData?.set(response?.data?.exam_details || {});
-        this.questions?.set(this.examData()?.questions || []);
-        const questionCount = this.questions()?.length;
+        this.isLoading.set(false);
+        const normalized = this.normalizeStartExamResponse(response);
+        if (!normalized.sessionId || !normalized.questions.length) {
+          this.startError.set('Unable to load this test. Please try again.');
+          return;
+        }
 
-        const savedAnswers = response?.data?.saved_answers || [];
+        this.session_id?.set(normalized.sessionId);
+        this.examData?.set(normalized.exam);
+        this.questions?.set(normalized.questions);
+        const questionCount = normalized.questions.length;
+
+        const savedAnswers = normalized.savedAnswers;
         const selected = new Array(questionCount)?.fill('');
         const answered = new Array(questionCount)?.fill(false);
 
@@ -92,49 +102,16 @@ export class StartExam {
 
         this.selectedOptions?.set(selected);
         this.answeredStatus?.set(answered);
-        // this.selectedOptions?.set(new Array(questionCount)?.fill(''));
-        // this.answeredStatus?.set(new Array(questionCount)?.fill(false));
-        // this.selectedOptions?.set(
-        //   new Array(this.questions()?.length)?.fill(''),
-        // );
-        const durationMinutes = Number(this.examData()?.duration_minutes) || 0;
-        const exam = this.examData();
-        const totalSeconds = durationMinutes * 60;
-        let scheduledStart: Date | null = null;
 
-        if (exam?.exam_date && exam?.exam_start_time) {
-          const dateStr =
-            typeof exam?.exam_date === 'string'
-              ? exam?.exam_date
-              : new Date(exam?.exam_date)?.toISOString()?.split('T')[0];
-
-          const timeStr = exam?.exam_start_time?.toString();
-          const direct = new Date(timeStr);
-          scheduledStart =
-            timeStr?.includes('T') && !isNaN(direct?.getTime())
-              ? direct
-              : new Date(`${dateStr}T${timeStr}`);
+        if (normalized.remainingSeconds > 0) {
+          this?.startCountdown(normalized.remainingSeconds);
+          return;
         }
-        if (
-          scheduledStart &&
-          !isNaN(scheduledStart?.getTime()) &&
-          this.actualStartTime
-        ) {
-          const delaySeconds = Math?.max(
-            0,
-            Math?.floor(
-              (this.actualStartTime?.getTime() - scheduledStart?.getTime()) /
-                1000,
-            ),
-          );
 
-          const remainingSeconds = Math?.max(0, totalSeconds - delaySeconds);
-          this?.startCountdown(remainingSeconds);
-        } else {
-          this?.startCountdown(totalSeconds);
-        }
+        this.startError.set('This test has expired.');
       },
       error: (error) => {
+        this.isLoading.set(false);
         const code = error?.error?.error_code;
         const message =
           code === 'TEST_EXPIRED'
@@ -150,6 +127,110 @@ export class StartExam {
         this.toastr.error(message);
       },
     });
+  }
+
+  private normalizeStartExamResponse(response: any) {
+    const data = response?.data || {};
+    const rawExam =
+      data?.exam ||
+      data?.exam_details ||
+      data?.exam_snapshot ||
+      data?.session?.exam_snapshot ||
+      data?.answers_data?.exam_snapshot ||
+      {};
+    const rawQuestions =
+      data?.questions ||
+      rawExam?.questions ||
+      data?.exam_snapshot?.questions ||
+      data?.answers_data?.exam_snapshot?.questions ||
+      [];
+    const questions = (Array.isArray(rawQuestions) ? rawQuestions : []).map(
+      (question: any) => this.normalizeQuestion(question),
+    );
+    const durationMinutes = Number(
+      rawExam?.duration_minutes || rawExam?.durationMinutes || data?.duration_minutes || 0,
+    );
+    const expiresAt =
+      rawExam?.expires_at ||
+      rawExam?.end_time ||
+      rawExam?.endTime ||
+      data?.expires_at ||
+      null;
+    const remainingFromBackend = Number(data?.remaining_seconds);
+    const remainingFromExpiry = expiresAt
+      ? Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000)
+      : 0;
+    const remainingSeconds = Number.isFinite(remainingFromBackend) && remainingFromBackend > 0
+      ? remainingFromBackend
+      : remainingFromExpiry > 0
+        ? remainingFromExpiry
+        : durationMinutes > 0
+          ? durationMinutes * 60
+          : 0;
+
+    return {
+      sessionId: data?.session_id || data?.session?.id || '',
+      savedAnswers: data?.saved_answers || data?.answers || [],
+      remainingSeconds,
+      exam: {
+        id: rawExam?.id || rawExam?.exam_id || this.examId,
+        title: rawExam?.title || rawExam?.name || '',
+        duration_minutes: durationMinutes,
+        total_marks: Number(rawExam?.total_marks || rawExam?.totalMarks || 0),
+        passing_marks: Number(rawExam?.passing_marks || rawExam?.passingMarks || 0),
+        started_at: rawExam?.started_at || data?.started_at || null,
+        expires_at: expiresAt,
+        exam_date: rawExam?.exam_date || rawExam?.start_time || null,
+        exam_start_time: rawExam?.exam_start_time || rawExam?.start_time || null,
+        questions,
+      },
+      questions,
+    };
+  }
+
+  private normalizeQuestion(question: any) {
+    const rawType = String(
+      question?.question_type || question?.type || question?.questionType || '',
+    ).toLowerCase();
+    const type =
+      rawType === 'mcq'
+        ? 'mcq'
+        : rawType === 'long' || rawType === 'practical'
+          ? rawType
+          : 'short';
+    const rawOptions =
+      question?.options || question?.choices || question?.answer_options || [];
+    const options = (Array.isArray(rawOptions) ? rawOptions : []).map((option: any) =>
+      typeof option === 'string'
+        ? { option_text: option }
+        : {
+            ...option,
+            option_text:
+              option?.option_text || option?.label || option?.value || option?.text || '',
+          },
+    );
+
+    return {
+      ...question,
+      id: question?.id || question?.question_id,
+      question_id: question?.question_id || question?.id,
+      text:
+        question?.question_text ||
+        question?.question ||
+        question?.title ||
+        question?.text ||
+        '',
+      question_text:
+        question?.question_text ||
+        question?.question ||
+        question?.title ||
+        question?.text ||
+        '',
+      type,
+      question_type: type === 'mcq' ? 'mcq' : 'theory',
+      options,
+      marks: Number(question?.marks || question?.question_marks || 0),
+    };
   }
 
   submitExam() {
@@ -257,7 +338,7 @@ export class StartExam {
     this.clearCountdown();
     this.remainingSeconds?.set(Math?.max(0, totalSeconds));
     if (this.remainingSeconds() <= 0) {
-      this.onTimeUp();
+      this.startError.set('This test has expired.');
       return;
     }
     this.countdown = setInterval(() => {
@@ -289,6 +370,7 @@ export class StartExam {
 
   private onTimeUp() {
     if (this.examSubmitted) return;
+    if (!this.session_id() || !this.questions().length) return;
 
     this.showTimeUpModal?.set(true);
     this.submitExam();

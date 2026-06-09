@@ -293,7 +293,7 @@
               Cancel
             </button>
             <button
-              *authorize="'TSE'"
+              type="button"
               (click)="
                 canStartExam(selectedTest) && startExam(selectedTest?.id)
               "
