@@ -48,7 +48,7 @@ export class SocketService {
     }
 
     this.socket = new WebSocket(
-      `wss://meet.157-20-215-17.nip.io/ws/meetings/${roomName}`,
+      `ws://localhost:3000/ws/meetings/${roomName}`,
     );
 
     // register callback for signaling frames
@@ -454,3 +454,4 @@ export class SocketService {
     }
   }
 }
+

@@ -13,13 +13,12 @@ import { StorageService } from '../../services/storage-service';
 import { STORAGEENUMS } from '../../shared/enum';
 import { CommonHttpService } from '../../services/common-http.service';
 import { PermissionDirective } from '../../services/permission-directive';
-import { Tooltip } from '../tooltip';
 import { NavigationService } from '../../core/navigation/navigation.service';
 import { NavConfig, NavItem } from '../../core/navigation/navigation.types';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [CommonModule, RouterModule, Tooltip, PermissionDirective],
+  imports: [CommonModule, RouterModule, PermissionDirective],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
@@ -316,3 +315,4 @@ export class Sidebar implements OnInit {
     this.router?.navigate(['/organizations']);
   }
 }
+

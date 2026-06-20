@@ -13,7 +13,6 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
   const skipTokenUrls = [
     'doc-upload/signed-url',
-    'baap-app-images.s3.ap-south-1.amazonaws.com',
   ];
   const isAuthLogin = req.url.includes('/auth/login');
   const isAuthMe = req.url === `${environment.AUTH_BASE_URL}/me`;
@@ -54,3 +53,4 @@ export const tokenInterceptor: HttpInterceptorFn = (req, next) => {
     }),
   );
 };
+
