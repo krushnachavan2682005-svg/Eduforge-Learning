@@ -18,7 +18,7 @@ import { Auth } from './auth/auth';
 export class App implements OnInit {
   isUser: any;
   private router = inject(Router);
-  protected title = 'Credit Portal';
+  protected title = 'EduForge LMS';
   private str = inject(StorageService);
   private sidebarService = inject(SidebarService);
   private authService = inject(Auth);
@@ -72,3 +72,4 @@ export class App implements OnInit {
     this.sidebarService?.isOpen?.set(this.user && shouldShowSidebar);
   }
 }
+

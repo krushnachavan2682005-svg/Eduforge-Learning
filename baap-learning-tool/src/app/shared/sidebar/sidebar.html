@@ -3,32 +3,11 @@
   [class.collapsed]="isCollapsed"
 >
       @if (!isCollapsed) {
-        <div class="pl-6 pt-3 flex gap-3 items-center shrink-0">
-          <div
-            class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-white flex-shrink-0"
-          >
-            @if (logoUrl) {
-              <img
-                [src]="logoUrl"
-                class="w-full h-full object-cover rounded-full"
-              />
-            } @else {
-              <img
-                src="images/baap-logo.png"
-                alt="default-logo"
-                class="w-full h-full object-cover rounded-full"
-              />
-            }
-          </div>
-
-          <div>
-            <p
-              class="ellipsis text-lg sm:text-lg relative font-semibold px-1"
-              appTooltip="{{ legalOrgName }}"
-              tooltipPosition="bottom"
-            >
-              {{ legalOrgName }}
-            </p>
+        <div class="sidebar-brand shrink-0">
+          <div class="brand-mark" aria-hidden="true">EF</div>
+          <div class="brand-text">
+            <strong>EduForge LMS</strong>
+            <span>Learning Workspace</span>
           </div>
         </div>
       }
@@ -219,3 +198,6 @@
     </div>
   </div>
 }
+
+
+
