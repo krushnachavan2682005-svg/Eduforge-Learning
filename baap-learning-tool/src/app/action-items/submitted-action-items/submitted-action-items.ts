@@ -7,7 +7,6 @@ import { Component, inject, signal } from '@angular/core';
 import { SkeletonTheme } from '../../services/skeleton-theme';
 import { SidebarService } from '../../services/sidebar.service';
 import { StorageService } from '../../services/storage-service';
-import { HeaderComponent } from '../../shared/header.component';
 import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
 import { CommonHttpService } from '../../services/common-http.service';
 import { PaginationComponent } from '../../pagination/pagination';
@@ -19,9 +18,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   standalone: true,
   imports: [
     FormsModule,
-    CommonModule,
-    HeaderComponent,
-    NgxSkeletonLoaderComponent,
+    CommonModule,    NgxSkeletonLoaderComponent,
     PaginationComponent,
   ],
   templateUrl: './submitted-action-items.html',
@@ -154,3 +151,4 @@ export class SubmittedActionItems {
     this.getAllActionItems();
   }
 }
+

@@ -12,17 +12,17 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
   standalone: true,
   imports: [CommonModule, FormsModule, PageHeader, EmptyState],
   template: `
-    <div class="p-4">
+    <div class="min-h-full bg-slate-50 p-5 md:p-6">
       <app-page-header
         [title]="'Manage Students'"
         [subtitle]="classItem()?.name ? 'Class: ' + classItem()?.name : 'Add students to this class'"
       ></app-page-header>
 
-      <section class="theme-bg-secondary theme-border rounded p-4 mb-4">
-        <div class="flex flex-col md:flex-row gap-3 md:items-end">
-          <label class="flex flex-col gap-1 flex-1">
+      <section class="mb-5 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div class="flex flex-col gap-3 md:flex-row md:items-end">
+          <label class="grid flex-1 gap-2 text-sm font-bold text-slate-700">
             Available Students
-            <select class="px-3 py-2 rounded theme-bg-gray theme-border" [(ngModel)]="selectedStudentId">
+            <select class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" [(ngModel)]="selectedStudentId">
               <option value="">Select student</option>
               @for (student of availableStudents(); track student.id) {
                 <option [value]="student.id">
@@ -31,40 +31,46 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
               }
             </select>
           </label>
-          <button class="px-4 py-2 rounded theme-bg-gray theme-border font-semibold" [disabled]="!selectedStudentId || isSaving()" (click)="addStudent()">
+          <button class="h-11 rounded-2xl bg-[#116466] px-5 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#0f3554] disabled:opacity-60" [disabled]="!selectedStudentId || isSaving()" (click)="addStudent()">
             {{ isSaving() ? 'Adding...' : 'Add Student' }}
           </button>
         </div>
       </section>
 
-      <section class="theme-bg-secondary theme-border rounded p-4">
-        <h2 class="font-semibold mb-2">Current Students</h2>
+      <section class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <div class="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900">Current Students</h2>
+            <p class="mt-1 text-sm text-slate-500">Students assigned to this class.</p>
+          </div>
+          <span class="rounded-full bg-teal-50 px-3 py-1 text-xs font-extrabold text-teal-700">{{ assignedStudents().length }} assigned</span>
+        </div>
         @if (isLoadingAssigned()) {
-          <div class="p-4">Loading assigned students...</div>
+          <div class="rounded-2xl bg-slate-50 p-4 text-slate-500">Loading assigned students...</div>
         } @else if (!assignedStudents().length) {
           <app-empty-state title="No students assigned" message="Add a student to this class to begin."></app-empty-state>
         } @else {
-          <div class="overflow-x-auto">
-            <table class="w-full text-left">
-              <thead>
+          <div class="overflow-x-auto rounded-2xl border border-slate-100">
+            <table class="w-full min-w-[760px] text-left text-sm">
+              <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
-                  <th class="p-3">Name</th>
-                  <th class="p-3">Email</th>
-                  <th class="p-3">Phone</th>
-                  <th class="p-3">Status</th>
-                  <th class="p-3 text-right">Action</th>
+                  <th class="px-5 py-4">Name</th>
+                  <th class="px-5 py-4">Email</th>
+                  <th class="px-5 py-4">Phone</th>
+                  <th class="px-5 py-4">Status</th>
+                  <th class="px-5 py-4 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-slate-100">
                 @for (student of assignedStudents(); track student.id) {
-                  <tr class="border-t theme-border">
-                    <td class="p-3">{{ student.first_name }} {{ student.last_name }}</td>
-                    <td class="p-3">{{ student.email }}</td>
-                    <td class="p-3">{{ student.phone || '--' }}</td>
-                    <td class="p-3">{{ student.status }}</td>
-                    <td class="p-3 text-right">
+                  <tr class="transition hover:bg-slate-50/80">
+                    <td class="px-5 py-4 font-bold text-slate-900">{{ student.first_name }} {{ student.last_name }}</td>
+                    <td class="px-5 py-4 text-slate-600">{{ student.email }}</td>
+                    <td class="px-5 py-4 text-slate-600">{{ student.phone || '--' }}</td>
+                    <td class="px-5 py-4"><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-extrabold text-emerald-700">{{ student.status }}</span></td>
+                    <td class="px-5 py-4 text-right">
                       <button
-                        class="px-3 py-1 rounded theme-bg-gray theme-border"
+                        class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 hover:border-rose-200 hover:text-rose-700 disabled:opacity-60"
                         [disabled]="removingStudentId() === student.id"
                         (click)="removeStudent(student.id)"
                       >

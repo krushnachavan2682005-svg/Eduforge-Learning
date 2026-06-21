@@ -1,0 +1,60 @@
+:host {
+  display: block;
+}
+
+:host > div:first-child > button {
+  min-height: 44px;
+  border: 1px solid #dbe5ee !important;
+  border-radius: 16px !important;
+  background: #eaf5f4 !important;
+  color: #0f3554 !important;
+  padding: 0.65rem 1rem !important;
+  font-weight: 800 !important;
+}
+
+.fixed.top-0.right-0,
+.overflow-auto.fixed.top-0.right-0 {
+  border-left: 1px solid #e6edf3;
+  box-shadow: -24px 0 60px rgba(15, 53, 84, 0.18);
+}
+
+h2 {
+  color: #0f3554;
+  font-weight: 800;
+}
+
+label {
+  color: #334155;
+  font-weight: 700;
+}
+
+button {
+  border-radius: 14px;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.fixed.bottom-0 button:last-child {
+  background: #0f3554 !important;
+  color: #ffffff !important;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(15, 53, 84, 0.2);
+}
+
+.fixed.bottom-0 button:first-child {
+  border: 1px solid #dbe5ee !important;
+  background: #ffffff !important;
+  color: #334155 !important;
+  font-weight: 700;
+}
+
+.theme-bg-secondary,
+.theme-bg-gray {
+  border-radius: 16px;
+}

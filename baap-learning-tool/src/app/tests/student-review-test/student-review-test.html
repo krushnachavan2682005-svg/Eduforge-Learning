@@ -1,272 +1,76 @@
-<div class="flex w-full min-h-screen">
-  <div class="flex-grow min-w-0 mx-8">
-    <div
-      class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 select-none theme-text-secondary theme-text-dark"
-    >
-      <div class="bg-white p-3 rounded-lg shadow-sm">
-        <div class="flex flex-wrap gap-4">
-          <div
-            class="flex items-center cursor-pointer h-10 w-10 mt-3 rounded-md pl-2 theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark"
-            (click)="goBack()"
-          >
-            <i class="material-icons mr-1 text-2xl">arrow_back</i>
-          </div>
-          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
-            <p>Student Name</p>
-            <h2 class="font-semibold text-lg">
-              {{ examData()?.student_name }}
-            </h2>
-          </div>
-          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
-            <p>Reviewed By</p>
-            <h2 class="font-semibold text-lg">
-              {{ examData()?.reviewer_name || "--" }}
-            </h2>
-          </div>
-          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
-            <p>Exam Name</p>
-            <h2 class="font-semibold text-lg">
-              {{ examData()?.test_name }}
-            </h2>
-          </div>
-
-          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
-            <p>Duration</p>
-            <span class="font-semibold">
-              {{ examData()?.duration_minutes }} Min
-            </span>
-          </div>
-
-          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
-            <p>Total Marks</p>
-            <span class="font-semibold">
-              {{ examData()?.total_marks }}
-            </span>
-          </div>
-
-          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
-            <p>Passing Marks</p>
-            <span class="font-semibold">
-              {{ examData()?.passing_marks }}
-            </span>
-          </div>
-
-          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
-            <p>Status</p>
-            <span class="font-semibold capitalize">
-              {{ examData()?.review_status }}
-            </span>
-          </div>
-
-          <div class="theme-bg-gray theme-bg-secondary px-4 py-2 rounded-lg">
-            <p>Submitted At</p>
-            <span class="font-semibold text-md">
-              {{ examData()?.submitted_at | date: "medium" }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white p-4 rounded-lg shadow-sm">
-        <h3 class="font-semibold text-lg mb-1">Summary</h3>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="bg-gray-50 p-3 rounded">
-            <p>Total Questions</p>
-            <span class="font-semibold">
-              {{ examData()?.summary?.total_questions }}
-            </span>
-          </div>
-
-          <div class="bg-green-50 p-3 rounded">
-            <p>Correct</p>
-            <span class="font-semibold text-green-600">
-              {{ examData()?.summary?.correct_answers }}
-            </span>
-          </div>
-
-          <div class="bg-red-50 p-3 rounded">
-            <p>Wrong</p>
-            <span class="font-semibold text-red-600">
-              {{ examData()?.summary?.wrong_answers }}
-            </span>
-          </div>
-
-          <div class="bg-blue-50 p-3 rounded">
-            <p>Marks</p>
-            <span class="font-semibold text-blue-600">
-              {{ examData()?.summary?.achieved_marks }} /
-              {{ examData()?.summary?.total_marks }}
-            </span>
-          </div>
-
-          <div class="bg-yellow-50 p-3 rounded">
-            <p>Percentage</p>
-            <span class="font-semibold">
-              {{ examData()?.summary?.percentage }}%
-            </span>
-          </div>
-
-          <div class="bg-purple-50 p-3 rounded">
-            <p>Grade</p>
-            <span class="font-semibold">
-              {{ examData()?.summary?.grade }}
-            </span>
-          </div>
-
-          <div class="bg-gray-100 p-3 rounded">
-            <p>Result</p>
-            <span
-              class="font-semibold"
-              [ngClass]="{
-                'text-green-600': examData()?.summary?.passed,
-                'text-red-600': !examData()?.summary?.passed,
-              }"
-            >
-              {{ examData()?.summary?.passed ? "Pass" : "Fail" }}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white mt-4 p-4 rounded-lg shadow-sm">
-        <div class="flex justify-between">
-          <div>
-            Type:
-            <span class="font-semibold">
-              {{ questions()[currentQuestionIndex]?.question_type | uppercase }}
-            </span>
-          </div>
-
-          <div>
-            Marks:
-            <span class="font-semibold">
-              {{ questions()[currentQuestionIndex]?.question_marks }}
-            </span>
-          </div>
-        </div>
-
-        <div class="mt-2 font-semibold text-xl">
-          Q{{ currentQuestionIndex + 1 }}.
-          {{ questions()[currentQuestionIndex]?.question_text }}
-        </div>
-        @if (questions()[currentQuestionIndex]?.question_type === "mcq") {
-          <div class="mt-4">
-            @for (
-              option of questions()[currentQuestionIndex]?.options;
-              track option
-            ) {
-              <div
-                class="flex items-center p-2 mb-5 border-2 rounded-xl cursor-pointer transition-all duration-200 bg-white"
-                [ngClass]="{
-                  'border-green-500':
-                    option.option_text ===
-                    questions()[currentQuestionIndex]?.correct_answer,
-                  'border-red-500':
-                    option.option_text ===
-                      questions()[currentQuestionIndex]?.user_answer &&
-                    !questions()[currentQuestionIndex]?.is_correct,
-                }"
-              >
-                <div
-                  class="rounded-full border-2 border-slate-300 p-1 flex items-center mr-2"
-                >
-                  <div
-                    class="w-3.5 h-3.5 rounded-full flex-shrink-0 transition-all duration-200"
-                    [ngClass]="{
-                      'bg-blue-500 ring-2 ring-blue-500':
-                        option?.option_text ===
-                        questions()[currentQuestionIndex]?.user_answer,
-                      'bg-transparent':
-                        option?.option_text !==
-                        questions()[currentQuestionIndex]?.user_answer,
-                    }"
-                  ></div>
-                </div>
-
-                {{ option.option_text }}
-              </div>
-            }
-          </div>
-        }
-        @if (questions()[currentQuestionIndex]?.question_type === "short") {
-          <textarea
-            class="w-full mt-3 border resize-none p-2 rounded"
-            [value]="questions()[currentQuestionIndex]?.user_answer"
-            disabled
-          >
-          </textarea>
-        }
-
-        @if (questions()[currentQuestionIndex]?.question_type === "long") {
-          <textarea
-            class="w-full mt-3 border resize-none p-2 rounded h-[120px]"
-            [value]="questions()[currentQuestionIndex]?.user_answer"
-            disabled
-          >
-          </textarea>
-        }
-        <div class="mt-4">
-          @if (questions()[currentQuestionIndex]?.question_type === "mcq") {
-            <span class="flex gap-2">
-              Correct Answer:
-              <p class="text-green-600">
-                {{ questions()[currentQuestionIndex]?.correct_answer || "--" }}
-              </p>
-            </span>
-          }
-
-          <span class="flex gap-2">
-            Status:
-            <p
-              [ngClass]="{
-                'text-green-600': questions()[currentQuestionIndex]?.is_correct,
-                'text-red-600': !questions()[currentQuestionIndex]?.is_correct,
-              }"
-            >
-              {{
-                questions()[currentQuestionIndex]?.is_correct
-                  ? "Correct"
-                  : "Wrong"
-              }}
-            </p>
-          </span>
-          <span class="flex gap-2"
-            >Marks Obtained:
-            <p class="text-md">
-              {{ questions()[currentQuestionIndex]?.marks_obtained }}
-            </p>
-          </span>
-          @if (questions()[currentQuestionIndex]?.reviewer_comment) {
-            <span class="flex gap-2"
-              >Reviewer Comment:
-              <p class="text-md">
-                {{
-                  questions()[currentQuestionIndex]?.reviewer_comment || "--"
-                }}
-              </p>
-            </span>
-          }
-        </div>
-      </div>
-
-      <div class="flex justify-between mt-4">
-        <button
-          class="px-3 py-2 rounded font-semibold disabled:opacity-50 bg-blue-600 text-white"
-          [disabled]="currentQuestionIndex === 0"
-          (click)="goToPreviousQuestion()"
-        >
-          Previous
-        </button>u
-
-        <button
-          class="px-3 py-2 rounded font-semibold disabled:opacity-50 bg-blue-600 text-white"
-          [disabled]="currentQuestionIndex === questions().length - 1"
-          (click)="goToNextQuestion()"
-        >
-          Next
-        </button>
+<div class="min-h-full bg-[#f5f7fb] p-5 md:p-6 text-slate-900">
+  <header class="rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center">
+      <button class="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 hover:text-teal-700" (click)="goBack()">
+        <i class="material-icons text-2xl">arrow_back</i>
+      </button>
+      <div class="grid flex-1 grid-cols-1 gap-3 md:grid-cols-4 xl:grid-cols-8">
+        <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Student</p><p class="mt-1 font-extrabold text-slate-900">{{ examData()?.student_name }}</p></div>
+        <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Reviewed By</p><p class="mt-1 font-extrabold text-slate-900">{{ examData()?.reviewer_name || '--' }}</p></div>
+        <div class="rounded-2xl bg-slate-50 p-4 md:col-span-2"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Exam Name</p><p class="mt-1 truncate font-extrabold text-slate-900">{{ examData()?.test_name }}</p></div>
+        <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Duration</p><p class="mt-1 font-extrabold text-slate-900">{{ examData()?.duration_minutes }} Min</p></div>
+        <div class="rounded-2xl bg-teal-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-teal-700">Total Marks</p><p class="mt-1 font-extrabold text-[#0f3554]">{{ examData()?.total_marks }}</p></div>
+        <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Passing</p><p class="mt-1 font-extrabold text-slate-900">{{ examData()?.passing_marks }}</p></div>
+        <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Status</p><p class="mt-1 font-extrabold capitalize text-slate-900">{{ examData()?.review_status }}</p></div>
       </div>
     </div>
+  </header>
+
+  <section class="mt-5 rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm">
+    <h2 class="mb-4 text-lg font-extrabold text-slate-900">Score summary</h2>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+      <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Questions</p><p class="mt-1 font-extrabold text-slate-900">{{ examData()?.summary?.total_questions }}</p></div>
+      <div class="rounded-2xl bg-emerald-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-emerald-700">Correct</p><p class="mt-1 font-extrabold text-emerald-700">{{ examData()?.summary?.correct_answers }}</p></div>
+      <div class="rounded-2xl bg-rose-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-rose-700">Wrong</p><p class="mt-1 font-extrabold text-rose-700">{{ examData()?.summary?.wrong_answers }}</p></div>
+      <div class="rounded-2xl bg-blue-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-blue-700">Marks</p><p class="mt-1 font-extrabold text-blue-700">{{ examData()?.summary?.achieved_marks }} / {{ examData()?.summary?.total_marks }}</p></div>
+      <div class="rounded-2xl bg-amber-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-amber-700">Percentage</p><p class="mt-1 font-extrabold text-slate-900">{{ examData()?.summary?.percentage }}%</p></div>
+      <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Grade</p><p class="mt-1 font-extrabold text-slate-900">{{ examData()?.summary?.grade }}</p></div>
+      <div class="rounded-2xl p-4" [ngClass]="examData()?.summary?.passed ? 'bg-emerald-50' : 'bg-rose-50'"><p class="text-xs font-bold uppercase tracking-wide" [ngClass]="examData()?.summary?.passed ? 'text-emerald-700' : 'text-rose-700'">Result</p><p class="mt-1 font-extrabold" [ngClass]="examData()?.summary?.passed ? 'text-emerald-700' : 'text-rose-700'">{{ examData()?.summary?.passed ? 'Pass' : 'Fail' }}</p></div>
+    </div>
+  </section>
+
+  <main class="mt-5 rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm md:p-6">
+    <div class="flex flex-col gap-3 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
+      <div class="flex flex-wrap items-center gap-2 text-sm font-bold text-slate-600">
+        <span class="rounded-full bg-slate-100 px-3 py-1">Q. {{ currentQuestionIndex + 1 }} of {{ questions().length }}</span>
+        <span class="rounded-full bg-blue-50 px-3 py-1 text-blue-700">{{ questions()[currentQuestionIndex]?.question_type | uppercase }}</span>
+      </div>
+      <span class="rounded-full bg-teal-50 px-3 py-1 text-sm font-extrabold text-teal-700">{{ questions()[currentQuestionIndex]?.question_marks }} marks</span>
+    </div>
+
+    <h1 class="mt-5 text-xl font-extrabold leading-8 text-slate-900">{{ questions()[currentQuestionIndex]?.question_text }}</h1>
+
+    @if (questions()[currentQuestionIndex]?.question_type === 'mcq') {
+      <div class="mt-5 grid gap-3">
+        @for (option of questions()[currentQuestionIndex]?.options; track option) {
+          <div class="flex items-center gap-3 rounded-2xl border p-4" [ngClass]="{ 'border-emerald-200 bg-emerald-50': option.option_text === questions()[currentQuestionIndex]?.correct_answer, 'border-rose-200 bg-rose-50': option.option_text === questions()[currentQuestionIndex]?.user_answer && !questions()[currentQuestionIndex]?.is_correct, 'border-slate-200 bg-slate-50': option.option_text !== questions()[currentQuestionIndex]?.correct_answer && option.option_text !== questions()[currentQuestionIndex]?.user_answer }">
+            <span class="inline-flex h-5 w-5 rounded-full border-2" [ngClass]="{ 'border-[#116466] bg-[#116466]': option?.option_text === questions()[currentQuestionIndex]?.user_answer, 'border-slate-300': option?.option_text !== questions()[currentQuestionIndex]?.user_answer }"></span>
+            <span class="font-semibold text-slate-800">{{ option.option_text }}</span>
+          </div>
+        }
+      </div>
+    }
+    @if (questions()[currentQuestionIndex]?.question_type === 'short') {
+      <textarea class="mt-5 min-h-32 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 p-4" [value]="questions()[currentQuestionIndex]?.user_answer" disabled></textarea>
+    }
+    @if (questions()[currentQuestionIndex]?.question_type === 'long') {
+      <textarea class="mt-5 h-40 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 p-4" [value]="questions()[currentQuestionIndex]?.user_answer" disabled></textarea>
+    }
+
+    <section class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-3">
+      @if (questions()[currentQuestionIndex]?.question_type === 'mcq') {
+        <div class="rounded-2xl bg-emerald-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-emerald-700">Correct Answer</p><p class="mt-1 font-bold text-emerald-700">{{ questions()[currentQuestionIndex]?.correct_answer || '--' }}</p></div>
+      }
+      <div class="rounded-2xl p-4" [ngClass]="questions()[currentQuestionIndex]?.is_correct ? 'bg-emerald-50' : 'bg-rose-50'"><p class="text-xs font-bold uppercase tracking-wide" [ngClass]="questions()[currentQuestionIndex]?.is_correct ? 'text-emerald-700' : 'text-rose-700'">Status</p><p class="mt-1 font-bold" [ngClass]="questions()[currentQuestionIndex]?.is_correct ? 'text-emerald-700' : 'text-rose-700'">{{ questions()[currentQuestionIndex]?.is_correct ? 'Correct' : 'Wrong' }}</p></div>
+      <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Marks Obtained</p><p class="mt-1 font-bold text-slate-900">{{ questions()[currentQuestionIndex]?.marks_obtained }}</p></div>
+      @if (questions()[currentQuestionIndex]?.reviewer_comment) {
+        <div class="rounded-2xl bg-slate-50 p-4 md:col-span-3"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Teacher Feedback</p><p class="mt-1 text-sm leading-6 text-slate-700">{{ questions()[currentQuestionIndex]?.reviewer_comment || '--' }}</p></div>
+      }
+    </section>
+  </main>
+
+  <div class="mt-5 flex justify-between">
+    <button class="rounded-2xl border border-slate-200 bg-white px-5 py-2.5 font-bold text-slate-700 disabled:opacity-50" [disabled]="currentQuestionIndex === 0" (click)="goToPreviousQuestion()">Previous</button>
+    <button class="rounded-2xl bg-[#116466] px-5 py-2.5 font-extrabold text-white disabled:opacity-50" [disabled]="currentQuestionIndex === questions().length - 1" (click)="goToNextQuestion()">Next</button>
   </div>
 </div>

@@ -30,6 +30,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   imports: [ReactiveFormsModule, FormsModule, NgSelectModule, CommonModule],
   providers: [StorageService],
   templateUrl: './add-courses.html',
+  styleUrl: './add-courses.scss',
 })
 export class AddCourses implements OnInit {
   courses: any;
@@ -496,3 +497,4 @@ export class AddCourses implements OnInit {
     );
   }
 }
+

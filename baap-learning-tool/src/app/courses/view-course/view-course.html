@@ -1,70 +1,87 @@
 @if (course()) {
-  <div class="mx-2 sm:mx-4 md:mx-8 lg:mx-10 mt-2">
-    <div
-      class="rounded theme-bg-gray theme-bg-secondary p-4 header theme-text-secondary theme-text-dark"
-    >
-      <div class="flex items-center cursor-pointer">
-        <i
-          class="material-icons cursor-pointer rounded-md hover:bg-gray-200 p-1"
-          (click)="goToCoursesList()"
-        >
-          arrow_back
-        </i>
-        <span class="px-3 font-normal">Back To List</span>
-      </div>
-      <div class="flex items-start gap-4">
-        <div class="flex-1 flex flex-col gap-2 mt-2">
-          <div class="flex items-center">
-            <h3 class="text-lg mr-2">Course Name:</h3>
-            <span class="font-semibold text-xl">
-              {{ course()?.title || "--" | titlecase }}
-            </span>
-          </div>
-          <div class="flex items-start justify-between gap-4 w-full">
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="flex items-center gap-1">
-                <h3 class="text-lg mr-2">Level:</h3>
-                <span class="font-semibold text-xl">
-                  {{ course()?.level || "--" | titlecase }}
-                </span>
-              </div>
-              <div class="flex items-center gap-1">
-                <h3 class="text-lg mr-2">Language:</h3>
-                <span class="font-semibold text-xl">
-                  {{ course()?.language || "--" | titlecase }}
-                </span>
-              </div>
+  <div class="min-h-[calc(100vh-110px)] bg-[#f5f7fb] px-3 pb-10 pt-4 text-slate-900 sm:px-5 lg:px-8">
+    <section class="rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm md:p-6">
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 transition hover:border-[#6fa7a4] hover:text-[#0f3554]"
+        (click)="goToCoursesList()"
+      >
+        <i class="material-icons text-lg">arrow_back</i>
+        Back to courses
+      </button>
 
-              @if (course()?.tags?.length > 0) {
-                <div class="flex items-center gap-2">
-                  <h3 class="text-lg mr-2">Tags:</h3>
-                  <div class="flex flex-wrap gap-2">
-                    @for (tag of course()?.tags; track tag) {
-                      @if (tag) {
-                        <span
-                          class="inline-block bg-gray-50 px-3 py-1 rounded text-lg font-semibold"
-                        >
-                          {{ tag }}
-                        </span>
-                      }
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-            <div>
-              <button
-                class="font-semibold text-base px-4 py-2 shadow-md rounded cursor-pointer theme-bg-secondary theme-bg-gray hover:bg-gray-200 transition"
-                (click)="showLessonModal = true"
-              >
-                <i class="fas fa-plus mr-2"></i>Add lesson
-              </button>
-            </div>
-          </div>
+      <div class="mt-5 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+        <div class="min-w-0 flex-1">
+          <p class="text-xs font-extrabold uppercase tracking-[0.18em] text-[#6fa7a4]">Course Detail</p>
+          <h1 class="mt-2 break-words text-2xl font-extrabold text-[#0f3554] md:text-4xl">
+            {{ course()?.title || '--' | titlecase }}
+          </h1>
+          <p class="mt-3 max-w-3xl text-sm leading-6 text-slate-500">
+            {{ course()?.description || 'No description has been added for this course yet.' }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0f3554] px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-[#0f3554]/20 transition hover:-translate-y-0.5"
+          (click)="showLessonModal = true"
+        >
+          <i class="material-icons text-lg">add</i>
+          Add Lesson
+        </button>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Level</p>
+          <p class="mt-1 font-extrabold text-slate-900">{{ course()?.level || '--' | titlecase }}</p>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Language</p>
+          <p class="mt-1 font-extrabold text-slate-900">{{ course()?.language || '--' | titlecase }}</p>
+        </div>
+        <div class="rounded-2xl bg-[#eaf5f4] p-4">
+          <p class="text-xs font-bold uppercase tracking-wide text-[#116466]">Lessons</p>
+          <p class="mt-1 font-extrabold text-[#0f3554]">{{ course()?.lessons?.length || 0 }}</p>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-4">
+          <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Status</p>
+          <p class="mt-1 font-extrabold text-slate-900">{{ course()?.status || 'Active' | titlecase }}</p>
         </div>
       </div>
-    </div>
-    <div class="mt-4">
+
+      @if (course()?.tags?.length > 0) {
+        <div class="mt-5 flex flex-wrap gap-2">
+          @for (tag of course()?.tags; track tag) {
+            @if (tag) {
+              <span class="rounded-full border border-[#d7e8e6] bg-[#f3fbfa] px-3 py-1 text-sm font-bold text-[#116466]">{{ tag }}</span>
+            }
+          }
+        </div>
+      }
+    </section>
+
+    <section class="mt-5 rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm md:p-6">
+      <div class="flex flex-col gap-2 border-b border-slate-100 pb-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-900">Lessons</h2>
+          <p class="text-sm text-slate-500">Organize sections, resources, and practice content for this course.</p>
+        </div>
+        <span class="rounded-full bg-slate-100 px-3 py-1 text-sm font-bold text-slate-600">
+          {{ course()?.lessons?.length || 0 }} lesson{{ (course()?.lessons?.length || 0) === 1 ? '' : 's' }}
+        </span>
+      </div>
+
+      @if ((course()?.lessons?.length || 0) === 0) {
+        <div class="mt-6 rounded-3xl border border-dashed border-[#cbd8e3] bg-[#fbfdff] p-10 text-center">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-[#eaf5f4] text-[#0f3554]">
+            <i class="material-icons text-3xl">auto_stories</i>
+          </div>
+          <h3 class="mt-4 text-lg font-extrabold text-slate-900">No lessons yet</h3>
+          <p class="mt-2 text-sm text-slate-500">Add a lesson to start building structured learning content.</p>
+        </div>
+      }
+
       <app-add-lesson
         [open]="showAddCourseModal"
         [course]="course()"
@@ -73,8 +90,7 @@
         (refreshCourse)="onRefreshCourse()"
         [openLessonModal]="showLessonModal"
         (openLessonModalChange)="showLessonModal = $event"
-      >
-      </app-add-lesson>
-    </div>
+      ></app-add-lesson>
+    </section>
   </div>
 }

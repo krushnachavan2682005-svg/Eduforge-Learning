@@ -180,6 +180,14 @@ export class Test {
     this.router?.navigate([this.workspaceNav.getTestCreateRoute()]);
   }
 
+  goToAssignTest() {
+    this.router?.navigate([this.workspaceNav.getTestAssignRoute()]);
+  }
+
+  goToReviews() {
+    this.router?.navigate([this.workspaceNav.getReviewListRoute()]);
+  }
+
   isExamExpired(test: any): boolean {
     if (!test?.exam_date) return false;
     const examDate = new Date(test?.exam_date);
@@ -287,3 +295,4 @@ export class Test {
     );
   }
 }
+

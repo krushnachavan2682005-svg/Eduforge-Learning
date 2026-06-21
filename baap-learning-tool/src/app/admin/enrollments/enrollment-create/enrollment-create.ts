@@ -13,13 +13,13 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, PageHeader],
   template: `
-    <div class="p-4">
+    <div class="min-h-full bg-slate-50 p-5 md:p-6">
       <app-page-header title="Create Enrollment" subtitle="Assign a course to a student"></app-page-header>
 
-      <form class="max-w-2xl theme-bg-secondary theme-border rounded p-4" [formGroup]="form" (ngSubmit)="submit()">
-        <label class="flex flex-col gap-1 mb-4">
+      <form class="max-w-3xl rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm md:p-6" [formGroup]="form" (ngSubmit)="submit()">
+        <label class="mb-4 grid gap-2 text-sm font-bold text-slate-700">
           Student
-          <select class="px-3 py-2 rounded theme-bg-gray theme-border" formControlName="student_id">
+          <select class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" formControlName="student_id">
             <option value="">Select student</option>
             @for (student of students(); track student.id) {
               <option [value]="student.id">{{ student.first_name }} {{ student.last_name }} - {{ student.email }}</option>
@@ -27,9 +27,9 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
           </select>
         </label>
 
-        <label class="flex flex-col gap-1 mb-4">
+        <label class="mb-4 grid gap-2 text-sm font-bold text-slate-700">
           Course
-          <select class="px-3 py-2 rounded theme-bg-gray theme-border" formControlName="course_id">
+          <select class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" formControlName="course_id">
             <option value="">Select course</option>
             @for (course of courses(); track course.id) {
               <option [value]="course.id">{{ course.title || course.name }}</option>
@@ -37,18 +37,18 @@ import { PageHeader } from '../../../shared/ui/page-header/page-header';
           </select>
         </label>
 
-        <label class="flex flex-col gap-1">
+        <label class="grid gap-2 text-sm font-bold text-slate-700">
           Status
-          <select class="px-3 py-2 rounded theme-bg-gray theme-border" formControlName="status">
+          <select class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" formControlName="status">
             <option value="assigned">Assigned</option>
             <option value="in_progress">In Progress</option>
             <option value="completed">Completed</option>
           </select>
         </label>
 
-        <div class="flex justify-end gap-2 mt-5">
-          <button type="button" class="px-4 py-2 rounded theme-bg-gray theme-border" (click)="cancel()">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded theme-bg-gray theme-border font-semibold" [disabled]="form.invalid || isSaving()">
+        <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button type="button" class="rounded-2xl border border-slate-200 bg-white px-5 py-2.5 font-bold text-slate-700 hover:bg-slate-50" (click)="cancel()">Cancel</button>
+          <button type="submit" class="rounded-2xl bg-[#116466] px-5 py-2.5 font-extrabold text-white hover:bg-[#0f3554] disabled:opacity-60" [disabled]="form.invalid || isSaving()">
             {{ isSaving() ? 'Creating...' : 'Create Enrollment' }}
           </button>
         </div>

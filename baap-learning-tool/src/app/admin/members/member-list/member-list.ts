@@ -10,113 +10,120 @@ import { HeaderComponent } from '../../../shared/header.component';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, HeaderComponent],
   template: `
-    <div class="p-4">
-      <app-header
-        [showBackBtnAndTitleSubtitle]="true"
-        titleName="Members"
-        subTitle="Manage teachers and students in your organization"
-      >
-        <button
-          header-actions
-          class="px-3 py-2 rounded theme-bg-secondary theme-bg-gray font-semibold"
-          routerLink="/admin/members/create"
+    <div class="min-h-full bg-slate-50 p-5 md:p-6">
+      <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <app-header
+          [showBackBtnAndTitleSubtitle]="true"
+          titleName="Members"
+          subTitle="Manage teachers and students in your organization"
         >
-          Create Member
-        </button>
-      </app-header>
-
-      <div class="flex flex-wrap gap-3 mb-4">
-        <input
-          class="px-3 py-2 rounded theme-bg-secondary theme-border min-w-64"
-          placeholder="Search members"
-          [(ngModel)]="search"
-          (ngModelChange)="loadMembers(1)"
-        />
-        <select
-          class="px-3 py-2 rounded theme-bg-secondary theme-border"
-          [(ngModel)]="role"
-          (ngModelChange)="loadMembers(1)"
-        >
-          <option value="">All roles</option>
-          <option value="organization_admin">Organization Admin</option>
-          <option value="teacher">Teacher</option>
-          <option value="student">Student</option>
-          <option value="reviewer">Reviewer</option>
-        </select>
-        <select
-          class="px-3 py-2 rounded theme-bg-secondary theme-border"
-          [(ngModel)]="active"
-          (ngModelChange)="loadMembers(1)"
-        >
-          <option value="">All status</option>
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
-        </select>
+          <button
+            header-actions
+            class="rounded-2xl bg-[#116466] px-4 py-2 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#0f3554]"
+            routerLink="/admin/members/create"
+          >
+            Create Member
+          </button>
+        </app-header>
       </div>
 
+      <section class="mt-5 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-sm">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-[1fr_220px_180px]">
+          <input
+            class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+            placeholder="Search members"
+            [(ngModel)]="search"
+            (ngModelChange)="loadMembers(1)"
+          />
+          <select
+            class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+            [(ngModel)]="role"
+            (ngModelChange)="loadMembers(1)"
+          >
+            <option value="">All roles</option>
+            <option value="organization_admin">Organization Admin</option>
+            <option value="teacher">Teacher</option>
+            <option value="student">Student</option>
+            <option value="reviewer">Reviewer</option>
+          </select>
+          <select
+            class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+            [(ngModel)]="active"
+            (ngModelChange)="loadMembers(1)"
+          >
+            <option value="">All status</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+      </section>
+
       @if (isLoading()) {
-        <div class="p-6 theme-bg-secondary rounded theme-border">Loading members...</div>
+        <div class="mt-5 rounded-3xl border border-slate-200/80 bg-white p-8 text-slate-500 shadow-sm">Loading members...</div>
       } @else if (!members().length) {
-        <div class="p-6 theme-bg-secondary rounded theme-border">
-          No members found.
+        <div class="mt-5 rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+          <p class="text-lg font-extrabold text-slate-900">No members found</p>
+          <p class="mt-2 text-sm text-slate-500">Try changing filters or create a new teacher or student.</p>
         </div>
       } @else {
-        <div class="overflow-x-auto rounded theme-border">
-          <table class="w-full text-left">
-            <thead class="theme-bg-secondary">
-              <tr>
-                <th class="p-3">Name</th>
-                <th class="p-3">Email</th>
-                <th class="p-3">Roles</th>
-                <th class="p-3">Status</th>
-                <th class="p-3">Created</th>
-                <th class="p-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (member of members(); track member.id) {
-                <tr class="theme-border border-t">
-                  <td class="p-3 font-medium">
-                    {{ member.user?.first_name }} {{ member.user?.last_name }}
-                  </td>
-                  <td class="p-3">{{ member.user?.email }}</td>
-                  <td class="p-3">
-                    @for (role of member.roles; track role.id) {
-                      <span class="inline-block mr-1 mb-1 px-2 py-1 text-xs rounded theme-bg-secondary theme-border">
-                        {{ role.name }}
-                      </span>
-                    }
-                  </td>
-                  <td class="p-3">
-                    <span
-                      class="px-2 py-1 text-xs rounded"
-                      [ngClass]="member.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-                    >
-                      {{ member.status }}
-                    </span>
-                  </td>
-                  <td class="p-3">{{ member.created_at | date: 'mediumDate' }}</td>
-                  <td class="p-3 text-right">
-                    <button
-                      class="px-3 py-1 rounded theme-bg-secondary theme-border"
-                      (click)="viewMember(member.id)"
-                    >
-                      View
-                    </button>
-                  </td>
+        <div class="mt-5 overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[860px] text-left text-sm">
+              <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th class="px-5 py-4">Name</th>
+                  <th class="px-5 py-4">Email</th>
+                  <th class="px-5 py-4">Roles</th>
+                  <th class="px-5 py-4">Status</th>
+                  <th class="px-5 py-4">Created</th>
+                  <th class="px-5 py-4 text-right">Action</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                @for (member of members(); track member.id) {
+                  <tr class="transition hover:bg-slate-50/80">
+                    <td class="px-5 py-4 font-bold text-slate-900">
+                      {{ member.user?.first_name }} {{ member.user?.last_name }}
+                    </td>
+                    <td class="px-5 py-4 text-slate-600">{{ member.user?.email }}</td>
+                    <td class="px-5 py-4">
+                      @for (role of member.roles; track role.id) {
+                        <span class="mb-1 mr-1 inline-flex rounded-full border border-teal-100 bg-teal-50 px-2.5 py-1 text-xs font-bold text-teal-700">
+                          {{ role.name }}
+                        </span>
+                      }
+                    </td>
+                    <td class="px-5 py-4">
+                      <span
+                        class="inline-flex rounded-full px-2.5 py-1 text-xs font-extrabold capitalize"
+                        [ngClass]="member.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'"
+                      >
+                        {{ member.status }}
+                      </span>
+                    </td>
+                    <td class="px-5 py-4 text-slate-600">{{ member.created_at | date: 'mediumDate' }}</td>
+                    <td class="px-5 py-4 text-right">
+                      <button
+                        class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:border-teal-200 hover:text-teal-700"
+                        (click)="viewMember(member.id)"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div class="flex justify-between items-center mt-4">
-          <span class="text-sm">Page {{ pagination()?.page || 1 }} of {{ pagination()?.totalPages || 1 }}</span>
+        <div class="mt-4 flex flex-col gap-3 rounded-3xl border border-slate-200/80 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <span>Page {{ pagination()?.page || 1 }} of {{ pagination()?.totalPages || 1 }}</span>
           <div class="flex gap-2">
-            <button class="px-3 py-2 rounded theme-bg-secondary theme-border" [disabled]="page <= 1" (click)="loadMembers(page - 1)">
+            <button class="rounded-xl border border-slate-200 bg-white px-3 py-2 font-bold disabled:opacity-50" [disabled]="page <= 1" (click)="loadMembers(page - 1)">
               Previous
             </button>
-            <button class="px-3 py-2 rounded theme-bg-secondary theme-border" [disabled]="page >= (pagination()?.totalPages || 1)" (click)="loadMembers(page + 1)">
+            <button class="rounded-xl border border-slate-200 bg-white px-3 py-2 font-bold disabled:opacity-50" [disabled]="page >= (pagination()?.totalPages || 1)" (click)="loadMembers(page + 1)">
               Next
             </button>
           </div>

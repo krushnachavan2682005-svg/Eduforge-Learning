@@ -6,18 +6,20 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="theme-bg-secondary theme-border rounded p-4 min-h-24">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <p class="text-sm opacity-70">{{ label }}</p>
-          <p class="text-2xl font-semibold mt-1">{{ value }}</p>
+    <div class="group min-h-28 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div class="flex items-start justify-between gap-4">
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-slate-500">{{ label }}</p>
+          <p class="mt-2 text-3xl font-extrabold tracking-normal text-slate-900">{{ value }}</p>
         </div>
         @if (icon) {
-          <i class="material-icons text-2xl opacity-70">{{ icon }}</i>
+          <span class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+            <i class="material-icons text-2xl">{{ icon }}</i>
+          </span>
         }
       </div>
       @if (hint) {
-        <p class="text-xs opacity-70 mt-2">{{ hint }}</p>
+        <p class="mt-3 text-xs leading-5 text-slate-500">{{ hint }}</p>
       }
     </div>
   `,

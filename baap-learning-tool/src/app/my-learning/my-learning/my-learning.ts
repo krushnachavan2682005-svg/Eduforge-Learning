@@ -15,7 +15,6 @@ import { STORAGEENUMS } from '../../shared/enum';
 import { StorageService } from '../../services/storage-service';
 import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
 import { SkeletonTheme } from '../../services/skeleton-theme';
-import { HeaderComponent } from '../../shared/header.component';
 import { ToastrService } from 'ngx-toastr';
 import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
@@ -40,9 +39,7 @@ export interface Level {
     ReactiveFormsModule,
     NgSelectModule,
     Tooltip,
-    NgxSkeletonLoaderComponent,
-    HeaderComponent,
-  ],
+    NgxSkeletonLoaderComponent,  ],
   providers: [StorageService],
   templateUrl: './my-learning.html',
   styleUrls: ['./my-learning.scss'],
@@ -188,3 +185,4 @@ export class MyLearning {
     return course ? course?.title : 'Unknown';
   }
 }
+

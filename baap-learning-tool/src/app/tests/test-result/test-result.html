@@ -1,72 +1,38 @@
-<div class="p-6">
-  <div class="mb-4">
-    <app-header
-      [name]="'Student Result'"
-      [studentClass]="student()"
-    ></app-header>
+<div class="min-h-full bg-[#f5f7fb] p-5 md:p-6 text-slate-900">
+  <div class="rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm">
+    <app-header [name]="'Test Results'" [studentClass]="student()"></app-header>
   </div>
 
-  <div class="border-1 rounded-md overflow-hidden">
+  <div class="mt-5 overflow-hidden rounded-3xl border border-[#e6edf3] bg-white shadow-sm">
     <div class="max-h-[620px] overflow-y-auto">
       @if (studentResult().length > 0) {
-        <table class="w-full border-collapse">
-          <thead
-            class="theme-bg-gray theme-bg-secondary theme-text-dark theme-text-secondary font-bold sticky top-0 z-10"
-          >
+        <table class="w-full min-w-[820px] border-collapse text-left text-sm">
+          <thead class="sticky top-0 z-10 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
-              <th class="px-4 py-3 border-r border-gray-300 w-12 text-center">
-                #
-              </th>
-              <th class="px-6 py-3 border-r border-gray-300 text-left">
-                Test Name
-              </th>
-              <th class="px-4 py-3 border-r border-gray-300 text-center">
-                Achieved
-              </th>
-              <th class="px-4 py-3 border-r border-gray-300 text-center">
-                Total
-              </th>
-              <th class="px-4 py-3 border-r border-gray-300 text-center">
-                Exam Date
-              </th>
-              <th class="px-4 py-3 text-center">Status</th>
+              <th class="px-5 py-4 text-center">#</th>
+              <th class="px-5 py-4">Test Name</th>
+              <th class="px-5 py-4 text-center">Achieved</th>
+              <th class="px-5 py-4 text-center">Total</th>
+              <th class="px-5 py-4 text-center">Exam Date</th>
+              <th class="px-5 py-4 text-center">Status</th>
             </tr>
           </thead>
 
-          <tbody>
+          <tbody class="divide-y divide-slate-100">
             @for (result of paginatedResult(); track result) {
-              <tr class="border-b hover:bg-gray-50">
-                <td class="px-4 py-3 border-r w-12 text-center font-medium">
-                  {{ (currentPage - 1) * pageSize + $index + 1 }}
-                </td>
-                <td class="px-6 py-3 border-r">
-                  {{ result?.test_name }}
-                </td>
-                <td class="px-4 py-3 border-r text-center font-semibold">
-                  {{ result?.achieved_marks ?? "--" }}
-                </td>
-                <td class="px-4 py-3 border-r text-center font-semibold">
-                  {{ result?.total_marks }}
-                </td>
-                <td class="px-4 py-3 border-r text-center font-semibold">
-                  {{ result?.exam_date | date }}
-                </td>
-                <td
-                  class="px-4 py-3 text-center font-bold"
-                  [ngClass]="{
-                    'text-green-600':
-                      result?.status === 'Pass' &&
-                      result?.review_status !== 'pending_review',
-                    'text-red-600':
-                      result?.status === 'Fail' &&
-                      result?.review_status !== 'pending_review',
-                    'text-yellow-600': result?.review_status === 'pending_review',
-                  }"
-                >
-                  @if (result?.review_status === "pending_review") {
-                    Pending
+              <tr class="transition hover:bg-slate-50/80">
+                <td class="px-5 py-4 text-center font-bold text-slate-500">{{ (currentPage - 1) * pageSize + $index + 1 }}</td>
+                <td class="px-5 py-4 font-extrabold text-slate-900">{{ result?.test_name }}</td>
+                <td class="px-5 py-4 text-center font-extrabold text-slate-900">{{ result?.achieved_marks ?? '--' }}</td>
+                <td class="px-5 py-4 text-center font-bold text-slate-600">{{ result?.total_marks }}</td>
+                <td class="px-5 py-4 text-center font-bold text-slate-600">{{ result?.exam_date | date }}</td>
+                <td class="px-5 py-4 text-center">
+                  @if (result?.review_status === 'pending_review') {
+                    <span class="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-extrabold text-amber-700">Pending Review</span>
+                  } @else if (result?.status === 'Pass') {
+                    <span class="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">Pass</span>
                   } @else {
-                    {{ result?.status }}
+                    <span class="inline-flex rounded-full bg-rose-50 px-3 py-1 text-xs font-extrabold text-rose-700">{{ result?.status }}</span>
                   }
                 </td>
               </tr>
@@ -74,53 +40,16 @@
           </tbody>
         </table>
       } @else if (isLoadingResults()) {
-        <div class="p-1">
-          <ngx-skeleton-loader
-            appearance="line"
-            count="10"
-            [theme]="skeletonService.lineTheme"
-          >
-          </ngx-skeleton-loader>
-        </div>
+        <div class="p-5"><ngx-skeleton-loader appearance="line" count="10" [theme]="skeletonService.lineTheme"></ngx-skeleton-loader></div>
       } @else if (studentResult().length === 0) {
-        <div
-          class="flex flex-col items-center justify-center pt-36 text-center"
-        >
-          <div
-            class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
-          >
-            <svg
-              class="w-12 h-12 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              ></path>
-            </svg>
-          </div>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">
-            No Tests Submitted Yet
-          </h3>
-          <p class="text-gray-500 mb-4 theme-text-secondary theme-text-dark">
-            You haven’t submitted any tests yet. Once you complete and submit a
-            test, it will appear here.
-          </p>
+        <div class="p-10 text-center">
+          <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><i class="material-icons text-3xl">fact_check</i></div>
+          <h3 class="text-lg font-extrabold text-slate-900">No tests submitted yet</h3>
+          <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">You haven't submitted any tests yet. Once you complete and submit a test, it will appear here.</p>
         </div>
       }
     </div>
   </div>
 
-  <app-pagination
-    [currentPage]="currentPage"
-    [totalPages]="totalPages"
-    [pageSize]="pageSize"
-    [pageSizeOptions]="pageSizeOptions"
-    (pageChange)="goToPage($event)"
-    (pageSizeChange)="onPageSizeChange($event)"
-  ></app-pagination>
+  <app-pagination [currentPage]="currentPage" [totalPages]="totalPages" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (pageChange)="goToPage($event)" (pageSizeChange)="onPageSizeChange($event)"></app-pagination>
 </div>

@@ -11,7 +11,6 @@ import { Tooltip } from '../../shared/tooltip';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 import { SkeletonTheme } from '../../services/skeleton-theme';
 import { AssginCourse } from '../assgin-course/assgin-course';
-import { HeaderComponent } from "../../shared/header.component";
 import { SidebarService } from '../../services/sidebar.service';
 import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
@@ -25,9 +24,7 @@ import { PaginationComponent } from '../../pagination/pagination';
     AddCourses,
     Tooltip,
     NgxSkeletonLoaderModule,
-    AssginCourse,
-    HeaderComponent,
-    PaginationComponent,
+    AssginCourse,    PaginationComponent,
   ],
   providers: [StorageService],
   templateUrl: './courses-list.html',
@@ -76,8 +73,8 @@ export class CoursesList {
 
   headers = [
     {
-      title: 'COURSES LIST',
-      subtitle: 'MANAGE AND EXPLORE ALL YOUR COURSES HERE',
+      title: 'Courses',
+      subtitle: 'Create, organize, and assign learning content',
     },
   ];
 
@@ -181,3 +178,5 @@ export class CoursesList {
     });
   }
 }
+
+
