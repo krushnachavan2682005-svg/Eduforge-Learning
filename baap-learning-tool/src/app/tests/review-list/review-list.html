@@ -1,245 +1,78 @@
-<div class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 theme-text-secondary theme-text-dark">
-  <div class="header bg-white pt-2">
-    <app-header [name]="headers[0].title" [studentClass]="headers[0].subtitle">
+<div class="min-h-full bg-[#f5f7fb] p-5 md:p-6 text-slate-900">
+  <div class="rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm">
+    <app-header [name]="'Review Submissions'" [studentClass]="'Review submitted tests and publish scores'">
       <div class="relative flex items-center">
-        <input
-          type="text"
-          [ngModel]="searchKey()"
-          (ngModelChange)="searchKey.set($event)"
-          placeholder="Search submitted tests..."
-          class="pl-10 pr-10 py-2 border rounded-full focus:outline-none focus:ring-1 focus:ring-slate-400  w-80 shadow-sm theme-border"
-        />
-
-        <span class="material-icons absolute left-3 text-gray-400 text-md">
-          search
-        </span>
-
+        <input type="text" [ngModel]="searchKey()" (ngModelChange)="searchKey.set($event)" placeholder="Search submitted tests..." class="h-11 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-10 pr-10 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100 sm:w-80" />
+        <span class="material-icons absolute left-3 text-slate-400 text-md">search</span>
         @if (searchKey()) {
-          <span
-            class="material-icons absolute right-3 text-gray-400 text-md cursor-pointer hover:text-red-500"
-            (click)="searchKey.set('')"
-          >
-            close
-          </span>
+          <span class="material-icons absolute right-3 cursor-pointer text-slate-400 text-md hover:text-rose-500" (click)="searchKey.set('')">close</span>
         }
       </div>
     </app-header>
-    <div class="">
-    <div class="grid grid-cols-12 gap-4 py-2 theme-bg-secondary theme-bg-gray">
-      <span class="font-semibold text-lg col-span-3 ml-8">Test Name</span>
-      <span class="font-semibold text-lg col-span-6 ml-1">Student Name</span>
-      <span class="font-semibold text-lg col-span-1">Result</span>
-      <span class="font-semibold text-lg col-span-2 ml-2">Review Status</span>
-    </div>
-  </div>
   </div>
 
-  <div class="max-h-[75vh] overflow-y-auto pr-2 my-1 mt-2">
-  @if (TestList().length > 0) {
-    @for (test of paginatedResults; track test) {
-      <div
-        class="theme-bg border rounded-md overflow-hidden cursor-pointer mb-4 mt-2"
-      >
-        <div
-          class="grid grid-cols-12 items-center gap-4 p-2 theme-bg-secondary theme-bg-gray"
-          (click)="toggleCard(test)"
-        >
-          <span class="col-span-3 gap-2 flex items-center">
-            @if (test?.isCollapsed == true) {
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            }
-
-            @if (!test?.isCollapsed == true) {
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M5 8l7 11 7-11z" />
-              </svg>
-            }
-            <span
-              class="flex-1 w-80 text-lg font-bold truncate"
-              appTooltip="{{
-                (test?.title?.length || 0) > 55 ? test?.title : ''
-              }}"
-            >
-              {{ test?.title || "--" }}
-            </span>
-          </span>
-          <div class="col-span-6">
-            <p class="whitespace-nowrap text-blue-600 text-lg font-semibold">
-              {{ test?.student_name || "--" }}
-            </p>
-          </div>
-
-          <div class="col-span-1 text-center">
-            <p
-              class="px-4 p-1 text-center font-bold"
-              [ngClass]="{
-                'text-green-600 bg-green-200 px-5 rounded-3xl':
-                  test?.review_status?.toLowerCase() === 'completed' &&
-                  test?.passed === true,
-                'text-red-600 bg-red-200 px-5 rounded-2xl':
-                  test?.review_status?.toLowerCase() === 'completed' &&
-                  test?.passed === false,
-              }"
-            >
-              {{
-                test?.review_status?.toLowerCase() === "completed" &&
-                test?.passed === true
-                  ? "Pass"
-                  : test?.review_status?.toLowerCase() === "completed" &&
-                      test?.passed === false
-                    ? "Fail"
-                    : ""
-              }}
-            </p>
-          </div>
-          <div class="col-span-2 text-center">
-            <p class="mx-5 md:mx-2 xl:mx-1">
-              @if (test?.review_status?.toLowerCase() === "pending_review") {
-                <p
-                  class="font-bold bg-yellow-200 text-red-600 py-1 rounded-2xl"
-                >
-                  Pending Review
-                </p>
-              } @else if (test?.review_status?.toLowerCase() === "completed") {
-                <p
-                  class="text-green-700 font-bold bg-green-200 py-1 rounded-2xl"
-                >
-                  Review Completed
-                </p>
-              }
-            </p>
-          </div>
-        </div>
-
-        @if (!test?.isCollapsed) {
-          <div class="px-4 sm:px-8 py-3 bg-white">
-            <div
-              class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 text-sm sm:text-base mb-5"
-            >
-              <div>
-                <div class="justify-start">Subject Name</div>
-                <div
-                  class="font-semibold truncate max-w-[15ch]"
-                  tooltipPosition="right"
-                  appTooltip="{{
-                    (test?.subject?.length || 0) > 15 ? test?.subject : ''
-                  }}"
-                >
-                  {{ test?.subject || "--" }}
+  <div class="mt-5 max-h-[74vh] overflow-y-auto pr-1">
+    @if (TestList().length > 0) {
+      <div class="grid grid-cols-1 gap-4">
+        @for (test of paginatedResults; track test) {
+          <article class="overflow-hidden rounded-3xl border border-[#e6edf3] bg-white shadow-sm transition hover:shadow-md">
+            <div class="grid cursor-pointer grid-cols-1 gap-4 p-5 md:grid-cols-[1fr_220px_160px_180px] md:items-center" (click)="toggleCard(test)">
+              <div class="flex min-w-0 items-start gap-3">
+                <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700"><i class="material-icons text-2xl">{{ test?.isCollapsed ? 'keyboard_arrow_right' : 'keyboard_arrow_down' }}</i></span>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold uppercase tracking-wide text-teal-700">Test Name</p>
+                  <h2 class="mt-1 truncate text-lg font-extrabold text-slate-900" appTooltip="{{ (test?.title?.length || 0) > 55 ? test?.title : '' }}">{{ test?.title || '--' }}</h2>
                 </div>
               </div>
-
+              <div><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Student</p><p class="mt-1 truncate font-bold text-slate-900">{{ test?.student_name || '--' }}</p></div>
               <div>
-                <div class="text-center">Passing Marks</div>
-                <div class="font-semibold text-center">
-                  {{ test?.passing_marks }}
-                </div>
-              </div>
-
-              <div>
-                <div class="-secondary - text-center">Total Marks</div>
-                <div class="font-semibold text-center">
-                  {{ test?.total_marks }}
-                </div>
+                @if (test?.review_status?.toLowerCase() === 'completed' && test?.passed === true) {
+                  <span class="inline-flex rounded-full bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">Pass</span>
+                } @else if (test?.review_status?.toLowerCase() === 'completed' && test?.passed === false) {
+                  <span class="inline-flex rounded-full bg-rose-50 px-3 py-1 text-xs font-extrabold text-rose-700">Fail</span>
+                } @else {
+                  <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-600">--</span>
+                }
               </div>
               <div>
-                <div class="text-center">Achieved Marks</div>
-                <div class="font-semibold text-center">
-                  {{ test?.total_marks_obtained }}
-                </div>
-              </div>
-
-              <div>
-                <div class="text-center">Exam Schedule</div>
-
-                <div class="font-semibold text-center">
-                  {{ test?.exam_date | date }}
-                </div>
-              </div>
-              <div>
-                <div class="text-center">Submitted At</div>
-                <div class="font-semibold text-center">
-                  {{ test?.submitted_at | date }}
-                </div>
+                @if (test?.review_status?.toLowerCase() === 'pending_review') {
+                  <span class="inline-flex rounded-full bg-amber-50 px-3 py-1 text-xs font-extrabold text-amber-700">Pending Review</span>
+                } @else if (test?.review_status?.toLowerCase() === 'completed') {
+                  <span class="inline-flex rounded-full bg-teal-50 px-3 py-1 text-xs font-extrabold text-teal-700">Review Completed</span>
+                }
               </div>
             </div>
-            <div class="mt-4 flex justify-start">
-              @if (test?.review_status?.toLowerCase() === "completed") {
-                <button
-                  (click)="reviewExam(test)"
-                  class="px-3 py-2 rounded bg-blue-600 text-white font-semibold"
-                >
-                  Review Again
-                </button>
-              } @else {
-                <button
-                  (click)="reviewExam(test)"
-                  class="px-4 py-2 rounded bg-blue-600 text-white font-semibold"
-                >
-                  Review
-                </button>
-              }
-            </div>
-          </div>
+
+            @if (!test?.isCollapsed) {
+              <div class="border-t border-slate-100 bg-slate-50/70 p-5">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Subject</p><p class="mt-1 truncate font-bold text-slate-900" tooltipPosition="right" appTooltip="{{ (test?.subject?.length || 0) > 15 ? test?.subject : '' }}">{{ test?.subject || '--' }}</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Passing</p><p class="mt-1 font-bold text-slate-900">{{ test?.passing_marks }}</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Marks</p><p class="mt-1 font-bold text-slate-900">{{ test?.total_marks }}</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Achieved</p><p class="mt-1 font-bold text-slate-900">{{ test?.total_marks_obtained }}</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Schedule</p><p class="mt-1 font-bold text-slate-900">{{ test?.exam_date | date }}</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Submitted</p><p class="mt-1 font-bold text-slate-900">{{ test?.submitted_at | date }}</p></div>
+                </div>
+                <div class="mt-5">
+                  <button (click)="reviewExam(test)" class="rounded-2xl bg-[#116466] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#0f3554]">
+                    {{ test?.review_status?.toLowerCase() === 'completed' ? 'Review Again' : 'Review' }}
+                  </button>
+                </div>
+              </div>
+            }
+          </article>
         }
       </div>
-    }
-  } @else if (isLoadingExams()) {
-    <div class="mt-4">
-      <ngx-skeleton-loader
-        appearance="line"
-        count="5"
-        [theme]="skeletonService.expanded"
-      >
-      </ngx-skeleton-loader>
-    </div>
-  } @else if (testsLoaded() && TestList().length === 0) {
-    <div class="flex flex-col items-center justify-center mt-64 text-center">
-      <div
-        class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
-      >
-        <svg
-          class="w-12 h-12 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-          ></path>
-        </svg>
+    } @else if (isLoadingExams()) {
+      <div class="rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm"><ngx-skeleton-loader appearance="line" count="5" [theme]="skeletonService.expanded"></ngx-skeleton-loader></div>
+    } @else if (testsLoaded() && TestList().length === 0) {
+      <div class="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><i class="material-icons text-3xl">rate_review</i></div>
+        <h3 class="text-lg font-extrabold text-slate-900">No tests submitted</h3>
+        <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">Students haven't submitted any tests yet. Once submitted, they will appear here for review.</p>
       </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No Tests Submitted</h3>
-      <p class="text-gray-500 mb-4 theme-text-secondary theme-text-dark">
-        Students haven't submitted any tests yet. Once submitted, they will
-        appear here for review.
-      </p>
-    </div>
-  }
+    }
   </div>
-  <app-pagination
-    [currentPage]="currentPage"
-    [totalPages]="totalPages"
-    [pageSize]="pageSize"
-    [pageSizeOptions]="pageSizeOptions"
-    (pageChange)="goToPage($event)"
-    (pageSizeChange)="onPageSizeChange($event)"
-  ></app-pagination>
+
+  <app-pagination [currentPage]="currentPage" [totalPages]="totalPages" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (pageChange)="goToPage($event)" (pageSizeChange)="onPageSizeChange($event)"></app-pagination>
 </div>

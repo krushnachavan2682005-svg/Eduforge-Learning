@@ -1,0 +1,9 @@
+:host {
+  display: block;
+  min-height: 100%;
+  background: #f5f7fb;
+}
+
+:host ::ng-deep app-add-lesson > div {
+  margin-top: 1rem;
+}

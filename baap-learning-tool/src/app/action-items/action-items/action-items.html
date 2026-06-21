@@ -1,277 +1,139 @@
-<div
-  class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 theme-text-secondary theme-text-dark flex flex-col min-h-[calc(100vh-110px)] pb-20 sm:pb-16"
->
-  @for (head of headers; track head) {
-    <div class="header bg-white pt-2">
-      <app-header [name]="head?.title" [studentClass]="head?.subtitle">
-        <div class="flex gap-2" *authorize="'LMS_C'">
-          <app-add-level (closePopUp)="closeAddCourseModal()"> </app-add-level>
-          <app-add-action-items
-            [show]="openAssignMenubar()"
-            [data]="editData()"
-            (closePopUp)="closeAddCourseModal()"
-          >
-          </app-add-action-items>
-          <app-assign-action-items></app-assign-action-items>
-        </div>
-      </app-header>
+<div class="min-h-[calc(100vh-110px)] bg-[#f5f7fb] px-3 pb-20 pt-4 text-slate-900 sm:px-5 lg:px-8">
+  <section class="rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm md:p-6">
+    <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="text-xs font-extrabold uppercase tracking-[0.18em] text-[#6fa7a4]">Teacher Workspace</p>
+        <h1 class="mt-2 text-2xl font-extrabold text-[#0f3554] md:text-3xl">Action Items</h1>
+        <p class="mt-1 text-sm font-medium text-slate-500">Create, assign, and review practical tasks</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3" *authorize="'LMS_C'">
+        <app-add-level (closePopUp)="closeAddCourseModal()"></app-add-level>
+        <app-add-action-items
+          [show]="openAssignMenubar()"
+          [data]="editData()"
+          (closePopUp)="closeAddCourseModal()"
+        ></app-add-action-items>
+        <app-assign-action-items></app-assign-action-items>
+      </div>
     </div>
-  }
+  </section>
 
-  <div class="overflow-y-auto max-h-[calc(110vh-180px)] pr-1 mt-3">
+  <section class="mt-5">
     @if (ActionItems().length > 0) {
-      @for (card of ActionItems(); track card) {
-        <div class="theme-bg border rounded-md overflow-hidden mb-4">
-          <div
-            class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 p-2 theme-bg-secondary theme-bg-gray h-auto md:h-11 md:py-0 cursor-pointer"
-            (click)="toggleCard(card)"
-          >
-            <div class="flex items-center gap-2 w-full md:w-auto">
-              <span style="float: right">
-                @if (card?.isCollapsed == true) {
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                }
-
-                @if (!card?.isCollapsed == true) {
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M5 8l7 11 7-11z" />
-                  </svg>
-                }
-              </span>
-              <p class="mb-0 text-lg font-bold sm:text-lg break-words">
-                {{ card?.task_name || "--" }}
-              </p>
-            </div>
-
-            <div
-              class="flex flex-wrap md:flex-nowrap items-center gap-3 text-sm sm:text-base w-full md:w-auto"
-            >
-              <!-- <div class="mr-5 flex items-center gap-2 min-w-[120px]">
-                <div class="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    class="h-2 bg-[#3B82F6]"
-                    [ngStyle]="{
-                      width: getProgressPercentage(card?.total_score) + '%',
-                    }"
-                  ></div>
-                </div>
-                <span class="whitespace-nowrap">{{
-                  card?.total_score || "--"
-                }}</span>
-              </div> -->
-              <!-- <img src="images/medal-outline.svg" alt="icon1" class="w-5 h-5" />
-              <img src="images/solid-medal.svg" alt="icon2" class="w-5 h-5" /> -->
-
-              <div *authorize="'LMS_C'">
-                <button
-                  type="button"
-                  class="p-1 rounded-full hover:bg-gray-200 transition"
-                  (click)="onEditClick(card)"
-                >
-                  <svg
-                    tooltipPosition="left"
-                    class="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    ></path>
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  class="p-1 rounded-full hover:bg-gray-200 transition"
-                  (click)="onDeleteClick(card)"
-                >
-                  <svg
-                    class="w-5 h-5 text-red-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2
-                       2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M4 7h16M10
-                       3h4a1 1 0 011 1v2H9V4a1 1 0 011-1z"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-          @if (!card?.isCollapsed) {
-            <div class="px-4 sm:px-8 py-3 bg-white">
-              <div class="text-sm text-dark sm:text-base leading-relaxed mb-5">
-                @if (!isExpanded(card)) {
-                  {{ getShortDescription(card?.description) }}
-                } @else {
-                  {{ card?.description || "--" }}
-                }
-
-                @if ((card?.description?.length || 0) > descriptionLimit) {
-                  <button
-                    (click)="toggleDescription(card)"
-                    class="text-primary underline cursor-pointer mb-4 ml-3"
-                  >
-                    {{ isExpanded(card) ? "Less" : "More" }}
-                  </button>
-                }
-              </div>
-              <div
-                class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 text-sm sm:text-base mb-5"
-              >
-                <div>
-                  <div class="font-medium">Level</div>
-                  <div class="font-semibold">
-                    {{ card?.level || "--" }}
+      <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        @for (card of ActionItems(); track card) {
+          <article class="overflow-hidden rounded-3xl border border-[#e6edf3] bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+            <div class="cursor-pointer p-5" (click)="toggleCard(card)">
+              <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full bg-[#eaf5f4] px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[#116466]">
+                      {{ card?.level || 'Task' | titlecase }}
+                    </span>
+                    <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">
+                      {{ card?.total_score || '--' }} marks
+                    </span>
                   </div>
+                  <h2 class="mt-3 break-words text-xl font-extrabold text-slate-900">{{ card?.task_name || '--' }}</h2>
+                  <p class="mt-2 line-clamp-2 min-h-11 text-sm leading-6 text-slate-500">
+                    {{ card?.description || 'No description added yet.' }}
+                  </p>
                 </div>
 
-                <div>
-                  <div>
-                    <div class="justify-start font-medium">Reviewer</div>
-                    <div class="font-semibold flex flex-wrap gap-2">
+                <div class="flex shrink-0 items-center gap-2" *authorize="'LMS_C'" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-[#0f3554] transition hover:border-[#6fa7a4] hover:bg-[#eaf5f4]"
+                    (click)="onEditClick(card)"
+                    appTooltip="Edit"
+                    tooltipPosition="left"
+                  >
+                    <i class="material-icons text-xl">edit</i>
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-red-100 bg-red-50 text-red-600 transition hover:bg-red-100"
+                    (click)="onDeleteClick(card)"
+                    appTooltip="Delete"
+                    tooltipPosition="left"
+                  >
+                    <i class="material-icons text-xl">delete</i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            @if (!card?.isCollapsed) {
+              <div class="border-t border-slate-100 bg-slate-50/60 p-5">
+                <div class="rounded-2xl bg-white p-4 text-sm leading-6 text-slate-600">
+                  @if (!isExpanded(card)) {
+                    {{ getShortDescription(card?.description) }}
+                  } @else {
+                    {{ card?.description || '--' }}
+                  }
+
+                  @if ((card?.description?.length || 0) > descriptionLimit) {
+                    <button type="button" (click)="toggleDescription(card); $event.stopPropagation()" class="ml-2 font-extrabold text-[#116466] underline">
+                      {{ isExpanded(card) ? 'Less' : 'More' }}
+                    </button>
+                  }
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <div class="rounded-2xl bg-white p-4">
+                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Level</p>
+                    <p class="mt-1 font-extrabold text-slate-900">{{ card?.level || '--' }}</p>
+                  </div>
+                  <div class="rounded-2xl bg-white p-4">
+                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Score</p>
+                    <p class="mt-1 font-extrabold text-slate-900">{{ card?.total_score || '--' }}</p>
+                  </div>
+                  <div class="rounded-2xl bg-white p-4 sm:col-span-2">
+                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Reviewer</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
                       @if (card?.reviewer && card?.reviewer?.length > 0) {
-                        @for (
-                          person of card?.reviewer;
-                          track person;
-                          let i = $index
-                        ) {
-                          <span
-                            class="px-2 py-1 theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark rounded font-semibold text-md"
-                          >
-                            {{ person?.name }}
-                            @if (i < card?.reviewer?.length - 1) {
-                              ,
-                            }
-                          </span>
-                        } @empty {
-                          --
+                        @for (person of card?.reviewer; track person) {
+                          <span class="rounded-full bg-[#eaf5f4] px-3 py-1 text-sm font-bold text-[#116466]">{{ person?.name }}</span>
                         }
+                      } @else {
+                        <span class="font-bold text-slate-500">--</span>
                       }
                     </div>
                   </div>
                 </div>
-                <div>
-                  <div class="justify-start font-medium">Total Score</div>
-                  <div class="font-semibold flex flex-wrap gap-2">
-                    <span class="whitespace-nowrap">{{
-                      card?.total_score || "--"
-                    }}</span>
-                  </div>
-                </div>
-                <div>
-                  <div class="font-medium">Tutor Attachments</div>
-                  <div class="font-semibold">
-                    @if (card?.signedUrl) {
-                      <div
-                        class="theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark p-1 rounded-md flex items-center justify-between"
-                      >
-                        <span
-                          class="truncate text-lg px-1"
-                          [appTooltip]="getFileName(card?.signedUrl)"
-                          tooltipPosition="bottom"
-                          >{{ getFileName(card?.signedUrl) }}</span
-                        >
 
-                        <span
-                          [appTooltip]="'View & download'"
-                          tooltipPosition="right"
-                          class="flex justify-center px-1 text-blue-600 cursor-pointer"
-                          (click)="
-                            openPdf(card?.signedUrl); $event.stopPropagation()
-                          "
-                        >
-                          <p class="pt-1">
-                            <svg
-                              viewBox="0 0 24 24"
-                              class="w-4 h-4 mr-1"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                            >
-                              <path d="M15 3h6v6" />
-                              <path d="M10 14 21 3" />
-                              <path
-                                d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-                              />
-                            </svg>
-                          </p>
-                          <p>view</p>
-                        </span>
-                      </div>
-                    } @else {
-                      --
-                    }
+                @if (card?.signedUrl) {
+                  <div class="mt-4 rounded-2xl border border-[#e6edf3] bg-white p-4">
+                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Tutor Attachment</p>
+                    <div class="mt-2 flex items-center justify-between gap-3 rounded-2xl bg-slate-50 p-3">
+                      <span class="truncate font-bold text-slate-700" [appTooltip]="getFileName(card?.signedUrl)" tooltipPosition="bottom">{{ getFileName(card?.signedUrl) }}</span>
+                      <button type="button" class="inline-flex items-center gap-1 rounded-xl bg-[#eaf5f4] px-3 py-2 text-sm font-extrabold text-[#116466]" (click)="openPdf(card?.signedUrl); $event.stopPropagation()">
+                        <i class="material-icons text-base">open_in_new</i>
+                        View
+                      </button>
+                    </div>
                   </div>
-                </div>
+                }
               </div>
-            </div>
-          }
-        </div>
-      }
+            }
+          </article>
+        }
+      </div>
     } @else if (isLoadingAction()) {
-      <div class="mt-4">
-        <ngx-skeleton-loader
-          appearance="line"
-          count="5"
-          [theme]="skeletonService.expanded"
-        >
-        </ngx-skeleton-loader>
+      <div class="rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm">
+        <ngx-skeleton-loader appearance="line" count="5" [theme]="skeletonService.expanded"></ngx-skeleton-loader>
       </div>
     } @else if (actionLoaded() && ActionItems().length === 0) {
-      <div
-        class="flex flex-col items-center justify-center py-12 mt-48 text-center"
-      >
-        <div
-          class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
-        >
-          <svg
-            class="w-12 h-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-            ></path>
-          </svg>
+      <div class="rounded-3xl border border-dashed border-[#cbd8e3] bg-white p-10 text-center shadow-sm">
+        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-[#eaf5f4] text-[#0f3554]">
+          <i class="material-icons text-3xl">task_alt</i>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">
-          Not Created Action Items
-        </h3>
-        <p class="mb-4 theme-text-secondary theme-text-dark">
-          You don't have Created any Action Items yet. Contact your
-          administrator to get started with Action Items.
-        </p>
+        <h3 class="mt-4 text-xl font-extrabold text-slate-900">No action items yet</h3>
+        <p class="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">Create practical tasks for students and assign them to a class, role, or individual learner.</p>
       </div>
     }
-  </div>
+  </section>
 
   <app-pagination
     [currentPage]="currentPage"
@@ -285,49 +147,27 @@
   <app-modal [open]="showPdfModal" (close)="closePdfModal()">
     @if (showPdfModal && pdfUrl) {
       <div class="w-full min-w-[500px] md:min-w-[300px]">
-        <div
-          class="flex justify-between items-center px-4 py-3 border-b theme-bg-secondary theme-bg-gray"
-        >
-          <h2 class="text-lg font-semibold">Student Assignment</h2>
+        <div class="flex justify-between items-center px-4 py-3 border-b bg-[#f5f7fb]">
+          <h2 class="text-lg font-extrabold text-[#0f3554]">Action Item Attachment</h2>
         </div>
-
         <div class="h-[75vh]">
-          <iframe
-            [src]="pdfUrl | safeUrl"
-            class="w-full h-full"
-            loading="lazy"
-          ></iframe>
+          <iframe [src]="pdfUrl | safeUrl" class="w-full h-full" loading="lazy"></iframe>
         </div>
       </div>
     }
   </app-modal>
+
   <app-modal [open]="deleteExam" (close)="closeModal()">
     @if (deleteExam) {
-      <div class="mb-6">
-        <div class="flex justify-center mb-6">
-          <i class="material-icons text-red-600 text-4xl p-2"> delete </i>
+      <div class="p-3 text-center">
+        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+          <i class="material-icons text-3xl">delete</i>
         </div>
-        <div
-          class="text-2xl font-semibold mb-8 flex justify-center text-red-600"
-        >
-          Are you sure you want to delete this action item?
-        </div>
-
-        <div class="flex justify-center">
-          <button
-            type="button"
-            class="mt-2 px-4 ml-2 py-2 rounded bg-blue-600 text-white font-semibold"
-            (click)="deleteActionItem()"
-          >
-            <span class="text-lg font-semibold">Yes</span>
-          </button>
-          <button
-            type="button"
-            class="mt-2 px-4 ml-16 py-2 rounded bg-blue-600 text-white font-semibold"
-            (click)="closeModal()"
-          >
-            <span class="text-lg font-semibold">No</span>
-          </button>
+        <h2 class="text-xl font-extrabold text-slate-900">Delete action item?</h2>
+        <p class="mt-2 text-sm text-slate-500">This action cannot be undone.</p>
+        <div class="mt-6 flex justify-center gap-3">
+          <button type="button" class="rounded-2xl border border-slate-200 bg-white px-5 py-2 font-bold text-slate-700" (click)="closeModal()">Cancel</button>
+          <button type="button" class="rounded-2xl bg-red-600 px-5 py-2 font-extrabold text-white" (click)="deleteActionItem()">Delete</button>
         </div>
       </div>
     }

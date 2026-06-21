@@ -1,360 +1,130 @@
-<div class="mx-2 sm:mx-3 md:mx-6 lg:mx-8 theme-text-secondary theme-text-dark">
-  <div class="header bg-white pt-2">
-    <app-header [name]="headers[0].title" [studentClass]="headers[0].subtitle">
-    </app-header>
+<div class="min-h-full bg-[#f5f7fb] p-5 md:p-6 text-slate-900">
+  <div class="rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm">
+    <app-header [name]="'My Tests'" [studentClass]="'View available, upcoming, expired, and submitted tests'"></app-header>
   </div>
 
-  @if (TestList().length > 0) {
-    @for (test of TestList(); track test) {
-      <div class="theme-bg border rounded-md overflow-hidden mb-3 mt-3">
-        <div
-          class="flex flex-col md:flex-row cursor-pointer justify-between items-start md:items-center gap-2 p-2 theme-bg-secondary theme-bg-gray"
-          (click)="toggleCard(test)"
-        >
-          <div class="flex items-center gap-2 w-full md:w-auto">
-            <span style="float: right">
-              @if (activeCardId !== test?.id) {
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              }
-
-              @if (activeCardId === test?.id) {
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M5 8l7 11 7-11z" />
-                </svg>
-              }
-            </span>
-            <p
-              class="mb-0 text-xl sm:text-xl font-semibold truncate max-w-[55ch] break-words"
-              appTooltip="{{
-                (test?.title?.length || 0) > 55 ? test?.title : ''
-              }}"
-            >
-              {{ test?.title }}
-            </p>
-          </div>
-
-          <div class="flex items-center mr-7 px-1">
-            @if (test?.is_completed === true) {
-              <div class="flex items-center px-1 min-w-[110px]">
-                <label
-                  class="mx-2 relative inline-flex items-center cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    class="sr-only peer"
-                    [checked]="test?.is_published"
-                    (change)="onPublish($event, test)"
-                  />
-                  <div
-                    class="w-8 h-4 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:w-3 after:h-3 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"
-                  ></div>
-                </label>
-                <span
-                  class="w-16"
-                  [ngClass]="
-                    test?.is_published
-                      ? 'text-green-500 font-semibold'
-                      : 'text-gray-700 font-semibold'
-                  "
-                >
-                  {{ test?.is_published ? "Public" : "Private" }}
-                </span>
-              </div>
-            }
-            <p>
-              @if (getAvailabilityStatus(test) === 'submitted') {
-                <p
-                  class="inline-flex min-w-[96px] items-center justify-center font-medium text-white bg-green-600 px-5 py-1 rounded-full whitespace-nowrap"
-                >
-                  Submitted
-                </p>
-              } @else if (getAvailabilityStatus(test) === 'expired') {
-                <p
-                  class="inline-flex min-w-[96px] items-center justify-center font-medium bg-red-600 text-white px-3 py-1 rounded-full whitespace-nowrap"
-                >
-                  Expired
-                </p>
-              } @else if (getAvailabilityStatus(test) === 'not_started') {
-                <p
-                  class="inline-flex min-w-[96px] items-center justify-center font-medium bg-blue-100 text-blue-700 px-3 py-1 rounded-full whitespace-nowrap"
-                >
-                  Not Started
-                </p>
-              } @else {
-                <p
-                  class="inline-flex min-w-[96px] items-center justify-center font-medium bg-green-100 text-green-700 px-7 py-1 rounded-full whitespace-nowrap"
-                >
-                  Available
-                </p>
-              }
-            </p>
-          </div>
-        </div>
-
-        @if (activeCardId === test?.id) {
-          <div class="px-4 sm:px-8 py-3 bg-white">
-            <div
-              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 text-sm sm:text-base mb-5"
-            >
-              <div>
-                <div class="justify-start">Course Name</div>
-                <div
-                  class="font-semibold truncate max-w-[15ch]"
-                  tooltipPosition="right"
-                  appTooltip="{{
-                    (test?.subject?.length || 0) > 15 ? test?.subject : ''
-                  }}"
-                >
-                  {{ test?.subject }}
+  <div class="mt-5">
+    @if (TestList().length > 0) {
+      <div class="grid grid-cols-1 gap-4">
+        @for (test of TestList(); track test) {
+          <article class="overflow-hidden rounded-3xl border border-[#e6edf3] bg-white shadow-sm transition hover:shadow-md">
+            <div class="flex flex-col gap-4 p-5 md:flex-row md:items-start md:justify-between">
+              <div class="flex min-w-0 flex-1 items-start gap-3">
+                <button type="button" class="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition hover:bg-teal-50 hover:text-teal-700" (click)="toggleCard(test)">
+                  <i class="material-icons text-2xl">{{ activeCardId !== test?.id ? 'keyboard_arrow_right' : 'keyboard_arrow_down' }}</i>
+                </button>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold uppercase tracking-wide text-teal-700">Assigned Test</p>
+                  <h2 class="mt-1 truncate text-xl font-extrabold text-slate-900" appTooltip="{{ (test?.title?.length || 0) > 55 ? test?.title : '' }}">
+                    {{ test?.title }}
+                  </h2>
+                  <p class="mt-2 text-sm text-slate-500">{{ test?.subject || test?.course_name || 'Course not specified' }}</p>
                 </div>
               </div>
-              <div>
-                <div class="justify-start">Reviewer</div>
-                <div class="font-semibold flex flex-wrap gap-2">
-                  @for (reviewer of test?.reviewers; track $index) {
-                    <span
-                      class="px-2 py-1 theme-bg-secondary theme-bg-gray theme-text-secondary theme-text-dark rounded font-semibold text-sm"
-                    >
-                      {{ reviewer?.name }}
-                    </span>
+
+              <div class="flex flex-wrap items-center gap-2 md:justify-end">
+                @if (test?.is_completed === true) {
+                  <div class="flex items-center rounded-2xl border border-slate-200 bg-slate-50 px-2 py-1">
+                    <label class="relative inline-flex cursor-pointer items-center">
+                      <input type="checkbox" class="sr-only peer" [checked]="test?.is_published" (change)="onPublish($event, test)" />
+                      <div class="h-5 w-9 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-[#116466] peer-checked:after:translate-x-4"></div>
+                    </label>
+                    <span class="ml-2 text-xs font-bold text-slate-600">{{ test?.is_published ? 'Public' : 'Private' }}</span>
+                  </div>
+                }
+                @if (getAvailabilityStatus(test) === 'submitted') {
+                  <span class="inline-flex min-w-[96px] justify-center rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">Submitted</span>
+                } @else if (getAvailabilityStatus(test) === 'expired') {
+                  <span class="inline-flex min-w-[96px] justify-center rounded-full bg-rose-50 px-3 py-1 text-xs font-extrabold text-rose-700">Expired</span>
+                } @else if (getAvailabilityStatus(test) === 'not_started') {
+                  <span class="inline-flex min-w-[96px] justify-center rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold text-blue-700">Not Started</span>
+                } @else {
+                  <span class="inline-flex min-w-[96px] justify-center rounded-full bg-teal-50 px-3 py-1 text-xs font-extrabold text-teal-700">Available</span>
+                }
+              </div>
+            </div>
+
+            @if (activeCardId === test?.id) {
+              <div class="border-t border-slate-100 bg-slate-50/70 p-5">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Course</p><p class="mt-1 truncate font-bold text-slate-900" tooltipPosition="right" appTooltip="{{ (test?.subject?.length || 0) > 15 ? test?.subject : '' }}">{{ test?.subject || '--' }}</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Reviewer</p><div class="mt-1 flex flex-wrap gap-1">@for (reviewer of test?.reviewers; track $index) {<span class="rounded-full bg-teal-50 px-2 py-1 text-xs font-bold text-teal-700">{{ reviewer?.name }}</span>}</div></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Passing</p><p class="mt-1 font-bold text-slate-900">{{ test?.passing_marks }}</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Marks</p><p class="mt-1 font-bold text-slate-900">{{ test?.total_marks }}</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Duration</p><p class="mt-1 font-bold text-slate-900">{{ test?.duration_minutes }} min</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Schedule</p><p class="mt-1 font-bold text-slate-900">{{ test?.exam_date | date }}</p></div>
+                  <div class="rounded-2xl bg-white p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Time</p><p class="mt-1 font-bold text-slate-900">{{ getExamTime(test) }}</p></div>
+                </div>
+                <div class="mt-5 flex flex-wrap gap-3">
+                  <button class="rounded-2xl bg-[#116466] px-5 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#0f3554] disabled:cursor-not-allowed disabled:opacity-50" (click)="openExamModal(test)" [disabled]="!isStartAllowed(test)" [appTooltip]="getAvailabilityStatus(test) === 'submitted' ? 'Test already completed' : getAvailabilityStatus(test) === 'expired' ? 'This test has expired' : getAvailabilityStatus(test) === 'not_started' ? 'This test starts at ' + getScheduleDisplay(test) : 'Start Test'">
+                    Start Test
+                  </button>
+                  @if (test?.is_completed === true) {
+                    <button class="rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:border-teal-200 hover:text-teal-700 disabled:cursor-not-allowed disabled:opacity-50" [disabled]="test?.review_status === 'pending_review'" (click)="goToRechack(test?.id)">
+                      View Result
+                    </button>
                   }
                 </div>
               </div>
-              <div>
-                <div class="text-center">Passing Marks</div>
-                <div class="font-semibold text-center">
-                  {{ test?.passing_marks }}
-                </div>
-              </div>
-              <div>
-                <div class="-secondary - text-center">Total Marks</div>
-                <div class="font-semibold text-center">
-                  {{ test?.total_marks }}
-                </div>
-              </div>
-
-              <div>
-                <div class="text-center">Duration</div>
-                <div class="font-semibold text-center">
-                  {{ test?.duration_minutes }} min
-                </div>
-              </div>
-
-              <div>
-                <div class="text-center">Exam Schedule</div>
-                <div class="font-semibold text-center">
-                  {{ test?.exam_date | date }}
-                </div>
-              </div>
-
-              <div>
-                <div class="text-center">Exam Time</div>
-                <div class="font-semibold text-center">
-                  {{ getExamTime(test) }}
-                </div>
-              </div>
-
-              <!-- <div>
-                <div class="text-center">Created On</div>
-                <div class="font-semibold text-center">
-                  {{ test?.created_on | date }}
-                </div>
-              </div> -->
-            </div>
-            <button
-              class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              (click)="openExamModal(test)"
-              [disabled]="!isStartAllowed(test)"
-              [appTooltip]="
-                getAvailabilityStatus(test) === 'submitted'
-                  ? 'Test already completed'
-                  : getAvailabilityStatus(test) === 'expired'
-                    ? 'This test has expired'
-                    : getAvailabilityStatus(test) === 'not_started'
-                      ? 'This test starts at ' + getScheduleDisplay(test)
-                    : 'Start Test'
-              "
-            >
-              Start Test
-            </button>
-
-            @if (test?.is_completed === true) {
-              <button
-                class="px-4 py-2 mx-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                [disabled]="test?.review_status === 'pending_review'"
-                (click)="goToRechack(test?.id)"
-              >
-                ReCheck
-              </button>
             }
-          </div>
+          </article>
+
+          <app-modal [open]="showModal" (close)="closeModal()">
+            <div class="mx-auto max-w-3xl">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-xs font-bold uppercase tracking-wide text-teal-700">Before you start</p>
+                  <h2 class="mt-1 text-2xl font-extrabold text-slate-900">Exam Instructions</h2>
+                </div>
+              </div>
+
+              <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Marks</p><p class="mt-1 font-extrabold text-slate-900">{{ selectedTest?.total_marks }}</p></div>
+                <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Duration</p><p class="mt-1 font-extrabold text-slate-900">{{ selectedTest?.duration_minutes }} min</p></div>
+                <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wide text-slate-500">Schedule</p><p class="mt-1 font-extrabold text-slate-900">{{ getScheduleDisplay(selectedTest) }}</p></div>
+              </div>
+
+              <div class="mt-5 rounded-3xl border border-slate-200 bg-white p-4">
+                <h3 class="mb-3 font-extrabold text-slate-900">{{ selectedTest?.title }}</h3>
+                <div class="space-y-3 text-sm leading-6 text-slate-600">
+                  @for (instruction of [
+                    'Please read all instructions carefully before starting the exam.',
+                    'Ensure you have a stable internet connection throughout the exam duration.',
+                    'Do not refresh the page or navigate away during the exam.',
+                    'All questions must be answered within the allotted time.',
+                    'Once you start the exam, the timer will begin and cannot be paused.',
+                    'If you encounter any technical issues, please contact support immediately.'
+                  ]; track $index) {
+                    <div class="flex gap-3 rounded-2xl bg-slate-50 p-3">
+                      <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#116466] text-xs font-extrabold text-white">{{ $index + 1 }}</span>
+                      <p>{{ instruction }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button type="button" class="rounded-2xl border border-slate-200 bg-white px-5 py-2.5 font-bold text-slate-700" (click)="closeModal()">Cancel</button>
+                <button type="button" (click)="canStartExam(selectedTest) && startExam(selectedTest?.id)" [disabled]="!canStartExam(selectedTest)" tooltipPosition="right" [appTooltip]="!canStartExam(selectedTest) ? getAvailabilityLabel(selectedTest) : ''" class="rounded-2xl bg-[#116466] px-5 py-2.5 font-extrabold text-white shadow-sm transition hover:bg-[#0f3554] disabled:cursor-not-allowed disabled:opacity-50">
+                  Start Exam
+                </button>
+              </div>
+            </div>
+          </app-modal>
         }
       </div>
-      <app-modal [open]="showModal" (close)="closeModal()">
-        <div class="mx-auto sm:p-2">
-          <h2 class="text-xl sm:text-2xl font-bold text-center sm:text-left">
-            Exam Instructions
-          </h2>
-          <hr class="my-2 theme-border" />
-
-          <div
-            class="grid grid-cols-1 sm:grid-cols-2 gap-8 font-medium sm:font-semibold text-base sm:text-lg lg:text-xl"
-          >
-            <div>
-              <p>Title Name : {{ selectedTest?.title }}</p>
-              <p>Passing Marks : {{ selectedTest?.passing_marks }}</p>
-            </div>
-
-            <div>
-              <p>Total Marks : {{ selectedTest?.total_marks }}</p>
-              <p>Duration : {{ selectedTest?.duration_minutes }} min</p>
-            </div>
-          </div>
-
-          <div class="mt-4 text-sm sm:text-base lg:text-lg space-y-4">
-            <p class="flex items-start">
-              <span
-                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
-                >1</span
-              >
-              Please read all instructions carefully before starting the exam.
-            </p>
-            <hr class="theme-border" />
-
-            <p class="flex items-start">
-              <span
-                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
-                >2</span
-              >
-              Ensure you have a stable internet connection throughout the exam
-              duration.
-            </p>
-            <hr class="theme-border" />
-
-            <p class="flex items-start">
-              <span
-                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
-                >3</span
-              >
-              Do not refresh the page or navigate away during the exam.
-            </p>
-            <hr class="theme-border" />
-
-            <p class="flex items-start">
-              <span
-                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
-                >4</span
-              >
-              All questions must be answered within the allotted time.
-            </p>
-            <hr class="theme-border" />
-
-            <p class="flex items-start">
-              <span
-                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
-                >5</span
-              >
-              Once you start the exam, the timer will begin and cannot be
-              paused.
-            </p>
-            <hr class="theme-border" />
-
-            <p class="flex items-start">
-              <span
-                class="bg-blue-600 text-white mr-2 px-2 rounded-full min-w-[24px] text-center"
-                >6</span
-              >
-              If you encounter any technical issues, please contact support
-              immediately.
-            </p>
-            <hr class="my-2 theme-border" />
-          </div>
-
-          <div class="flex flex-col sm:flex-row justify-between gap-3 pt-4">
-            <button
-              type="button"
-              class="px-3 py-2 rounded theme-bg-secondary theme-bg-gray w-full sm:w-auto"
-              (click)="closeModal()"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              (click)="
-                canStartExam(selectedTest) && startExam(selectedTest?.id)
-              "
-              [disabled]="
-                !canStartExam(selectedTest)
-              "
-              tooltipPosition="right"
-              [appTooltip]="
-                !canStartExam(selectedTest)
-                  ? getAvailabilityLabel(selectedTest)
-                    : ''
-              "
-              class="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Start Exam
-            </button>
-          </div>
-        </div>
-      </app-modal>
-    }
-  } @else if (isLoadingExams()) {
-    <div class="mt-4">
-      <ngx-skeleton-loader
-        appearance="line"
-        count="5"
-        [theme]="skeletonService.expanded"
-      >
-      </ngx-skeleton-loader>
-    </div>
-  } @else if (testsLoaded() && TestList().length === 0) {
-    <div class="flex flex-col items-center justify-center mt-64 text-center">
-      <div
-        class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4"
-      >
-        <svg
-          class="w-12 h-12 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 5.477 5.754 5 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-          ></path>
-        </svg>
+    } @else if (isLoadingExams()) {
+      <div class="rounded-3xl border border-[#e6edf3] bg-white p-5 shadow-sm">
+        <ngx-skeleton-loader appearance="line" count="5" [theme]="skeletonService.expanded"></ngx-skeleton-loader>
       </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">NO TESTS ASSIGNED</h3>
-      <p class="text-gray-500 mb-4 theme-text-secondary theme-text-dark">
-        You don't have any Tests assigned yet. Contact your administrator to get
-        started with Test
-      </p>
-    </div>
-  }
-  <app-pagination
-    [currentPage]="currentPage"
-    [totalPages]="totalPages"
-    [pageSize]="pageSize"
-    [pageSizeOptions]="pageSizeOptions"
-    (pageChange)="goToPage($event)"
-    (pageSizeChange)="onPageSizeChange($event)"
-  ></app-pagination>
+    } @else if (testsLoaded() && TestList().length === 0) {
+      <div class="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><i class="material-icons text-3xl">assignment</i></div>
+        <h3 class="text-lg font-extrabold text-slate-900">No tests assigned</h3>
+        <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">You don't have any tests assigned yet. Contact your administrator to get started.</p>
+      </div>
+    }
+  </div>
+
+  <app-pagination [currentPage]="currentPage" [totalPages]="totalPages" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (pageChange)="goToPage($event)" (pageSizeChange)="onPageSizeChange($event)"></app-pagination>
 </div>

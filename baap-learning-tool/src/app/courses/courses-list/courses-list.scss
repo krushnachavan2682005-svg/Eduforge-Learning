@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  min-height: 100%;
+  background: #f5f7fb;
+}
+
+:host ::ng-deep app-add-courses > div > button,
+:host ::ng-deep app-assgin-course > div > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid #dbe5ee !important;
+  border-radius: 16px !important;
+  background: #0f3554 !important;
+  color: #ffffff !important;
+  padding: 0.65rem 1rem !important;
+  font-weight: 800 !important;
+  box-shadow: 0 12px 24px rgba(15, 53, 84, 0.18);
+}
+
+:host ::ng-deep app-assgin-course > div > button {
+  background: #eaf5f4 !important;
+  color: #0f3554 !important;
+  box-shadow: none;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

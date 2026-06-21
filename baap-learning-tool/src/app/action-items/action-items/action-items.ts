@@ -10,7 +10,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { SkeletonTheme } from '../../services/skeleton-theme';
 import { SidebarService } from '../../services/sidebar.service';
 import { StorageService } from '../../services/storage-service';
-import { HeaderComponent } from '../../shared/header.component';
 import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
 import { AddActionItems } from '../add-action-items/add-action-items';
 import { CommonHttpService } from '../../services/common-http.service';
@@ -31,9 +30,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
     FormsModule,
     SafeUrlPipe,
     CommonModule,
-    AddActionItems,
-    HeaderComponent,
-    AssignActionItems,
+    AddActionItems,    AssignActionItems,
     PermissionDirective,
     NgxSkeletonLoaderComponent,
     PaginationComponent,
@@ -359,3 +356,4 @@ export class ActionItems {
     this.selectedCard = null;
   }
 }
+

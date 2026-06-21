@@ -12,21 +12,24 @@ import { StatCard } from '../../../shared/ui/stat-card/stat-card';
   standalone: true,
   imports: [CommonModule, RouterLink, PageHeader, StatCard],
   template: `
-    <div class="p-4">
-      <app-page-header title="Student Dashboard" subtitle="Learning, tests, action items, and progress"></app-page-header>
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div class="min-h-full bg-slate-50 p-5 md:p-6">
+      <app-page-header title="Student Dashboard" subtitle="Continue learning, complete tests, and track your progress."></app-page-header>
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <app-stat-card label="Assigned Courses" [value]="courses()" icon="book"></app-stat-card>
         <app-stat-card label="Assigned Tests" [value]="tests()" icon="assignment"></app-stat-card>
         <app-stat-card label="Action Items" [value]="actionItems()" icon="checklist"></app-stat-card>
         <app-stat-card label="Progress" [value]="progress() + '%'" icon="trending_up"></app-stat-card>
       </div>
 
-      <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
+      <section class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         @for (item of shortcuts; track item.route) {
-          <a class="theme-bg-secondary theme-border rounded p-4 block" [routerLink]="item.route">
-            <div class="material-icons mb-2">{{ item.icon }}</div>
-            <h2 class="font-semibold">{{ item.label }}</h2>
-            <p class="text-sm opacity-70 mt-1">{{ item.description }}</p>
+          <a class="group flex min-h-40 flex-col rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-md" [routerLink]="item.route">
+            <span class="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+              <i class="material-icons text-2xl">{{ item.icon }}</i>
+            </span>
+            <h2 class="text-lg font-extrabold text-slate-900">{{ item.label }}</h2>
+            <p class="mt-2 flex-1 text-sm leading-6 text-slate-500">{{ item.description }}</p>
+            <span class="mt-4 inline-flex items-center gap-1 text-sm font-extrabold text-teal-700">Open <i class="material-icons text-base transition group-hover:translate-x-1">arrow_forward</i></span>
           </a>
         }
       </section>
@@ -46,7 +49,7 @@ export class StudentDashboard {
     { label: 'Action Items', description: 'Track assigned tasks', icon: 'checklist', route: '/student/action-items' },
     { label: 'Progress', description: 'Review learning progress', icon: 'trending_up', route: '/student/progress' },
     { label: 'Resume', description: 'Manage your resume', icon: 'assignment_ind', route: '/student/resume' },
-    { label: 'AI Tutor', description: 'Prepare AI-assisted learning', icon: 'auto_awesome', route: '/student/ai-tutor' },
+    { label: 'AI Tutor Coming Soon', description: 'Prepare AI-assisted learning', icon: 'auto_awesome', route: '/student/ai-tutor' },
   ];
 
   ngOnInit() {

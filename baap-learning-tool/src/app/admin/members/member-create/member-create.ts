@@ -17,67 +17,69 @@ import { HeaderComponent } from '../../../shared/header.component';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HeaderComponent],
   template: `
-    <div class="p-4">
-      <app-header
-        [showBackBtnAndTitleSubtitle]="true"
-        titleName="Create Member"
-        subTitle="Create a teacher or student in the current organization"
-      ></app-header>
+    <div class="min-h-full bg-slate-50 p-5 md:p-6">
+      <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+        <app-header
+          [showBackBtnAndTitleSubtitle]="true"
+          titleName="Create Member"
+          subTitle="Create a teacher or student in the current organization"
+        ></app-header>
+      </div>
 
-      <form class="max-w-2xl theme-bg-secondary theme-border rounded p-4" [formGroup]="form" (ngSubmit)="submit()">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label class="flex flex-col gap-1">
+      <form class="mt-5 max-w-4xl rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm md:p-6" [formGroup]="form" (ngSubmit)="submit()">
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
             First Name
-            <input class="px-3 py-2 rounded theme-bg-gray theme-border" formControlName="first_name" />
+            <input class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" formControlName="first_name" />
           </label>
-          <label class="flex flex-col gap-1">
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
             Last Name
-            <input class="px-3 py-2 rounded theme-bg-gray theme-border" formControlName="last_name" />
+            <input class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" formControlName="last_name" />
           </label>
-          <label class="flex flex-col gap-1">
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
             Email
-            <input class="px-3 py-2 rounded theme-bg-gray theme-border" formControlName="email" />
+            <input class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" formControlName="email" />
           </label>
-          <label class="flex flex-col gap-1">
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
             Phone
-            <input class="px-3 py-2 rounded theme-bg-gray theme-border" formControlName="phone" />
+            <input class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" formControlName="phone" />
           </label>
-          <label class="flex flex-col gap-1">
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
             Role
-            <select class="px-3 py-2 rounded theme-bg-gray theme-border" formControlName="role">
+            <select class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100" formControlName="role">
               <option value="teacher">Teacher</option>
               <option value="student">Student</option>
             </select>
           </label>
-          <label class="flex flex-col gap-1">
+          <label class="grid gap-2 text-sm font-bold text-slate-700">
             Password
             <input
-              class="px-3 py-2 rounded theme-bg-gray theme-border"
+              class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
               type="password"
               formControlName="password"
             />
             @if (form.get('password')?.touched && form.get('password')?.invalid) {
-              <span class="text-sm text-red-500">Use at least 8 characters with one letter and one number.</span>
+              <span class="text-xs font-semibold text-rose-600">Use at least 8 characters with one letter and one number.</span>
             }
           </label>
-          <label class="flex flex-col gap-1">
+          <label class="grid gap-2 text-sm font-bold text-slate-700 md:col-span-2">
             Confirm Password
             <input
-              class="px-3 py-2 rounded theme-bg-gray theme-border"
+              class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 font-normal outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
               type="password"
               formControlName="confirm_password"
             />
             @if (form.touched && form.errors?.['passwordMismatch']) {
-              <span class="text-sm text-red-500">Passwords do not match.</span>
+              <span class="text-xs font-semibold text-rose-600">Passwords do not match.</span>
             }
           </label>
         </div>
 
-        <div class="flex justify-end gap-2 mt-5">
-          <button type="button" class="px-4 py-2 rounded theme-bg-gray theme-border" (click)="cancel()">
+        <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button type="button" class="rounded-2xl border border-slate-200 bg-white px-5 py-2.5 font-bold text-slate-700 transition hover:bg-slate-50" (click)="cancel()">
             Cancel
           </button>
-          <button type="submit" class="px-4 py-2 rounded theme-bg-gray theme-border font-semibold" [disabled]="form.invalid || isSaving()">
+          <button type="submit" class="rounded-2xl bg-[#116466] px-5 py-2.5 font-extrabold text-white shadow-sm transition hover:bg-[#0f3554] disabled:cursor-not-allowed disabled:opacity-60" [disabled]="form.invalid || isSaving()">
             {{ isSaving() ? 'Creating...' : 'Create Member' }}
           </button>
         </div>

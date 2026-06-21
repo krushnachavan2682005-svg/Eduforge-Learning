@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  min-height: 100%;
+  background: #f5f7fb;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+:host ::ng-deep app-add-level > div > button,
+:host ::ng-deep app-add-action-items > div > button,
+:host ::ng-deep app-assign-action-items > div > button {
+  min-height: 44px;
+  border: 1px solid #dbe5ee !important;
+  border-radius: 16px !important;
+  padding: 0.65rem 1rem !important;
+  font-weight: 800 !important;
+}
+
+:host ::ng-deep app-add-action-items > div > button {
+  background: #0f3554 !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 24px rgba(15, 53, 84, 0.18);
+}
+
+:host ::ng-deep app-assign-action-items > div > button,
+:host ::ng-deep app-add-level > div > button {
+  background: #eaf5f4 !important;
+  color: #0f3554 !important;
+}

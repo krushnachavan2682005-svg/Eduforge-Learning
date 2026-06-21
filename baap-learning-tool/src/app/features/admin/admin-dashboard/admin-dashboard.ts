@@ -12,29 +12,33 @@ import { StatCard } from '../../../shared/ui/stat-card/stat-card';
   standalone: true,
   imports: [CommonModule, RouterModule, PageHeader, StatCard],
   template: `
-    <div class="p-4">
-      <app-page-header title="Organization Dashboard" subtitle="Members, students, classes, and enrollments"></app-page-header>
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div class="min-h-full bg-slate-50 p-5 md:p-6">
+      <app-page-header title="Organization Dashboard" subtitle="Members, students, classes, enrollments, and LMS operations in one workspace."></app-page-header>
+
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <app-stat-card label="Members" [value]="members()" icon="group"></app-stat-card>
         <app-stat-card label="Students" [value]="stats()?.total_students || 0" icon="school"></app-stat-card>
         <app-stat-card label="Classes" [value]="classes()" icon="groups"></app-stat-card>
         <app-stat-card label="Enrollments" [value]="stats()?.assigned_courses || 0" icon="assignment_turned_in"></app-stat-card>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6">
+      <section class="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         @for (card of operationCards(); track card.route) {
-          <a class="theme-bg-secondary theme-border rounded p-4 hover:opacity-90" [routerLink]="card.route">
-            <div class="flex justify-between items-start gap-3">
-              <div>
-                <p class="font-semibold">{{ card.title }}</p>
-                <p class="text-sm opacity-70 mt-1">{{ card.description }}</p>
+          <a class="group flex min-h-44 flex-col justify-between rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-md" [routerLink]="card.route">
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0">
+                <p class="text-lg font-extrabold text-slate-900">{{ card.title }}</p>
+                <p class="mt-2 text-sm leading-6 text-slate-500">{{ card.description }}</p>
               </div>
-              <span class="text-xl font-semibold">{{ card.count }}</span>
+              <span class="inline-flex min-w-12 justify-center rounded-2xl bg-slate-100 px-3 py-2 text-lg font-extrabold text-slate-900">{{ card.count }}</span>
             </div>
-            <p class="text-sm mt-4 font-semibold">{{ card.action }}</p>
+            <div class="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-teal-700">
+              {{ card.action }}
+              <span class="material-icons text-base transition group-hover:translate-x-1">arrow_forward</span>
+            </div>
           </a>
         }
-      </div>
+      </section>
     </div>
   `,
 })
@@ -42,8 +46,8 @@ export class AdminDashboard {
   stats = signal<any>(null);
   members = signal(0);
   classes = signal(0);
-  courses = signal<string | number>('â€”');
-  tests = signal<string | number>('â€”');
+  courses = signal<string | number>('—');
+  tests = signal<string | number>('—');
   private http = inject(CommonHttpService);
   private storage = inject(StorageService);
 
