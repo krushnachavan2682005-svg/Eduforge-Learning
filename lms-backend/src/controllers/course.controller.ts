@@ -52,7 +52,6 @@ export class CourseController {
       const body = req.body as Partial<Course>;
       const updateData = { ...body, client_id };
       const updated = await courseRepo.updateCourse(id, updateData);
-
       if (!updated) {
         throw new InternalServerError("Course not found");
       }

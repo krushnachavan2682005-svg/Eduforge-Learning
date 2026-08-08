@@ -3,7 +3,8 @@ import { sequelize } from "../config/database";
 import { convertEmptyStringsToNull } from "../db/hooks/convert_empty_strings_to_null";
 import { beforeSave } from "../db/hooks/time_format_hook";
 import { uniqueTitleCheckHook } from "../db/hooks/unique_title";
-
+import { lesson } from "./lesson.model";
+import { User } from "../modules/users/user.model";
 export interface ModelWithId extends Model {
   id: string | number;
 }
@@ -74,6 +75,4 @@ Course.init(
     },
   }
 );
-
-// Relations
-// Course.belongsTo(User, { foreignKey: "instructor_id" });
+Course.hasMany(lesson, { foreignKey: "course_id" });

@@ -80,4 +80,4 @@ lesson.init(
     },
   }
 );
-lesson.belongsTo(Course, { foreignKey: "course_id" });
+// lesson.belongsTo(Course, { foreignKey: "course_id" });
