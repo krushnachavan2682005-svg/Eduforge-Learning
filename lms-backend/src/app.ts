@@ -15,10 +15,21 @@ import memberRoutes from "./modules/members/member.routes";
 import { seedRbac } from "./modules/rbac/rbac.seed";
 import "./modules/roles/role.model";
 import "./modules/sessions/session.model";
-
+import { asyncLocalStorage as cls} from "./constants/request-context";
 export const buildApp = async () => {
   const app = Fastify({ logger: true });
-
+  app.addHook("onRequest",(request,reply,done)=>{
+    cls.run({queryCount:0},()=>{
+      done()
+    })
+  })
+app.addHook("onResponse",(request,reply,done)=>{
+const store=cls.getStore();
+if(store){
+  reply.header('x-query-count',store.queryCount)
+}
+done();
+})
   await connectDB();
   // Sync Sequelize models with the database
   await sequelize.sync()

@@ -1,0 +1,44 @@
+# Node.js / Express
+node_modules/
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Angular
+/dist
+/tmp
+/.angular
+/out-tsc
+/bazel-out
+src/environments/environment.*.ts
+
+# Python / Pytest (e2e_tests)
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+test-reports/
+report.html
+.coverage
+htmlcov/
+.tox/
+
+# OS/Editor files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
