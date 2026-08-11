@@ -208,7 +208,7 @@ export class ViewStudentSubmissions {
 
     this.http
       .putCourse(
-        `/client/${this.client_id}/update-assigned-action-status/${student_Id}`,
+        `/eduforge/api/update-assigned-action-status/${student_Id}`,
         payload,
       )
       .subscribe({

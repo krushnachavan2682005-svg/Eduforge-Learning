@@ -221,7 +221,7 @@ export class CommonHttpService {
 
   getCoursesForEnrollment(page = 1, limit = 100): Observable<any> {
     const clientId = this.str?.getItem<string>(STORAGEENUMS.CLIENT_ID) || '';
-    return this.getCourse(`/client/${clientId}/all-courses?page=${page}&limit=${limit}`);
+    return this.getCourse(`/eduforge/api/all-courses?page=${page}&limit=${limit}`);
   }
 
   postCourse(endpoint: string, data: any): Observable<any> {

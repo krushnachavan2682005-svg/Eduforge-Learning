@@ -106,7 +106,7 @@ export class AddActionItems implements OnInit {
   }
 
   getLevels() {
-    this.commonhttp.getCourse(`/client/${this.client_Id}/level`).subscribe({
+    this.commonhttp.getCourse(`/eduforge/api/level`).subscribe({
       next: (res: any) => {
         this.allLevels?.set(res?.data || []);
       },
@@ -143,8 +143,8 @@ export class AddActionItems implements OnInit {
 
     this.isLoading = true;
     const url = this.isEditMode
-      ? `/client/${this.client_Id}/action-items/${this.data?.id}`
-      : `/client/${this.client_Id}/action-items`;
+      ? `/eduforge/api/action-items/${this.data?.id}`
+      : `/eduforge/api/action-items`;
 
     const request$ = this.isEditMode
       ? this.commonhttp?.putCourse(url, payload)

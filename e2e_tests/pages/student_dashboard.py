@@ -5,8 +5,8 @@ class StudentDashboard(BasePage):
     """Page object for the Student Dashboard and interactions."""
     
     # --- Locators ---
-    PENDING_TESTS_TAB = (By.XPATH, "//a[contains(text(), 'Pending') or contains(text(), 'Dashboard')]")
-    START_ASSESSMENT_BTN = (By.XPATH, "//button[contains(text(), 'Start') or contains(text(), 'Attempt')]")
+    PENDING_TESTS_TAB = (By.XPATH, "//a[contains(@href, '/student/tests') or contains(text(), 'Tests')]")
+    START_ASSESSMENT_BTN = (By.XPATH, "//button[contains(text(), 'Start Test')]")
     
     # Attempting the test
     # Assuming there are radio buttons or text areas for answers
@@ -24,10 +24,21 @@ class StudentDashboard(BasePage):
         self.click(self.PENDING_TESTS_TAB)
 
     def start_assessment(self, title):
-        """Locates a test by title and starts it."""
-        # Locate the specific test card/row and click its start button
-        start_btn = (By.XPATH, f"//*[contains(text(), '{title}')]/ancestor::*[contains(@class, 'card') or name()='tr']//button[contains(text(), 'Start') or contains(text(), 'Attempt')]")
+        """Locates a test by title, expands the card, and starts it."""
+        import time
+        # Expand the test card
+        expand_btn = (By.XPATH, f"//h2[contains(normalize-space(text()), '{title}')]/ancestor::article//button[i[contains(text(), 'keyboard_arrow')]]")
+        self.click(expand_btn)
+        time.sleep(1)
+        
+        # Click 'Start Test' on the expanded card
+        start_btn = (By.XPATH, f"//h2[contains(normalize-space(text()), '{title}')]/ancestor::article//button[contains(normalize-space(text()), 'Start Test')]")
         self.click(start_btn)
+        time.sleep(1)
+        
+        # Click 'Start Exam' on the modal
+        modal_start_btn = (By.XPATH, "//app-modal//button[contains(normalize-space(text()), 'Start Exam')]")
+        self.click(modal_start_btn)
 
     def complete_and_submit_assessment(self):
         """Fills out arbitrary answers and submits the test."""

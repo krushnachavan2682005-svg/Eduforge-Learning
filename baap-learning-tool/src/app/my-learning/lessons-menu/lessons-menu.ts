@@ -57,7 +57,7 @@ export class LessonsMenu implements OnInit {
 
     this.commonHttp
       .getCourse(
-        `/client/${this.clientId}/user/${this.userId}/course/${courseId}`,
+        `/eduforge/api/user/${this.userId}/course/${courseId}`,
       )
       .subscribe({
         next: (res: any) => {

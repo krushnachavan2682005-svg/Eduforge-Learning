@@ -72,7 +72,7 @@ export class AssignActionItems implements OnInit {
 
   loadActionItems() {
     if (!this.clientId) return;
-    const endpoint = `/client/${this.clientId}/action-items`;
+    const endpoint = `/eduforge/api/action-items`;
     this.commonHttp.getCourse(endpoint).subscribe({
       next: (res: any) => {
         const actionItems = res?.data?.items || [];
@@ -332,7 +332,7 @@ export class AssignActionItems implements OnInit {
     }
 
     this.commonHttp
-      .postCourse(`/client/${this.clientId}/assign-action-items`, payload)
+      .postCourse(`/eduforge/api/assign-action-items`, payload)
       .subscribe({
         next: () => {
           this.isSidebarOpen = false;

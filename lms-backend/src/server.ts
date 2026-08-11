@@ -24,7 +24,6 @@ const start = async () => {
       host: host,
     });
     console.log(`🚀 Server running at http://${host}:${port}`);
-    console.log(`📄 Swagger Docs at http://${host}:${port}/docs`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

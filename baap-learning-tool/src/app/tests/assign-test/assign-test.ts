@@ -79,7 +79,7 @@ export class AssignTest implements OnInit {
 
   loadTests() {
     if (!this.clientId) return;
-    const endpoint = `/client/${this.clientId}/all-exams`;
+    const endpoint = `/eduforge/api/all-exams`;
     this.commonHttp.getCourse(endpoint).subscribe({
       next: (res: any) => {
         const exams = res?.exams || res?.data || [];
@@ -273,7 +273,7 @@ export class AssignTest implements OnInit {
     }
 
     this.commonHttp
-      .postCourse(`/client/${this.clientId}/exams/assign`, payload)
+      .postCourse(`/eduforge/api/exams/assign`, payload)
       .subscribe({
         next: () => {
           this.isSidebarOpen = false;

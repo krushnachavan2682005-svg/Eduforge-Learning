@@ -72,9 +72,7 @@ done();
     });
   }
 
-  await app.register(swaggerUi, {
-    routePrefix: "/docs",
-  });
+
 
   const routes = (await import("./routes/index")).default;
   app.register(authRoutes, { prefix: "/auth" });
@@ -83,7 +81,7 @@ done();
   app.register(localDashboardRoutes, { prefix: "/dashboard" });
   app.register(studentRoutes);
   app.register(memberRoutes);
-  app.register(routes, { prefix: "/lms/v1/api" });
-  app.register(publicExamRoutes,{prefix:"/lms/v1/api"})
+  app.register(routes, { prefix: "/eduforge/api" });
+  app.register(publicExamRoutes,{prefix:"/eduforge/api"})
   return app;
 };

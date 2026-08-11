@@ -125,7 +125,7 @@ export class AddLesson implements OnChanges {
     if (this.editMode && this.selectedSection?.id) {
       this.commonHttp
         .putCourse(
-          `/client/${this.clientId}/lesson/${this.selectedSection?.id}`,
+          `/eduforge/api/lesson/${this.selectedSection?.id}`,
           payload,
         )
         .subscribe({
@@ -152,7 +152,7 @@ export class AddLesson implements OnChanges {
         });
     } else {
       this.commonHttp
-        .postCourse(`/client/${this.clientId}/lesson`, payload)
+        .postCourse(`/eduforge/api/lesson`, payload)
         .subscribe({
           next: () => {
             this.toastr.success('Lesson added successfully', '', {
@@ -198,7 +198,7 @@ export class AddLesson implements OnChanges {
 
   deleteLesson(lesson: any) {
     this.commonHttp
-      .delete(`/client/${this.clientId}/lesson/${lesson?.id}`, {
+      .delete(`/eduforge/api/lesson/${lesson?.id}`, {
         course_id: this.courseId,
       })
       .subscribe({

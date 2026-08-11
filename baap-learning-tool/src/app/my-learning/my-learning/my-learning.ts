@@ -131,7 +131,7 @@ export class MyLearning {
 
     this.commonHttp
       .getCourse(
-        `/client/${this.clientId}/get-assigned-course-byuser/${this.user_id}`,
+        `/eduforge/api/get-assigned-course-byuser/${this.user_id}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -167,7 +167,7 @@ export class MyLearning {
     this.isLoading?.set(true);
     this.commonHttp
       .getCourse(
-        `/client/${this.clientId}/all-courses?limit=1000`,
+        `/eduforge/api/all-courses?limit=1000`,
       )
       .subscribe((res: any) => {
         this.assignCourses?.set(res?.items || []);

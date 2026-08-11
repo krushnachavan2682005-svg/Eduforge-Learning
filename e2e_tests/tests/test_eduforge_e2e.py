@@ -27,6 +27,7 @@ class TestEduforgeE2E:
         # Phase 1: Teacher Setup & Assignment
         # ==========================================
         login_page.go_to()
+        time.sleep(2)  # Temporary sleep to visually confirm page rendering
         login_page.login(Config.TEACHER_EMAIL, Config.TEACHER_PASSWORD)
         
         teacher_dashboard.create_assessment(self.assessment_title, Config.STUDENT_EMAIL)

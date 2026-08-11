@@ -104,7 +104,7 @@ export class LeaderView implements OnInit {
   }
 
   private loadCourses() {
-    this.commonHttp.getCourse(`/client/${this.clientId}/get-assigned-course-byuser/${this.userId}`)
+    this.commonHttp.getCourse(`/eduforge/api/get-assigned-course-byuser/${this.userId}`)
       .subscribe({
         next: (res: any) => {
           const courses = res?.data || [];
@@ -128,7 +128,7 @@ export class LeaderView implements OnInit {
   }
 
   private loadActionItems() {
-    this.commonHttp.getCourse(`/client/${this.clientId}/action-items`)
+    this.commonHttp.getCourse(`/eduforge/api/action-items`)
       .subscribe({
         next: (res: any) => {
           const items = res?.data?.items || [];

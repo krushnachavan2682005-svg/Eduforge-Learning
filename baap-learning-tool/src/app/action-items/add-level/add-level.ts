@@ -75,7 +75,7 @@ export class AddLevel implements OnInit, OnChanges {
   }
 
   getLevels() {
-    this.commonHttp.getCourse(`/client/${this.clientId}/level`).subscribe({
+    this.commonHttp.getCourse(`/eduforge/api/level`).subscribe({
       next: (res: any) => {
         const levels = res?.data?.map((l: any) => ({
           ...l,
@@ -87,7 +87,7 @@ export class AddLevel implements OnInit, OnChanges {
 
   deleteLevel(id: string) {
     this.commonHttp
-      .delete(`/client/${this.clientId}/level/${id}`, {})
+      .delete(`/eduforge/api/level/${id}`, {})
       .subscribe({
         next: () => {
           const updated = this.allLevels().filter((l) => l?.id !== id);
@@ -133,7 +133,7 @@ export class AddLevel implements OnInit, OnChanges {
     if (this.selectedLevelId) {
       this.commonHttp
         .putCourse(
-          `/client/${this.clientId}/level/${this.selectedLevelId}`,
+          `/eduforge/api/level/${this.selectedLevelId}`,
           payload,
         )
         .subscribe({
@@ -149,7 +149,7 @@ export class AddLevel implements OnInit, OnChanges {
         });
     } else {
       this.commonHttp
-        .postCourse(`/client/${this.clientId}/level`, payload)
+        .postCourse(`/eduforge/api/level`, payload)
         .subscribe({
           next: () => {
             this.toastr.success('Level added successfully');

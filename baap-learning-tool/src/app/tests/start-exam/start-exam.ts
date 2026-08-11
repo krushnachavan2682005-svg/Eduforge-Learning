@@ -71,7 +71,7 @@ export class StartExam {
     this.startError.set('');
     this.commonHttp
       .getCourse(
-        `/client/${this.clientId}/exams/${this.examId}/start/${this.userId}`,
+        `/eduforge/api/exams/${this.examId}/start/${this.userId}`,
       )
       .subscribe({
         next: (response: any) => {
@@ -242,7 +242,7 @@ export class StartExam {
       next: () => {
         this.commonHttp
           .postCourse(
-            `/client/${this.clientId}/exam/submit/${this.userId}`,
+            `/eduforge/api/exam/submit/${this.userId}`,
             payload,
           )
           .subscribe({
@@ -271,7 +271,7 @@ export class StartExam {
     };
 
     return this.commonHttp?.postCourse(
-      `/client/${this.clientId}/exam/${this.userId}/save-answer`,
+      `/eduforge/api/exam/${this.userId}/save-answer`,
       payload,
     );
   }
