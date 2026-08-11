@@ -156,7 +156,7 @@ export class DashboardComponent {
   getStudentData() {
     this.timelineLoading.set(true);
     this.commonHttp
-      .getCourse(`/client/${this.client_Id}/dashboard/${this.user_Id}`)
+      .getCourse(`/eduforge/api/dashboard/${this.user_Id}`)
       .subscribe({
         next: (res: any) => {
           this.profileData.set(res?.data?.profile);
@@ -174,7 +174,7 @@ export class DashboardComponent {
 
   getTutorData() {
     this.commonHttp
-      .getCourse(`/client/${this.client_Id}/tutor-dashboard/${this.user_Id}`)
+      .getCourse(`/eduforge/api/tutor-dashboard/${this.user_Id}`)
       .subscribe({
         next: (res: any) => {
           this.examProgress.set(res?.data?.testProgress?.tests);
@@ -190,7 +190,7 @@ export class DashboardComponent {
   getPublicTimeLines() {
     (this,
       this.commonHttp
-        .getCourse(`/client/${this.client_Id}/assignment/publish-timeline`)
+        .getCourse(`/eduforge/api/assignment/publish-timeline`)
         .subscribe({
           next: (res: any) => {
             this.timelineData.set(res?.data ?? []);

@@ -52,7 +52,7 @@ export class TestResult {
     this.isLoadingResults.set(true);
     this.http
       .getCourse(
-        `/client/${this.client_Id}/get-student-results/${this.user_Id}?page=${this.currentPage}&limit=${this.pageSize}`,
+        `/eduforge/api/get-student-results/${this.user_Id}?page=${this.currentPage}&limit=${this.pageSize}`,
       )
       .subscribe((res: any) => {
         this.isLoadingResults.set(false);

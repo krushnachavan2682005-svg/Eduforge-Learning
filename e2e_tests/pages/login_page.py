@@ -6,11 +6,12 @@ class LoginPage(BasePage):
     """Page object for the Login Page."""
     
     # --- Locators ---
-    # These may need to be updated to match the exact Angular DOM attributes
-    EMAIL_INPUT = (By.CSS_SELECTOR, "input[type='email'], input[name='email'], input[formcontrolname='email']")
-    PASSWORD_INPUT = (By.CSS_SELECTOR, "input[type='password'], input[name='password'], input[formcontrolname='password']")
+    # Force locators to strictly match <input> tags
+    EMAIL_INPUT = (By.XPATH, "//input[@type='email' or @formcontrolname='email' or @name='email']")
+    PASSWORD_INPUT = (By.XPATH, "//input[@type='password' or @formcontrolname='password' or @name='password']")
     LOGIN_BUTTON = (By.XPATH, "//button[contains(translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'login') or @type='submit']")
-    LOGOUT_BUTTON = (By.XPATH, "//button[contains(text(), 'Logout')]")
+    LOGOUT_MENU_ITEM = (By.XPATH, "//span[contains(text(), 'Logout')]")
+    LOGOUT_CONFIRM_BTN = (By.XPATH, "//button[contains(text(), 'Yes')]")
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -27,4 +28,8 @@ class LoginPage(BasePage):
 
     def logout(self):
         """Performs the logout action if the button is present."""
-        self.click(self.LOGOUT_BUTTON)
+        self.click(self.LOGOUT_MENU_ITEM)
+        # Wait for and click confirmation
+        import time
+        time.sleep(1)
+        self.click(self.LOGOUT_CONFIRM_BTN)

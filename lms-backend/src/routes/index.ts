@@ -26,21 +26,21 @@ export default async function routes(
   });
   fastify.addHook("onRoute", (routeOptions) => { });
   fastify.register(uploadRoutes);
-  fastify.register(courseRoutes, { prefix: "/client/:client_id" });
-  fastify.register(lessonRoutes, { prefix: "/client/:client_id" });
-  fastify.register(sectionRoutes, { prefix: "/client/:client_id" });
-  fastify.register(assignCourseRoutes, { prefix: "/client/:client_id" });
+  fastify.register(courseRoutes);
+  fastify.register(lessonRoutes);
+  fastify.register(sectionRoutes);
+  fastify.register(assignCourseRoutes);
   fastify.register(completedAssignCourseRoutes, {
     prefix: "/client/:client_id",
   });
-  fastify.register(resumeRoutes, { prefix: "/client/:client_id" });
-  fastify.register(examRoutes, { prefix: "/client/:client_id" });
-  fastify.register(actionItemsRoute, { prefix: "/client/:client_id" });
-  fastify.register(assignActionItemsRoutes, { prefix: "/client/:client_id" });
+  fastify.register(resumeRoutes);
+  fastify.register(examRoutes);
+  fastify.register(actionItemsRoute);
+  fastify.register(assignActionItemsRoutes);
   // fastify.register(creditRoutes, { prefix: "/client/:client_id" });
-  fastify.register(levelRoute, { prefix: "/client/:client_id" });
-  fastify.register(studentResultsRoutes, { prefix: "/client/:client_id" });
-  fastify.register(dashboardRoutes, { prefix: "/client/:client_id" });
+  fastify.register(levelRoute);
+  fastify.register(studentResultsRoutes);
+  fastify.register(dashboardRoutes);
   // fastify.register(enrollmentRoutes, { prefix: "/client/:client_id" });
   // fastify.register(quizRoutes, { prefix: "/client/:client_id" });
   // fastify.register(reviewsRoutes, { prefix: "/client/:client_id" });

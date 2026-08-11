@@ -56,7 +56,7 @@ export class ViewCourse {
   getCourseById(courseId: any) {
     this.isLoading?.set(true);
     this.commonHttp
-      .getCourse(`/client/${this.clientId}/course/${courseId}`)
+      .getCourse(`/eduforge/api/course/${courseId}`)
       .subscribe({
         next: (response: any) => {
           const courseData = response?.data;

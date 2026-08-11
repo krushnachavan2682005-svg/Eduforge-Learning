@@ -58,11 +58,11 @@ export class TeacherDashboard {
     const clientId = this.storage.getItem<string>(STORAGEENUMS.CLIENT_ID) || '';
     const userId = this.storage.getItem<string>(STORAGEENUMS.USER_ID) || '';
     if (!clientId) return;
-    this.http.getCourse(`/client/${clientId}/all-courses?page=1&limit=1`).subscribe((res: any) => this.courses.set(res?.pagination?.total || res?.items?.length || 0));
-    this.http.getCourse(`/client/${clientId}/all-exams?page=1&limit=1`).subscribe((res: any) => this.tests.set(res?.total || res?.data?.length || res?.exams?.length || 0));
-    this.http.getCourse(`/client/${clientId}/action-items?page=1&limit=1`).subscribe((res: any) => this.actionItems.set(res?.data?.pagination?.total || res?.data?.items?.length || 0));
+    this.http.getCourse(`/eduforge/api/all-courses?page=1&limit=1`).subscribe((res: any) => this.courses.set(res?.pagination?.total || res?.items?.length || 0));
+    this.http.getCourse(`/eduforge/api/all-exams?page=1&limit=1`).subscribe((res: any) => this.tests.set(res?.total || res?.data?.length || res?.exams?.length || 0));
+    this.http.getCourse(`/eduforge/api/action-items?page=1&limit=1`).subscribe((res: any) => this.actionItems.set(res?.data?.pagination?.total || res?.data?.items?.length || 0));
     if (userId) {
-      this.http.getCourse(`/client/${clientId}/reviewer-dashboard/${userId}`).subscribe({
+      this.http.getCourse(`/eduforge/api/reviewer-dashboard/${userId}`).subscribe({
         next: (res: any) => this.reviews.set((res?.data || []).length),
         error: () => this.reviews.set(0),
       });

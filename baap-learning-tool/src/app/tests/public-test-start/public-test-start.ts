@@ -80,7 +80,7 @@ export class PublicTestStart {
   onSubmit() {
     if (this.candidateForm.valid) {
       this.commonHttp.postCourse(
-        `/client/${this.clientId}/exams/${this.examId}/public`,
+        `/eduforge/api/exams/${this.examId}/public`,
         this.candidateForm.value,
       );
       this.toastr.success('Details Saved! Starting Exam...');

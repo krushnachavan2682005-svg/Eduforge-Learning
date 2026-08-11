@@ -465,7 +465,7 @@ export class AddNewTest {
 
   private loadExamForEdit(id: string) {
     this.commonservice
-      .getCourse(`/client/${this.clientId}/exam/${id}`)
+      .getCourse(`/eduforge/api/exam/${id}`)
       .subscribe((res: any) => {
         const data = res?.data || res;
         const examDate = data?.exam_date
@@ -845,11 +845,11 @@ export class AddNewTest {
     const request$ =
       this.isEditMode && this.examId
         ? this.commonservice?.putCourse(
-            `/client/${this.clientId}/exam/${this.examId}`,
+            `/eduforge/api/exam/${this.examId}`,
             payload,
           )
         : this.commonservice?.postCourse(
-            `/client/${this.clientId}/exams`,
+            `/eduforge/api/exams`,
             payload,
           );
 

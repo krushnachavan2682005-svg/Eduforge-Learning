@@ -104,7 +104,7 @@ export class ViewSection implements OnInit {
     this.isLoading?.set(true);
     if (this.courseId) {
       this.commonHttp
-        .getCourse(`/client/${this.clientId}/course/${this.courseId}`)
+        .getCourse(`/eduforge/api/course/${this.courseId}`)
         .subscribe({
           next: (res: any) => {
             const lessons = res?.data?.lessons || [];
@@ -210,7 +210,7 @@ export class ViewSection implements OnInit {
   confirmDelete() {
     if (this.sectionToDelete && this.sectionToDelete.id) {
       this.commonHttp
-        .delete(`/client/${this.clientId}/section/${this.sectionToDelete.id}`, {
+        .delete(`/eduforge/api/section/${this.sectionToDelete.id}`, {
           course_id: this.courseId,
         })
         .subscribe({

@@ -68,14 +68,14 @@ export class AdminDashboard {
       this.refreshCards();
     });
     if (clientId) {
-      this.http.getCourse(`/client/${clientId}/all-courses?page=1&limit=1`).subscribe({
+      this.http.getCourse(`/eduforge/api/all-courses?page=1&limit=1`).subscribe({
         next: (res: any) => {
           this.courses.set(res?.pagination?.total || res?.items?.length || 0);
           this.refreshCards();
         },
         error: () => this.refreshCards(),
       });
-      this.http.getCourse(`/client/${clientId}/all-exams?page=1&limit=1`).subscribe({
+      this.http.getCourse(`/eduforge/api/all-exams?page=1&limit=1`).subscribe({
         next: (res: any) => {
           this.tests.set(res?.total || res?.data?.length || res?.exams?.length || 0);
           this.refreshCards();

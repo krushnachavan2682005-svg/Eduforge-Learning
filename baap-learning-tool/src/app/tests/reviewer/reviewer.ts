@@ -52,7 +52,7 @@ export class Reviewer {
   getExam(): void {
     this.commonHttp
       ?.getCourse(
-        `/client/${this.clientId}/submission/user/${this.userId}/session/${this.session_id()}`,
+        `/eduforge/api/submission/user/${this.userId}/session/${this.session_id()}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -99,7 +99,7 @@ export class Reviewer {
 
     this.commonHttp
       ?.putCourse(
-        `/client/${this.clientId}/exam/review/${this.session_id()}`,
+        `/eduforge/api/exam/review/${this.session_id()}`,
         reviewPayload,
       )
       ?.subscribe({

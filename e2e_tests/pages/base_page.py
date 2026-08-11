@@ -1,6 +1,7 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, InvalidElementStateException
+from selenium.webdriver.common.keys import Keys
 from utils.config import Config
 import logging
 
@@ -38,9 +39,14 @@ class BasePage:
         element.click()
 
     def send_keys(self, locator, text):
-        """Waits for an element to be visible, clears it, and inputs text."""
-        element = self.wait_for_element_visible(locator)
-        element.clear()
+        """Waits for an element to be clickable, clears it, and inputs text."""
+        element = self.wait_for_element_clickable(locator)
+        try:
+            element.clear()
+        except InvalidElementStateException:
+            # Fallback to clear using Keys if native clear fails
+            element.send_keys(Keys.CONTROL + 'a')
+            element.send_keys(Keys.BACKSPACE)
         element.send_keys(text)
 
     def get_text(self, locator):

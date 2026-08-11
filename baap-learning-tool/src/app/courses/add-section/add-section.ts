@@ -487,7 +487,7 @@ export class AddSection implements OnInit, OnDestroy {
   fetchSectionById() {
     this.isLoading = true;
     this.commonHttp
-      .getCourse(`/client/${this.clientId}/section/${this.sectionId}`)
+      .getCourse(`/eduforge/api/section/${this.sectionId}`)
       .subscribe({
         next: (res: any) => {
           const data = res?.data;
@@ -671,10 +671,10 @@ export class AddSection implements OnInit, OnDestroy {
 
     const request$ = this.isEditMode
       ? this.commonHttp.putCourse(
-          `/client/${this.clientId}/section/${this.sectionId}`,
+          `/eduforge/api/section/${this.sectionId}`,
           payload,
         )
-      : this.commonHttp.postCourse(`/client/${this.clientId}/section`, payload);
+      : this.commonHttp.postCourse(`/eduforge/api/section`, payload);
 
     request$.subscribe({
       next: (res: any) => {
