@@ -113,7 +113,7 @@ export class AddCourses implements OnInit {
 
   fetchCourseData(courseId: string) {
     this.CommonHttpService?.getCourse(
-      `/eduforge/api/course/${courseId}`,
+      `/course/${courseId}`,
     )?.subscribe({
       next: (response: any) => {
         const course =
@@ -324,7 +324,7 @@ export class AddCourses implements OnInit {
   }
   addCourse(courseData: any) {
     this?.CommonHttpService?.postCourse(
-      `/eduforge/api/course`,
+      `/course`,
       courseData,
     )?.subscribe({
       next: () => {
@@ -346,7 +346,7 @@ export class AddCourses implements OnInit {
 
   updateCourse(courseData: any) {
     this?.CommonHttpService?.putCourse(
-      `/eduforge/api/course/${this.editCourseId}`,
+      `/course/${this.editCourseId}`,
       courseData,
     )?.subscribe({
       next: (response) => {

@@ -36,7 +36,7 @@ export class StudentReviewTest {
   getStudentSubmissions() {
     this.http
       .getCourse(
-        `/eduforge/api/exam/${this?.exam_id}/review_student_id/${this.user_id}`,
+        `/exam/${this?.exam_id}/review_student_id/${this.user_id}`,
       )
       .subscribe({
         next: (res: any) => {

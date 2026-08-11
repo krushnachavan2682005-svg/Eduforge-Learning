@@ -56,14 +56,14 @@ export class StudentDashboard {
     const clientId = this.storage.getItem<string>(STORAGEENUMS.CLIENT_ID) || '';
     const userId = this.storage.getItem<string>(STORAGEENUMS.USER_ID) || '';
     if (!clientId || !userId) return;
-    this.http.getCourse(`/eduforge/api/get-assigned-course-byuser/${userId}?page=1&limit=100`).subscribe((res: any) => {
+    this.http.getCourse(`/get-assigned-course-byuser/${userId}?page=1&limit=100`).subscribe((res: any) => {
       const data = res?.data || [];
       this.courses.set(data.length);
       const total = data.length || 0;
       const sum = data.reduce((acc: number, item: any) => acc + Number(item?.progress_percentage || 0), 0);
       this.progress.set(total ? Math.round(sum / total) : 0);
     });
-    this.http.getCourse(`/eduforge/api/assigned-exams/${userId}?page=1&limit=100`).subscribe((res: any) => this.tests.set((res?.data || []).length));
-    this.http.getCourse(`/eduforge/api/get-assigned-action-items-byuser/${userId}?page=1&limit=100`).subscribe((res: any) => this.actionItems.set((res?.data || []).length));
+    this.http.getCourse(`/assigned-exams/${userId}?page=1&limit=100`).subscribe((res: any) => this.tests.set((res?.data || []).length));
+    this.http.getCourse(`/get-assigned-action-items-byuser/${userId}?page=1&limit=100`).subscribe((res: any) => this.actionItems.set((res?.data || []).length));
   }
 }

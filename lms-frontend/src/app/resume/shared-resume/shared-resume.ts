@@ -52,7 +52,7 @@ export class SharedResume implements OnInit {
 
     // If no clientId, try to get it from the API without client prefix
     const endpoint = this.clientId
-      ? `/eduforge/api/resume/user/${this.userId}`
+      ? `/resume/user/${this.userId}`
       : `/resume/user/${this.userId}`;
 
     // Use public method that doesn't require authentication

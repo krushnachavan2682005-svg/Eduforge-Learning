@@ -46,8 +46,8 @@ export class AdminDashboard {
   stats = signal<any>(null);
   members = signal(0);
   classes = signal(0);
-  courses = signal<string | number>('—');
-  tests = signal<string | number>('—');
+  courses = signal<string | number>('ï¿½');
+  tests = signal<string | number>('ï¿½');
   private http = inject(CommonHttpService);
   private storage = inject(StorageService);
 
@@ -68,14 +68,14 @@ export class AdminDashboard {
       this.refreshCards();
     });
     if (clientId) {
-      this.http.getCourse(`/eduforge/api/all-courses?page=1&limit=1`).subscribe({
+      this.http.getCourse(`/all-courses?page=1&limit=1`).subscribe({
         next: (res: any) => {
           this.courses.set(res?.pagination?.total || res?.items?.length || 0);
           this.refreshCards();
         },
         error: () => this.refreshCards(),
       });
-      this.http.getCourse(`/eduforge/api/all-exams?page=1&limit=1`).subscribe({
+      this.http.getCourse(`/all-exams?page=1&limit=1`).subscribe({
         next: (res: any) => {
           this.tests.set(res?.total || res?.data?.length || res?.exams?.length || 0);
           this.refreshCards();

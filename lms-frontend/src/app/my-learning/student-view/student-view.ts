@@ -240,7 +240,7 @@ export class StudentView {
       user_quiz_answers: quizAnswersArray,
     };
     this.commonHttp
-      .postCourse(`/eduforge/api/completed-assign-course`, payload)
+      .postCourse(`/completed-assign-course`, payload)
       .subscribe({
         next: () => {
           this.toastr?.success('Course completed successfully');

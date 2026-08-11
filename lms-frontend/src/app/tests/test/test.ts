@@ -77,7 +77,7 @@ export class Test {
     this.isLoadingCourses?.set(true);
     this.http
       .getCourse(
-        `/eduforge/api/exams/created-by/${this.user_id}?page=${this.currentPage}&limit=${this.pageSize}`,
+        `/exams/created-by/${this.user_id}?page=${this.currentPage}&limit=${this.pageSize}`,
       )
       .subscribe((response) => {
         const tests =
@@ -109,7 +109,7 @@ export class Test {
 
         // Fetch detailed test object to access missing properties like 'type' and 'questions'
         tests.forEach((t: any) => {
-          this.http.getCourse(`/eduforge/api/exam/${t.id}`).subscribe({
+          this.http.getCourse(`/exam/${t.id}`).subscribe({
             next: (res: any) => {
               const data = res?.data || res;
               if (data) {
@@ -141,7 +141,7 @@ export class Test {
 
   deleteTest(examId: string) {
     this.http
-      .delete(`/eduforge/api/exam/${examId}`, {})
+      .delete(`/exam/${examId}`, {})
       .subscribe(() => {
         this.toastr?.success('Test successfully deleted');
         this.getAllExams();

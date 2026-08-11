@@ -253,11 +253,11 @@ export class CreateResume implements OnInit {
 
     const request$ = isEditMode
       ? this.commonService?.putCourse(
-          `/eduforge/api/resume/user/${userId}`,
+          `/resume/user/${userId}`,
           resumeData,
         )
       : this.commonService?.postCourse(
-          `/eduforge/api/resume`,
+          `/resume`,
           resumeData,
         );
 
@@ -282,7 +282,7 @@ export class CreateResume implements OnInit {
 
   loadResume(userId: string) {
     this.commonService
-      .getCourse(`/eduforge/api/resume/user/${userId}`)
+      .getCourse(`/resume/user/${userId}`)
       .subscribe({
         next: (res: any) => {
           const data = res?.data;

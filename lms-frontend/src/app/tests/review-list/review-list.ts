@@ -67,7 +67,7 @@ export class ReviewList {
     this.testsLoaded?.set(false);
     this.isLoadingExams?.set(true);
     this.http
-      .getCourse(`/eduforge/api/reviewer-dashboard/${this.user_id}`,)
+      .getCourse(`/reviewer-dashboard/${this.user_id}`,)
       .subscribe({
         next: (response) => {
           if (response?.success) {

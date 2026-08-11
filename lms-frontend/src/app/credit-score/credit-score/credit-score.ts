@@ -56,7 +56,7 @@ export class CreditScore {
 
     this.commonHttp
       .getCourse(
-        `/eduforge/api/get-approved-action-items-grouped/${this.user_Id}`,
+        `/get-approved-action-items-grouped/${this.user_Id}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -108,7 +108,7 @@ export class CreditScore {
 
   getAllStudentCredit() {
     this.commonHttp
-      .getCourse(`/eduforge/api/tutor/all-approved-action-items`)
+      .getCourse(`/tutor/all-approved-action-items`)
       .subscribe((res: any) => {
         const levels = (res?.data ?? []).map((level: any) => {
           const updatedStudents = (level?.students ?? []).map(

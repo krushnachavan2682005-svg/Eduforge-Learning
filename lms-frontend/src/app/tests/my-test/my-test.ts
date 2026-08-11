@@ -76,7 +76,7 @@ export class MyTest {
     this.isLoadingExams?.set(true);
     this.http
       .getCourse(
-        `/eduforge/api/assigned-exams/${this.user_id}?page=${this.currentPage}&limit=${this.pageSize}`,
+        `/assigned-exams/${this.user_id}?page=${this.currentPage}&limit=${this.pageSize}`,
       )
       .subscribe((response: any) => {
         if (response?.success) {
@@ -122,7 +122,7 @@ export class MyTest {
     };
 
     this.http
-      .postCourse(`/eduforge/api/assignment/publish`, payload)
+      .postCourse(`/assignment/publish`, payload)
       .subscribe({
         next: () => {
           this.toastr?.success(

@@ -114,7 +114,7 @@ export class CoursesList {
 
   deleteCourse(course: any) {
     this.commonHttp
-      .delete(`/eduforge/api/courses/${course?.id}`, {})
+      .delete(`/courses/${course?.id}`, {})
       .subscribe({
         next: () => {
           this.toastr?.success('Course deleted successfully');
@@ -128,7 +128,7 @@ export class CoursesList {
     this.isLoading = true;
     this.commonHttp
       .getCourse(
-        `/eduforge/api/all-courses?page=${page}&limit=${this.pageSize}`,
+        `/all-courses?page=${page}&limit=${this.pageSize}`,
       )
       .subscribe((response: any) => {
         // Use 'items' for the array, fallback to 'courses' if needed

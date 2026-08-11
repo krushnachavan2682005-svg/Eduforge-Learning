@@ -263,7 +263,7 @@ export class MyActionItems {
     this.isLoadingAction?.set(true);
     this.commonHttp
       .getCourse(
-        `/eduforge/api/get-assigned-action-items-byuser/${this.userId}?page=${page}&limit=${this.pageSize}`,
+        `/get-assigned-action-items-byuser/${this.userId}?page=${page}&limit=${this.pageSize}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -445,7 +445,7 @@ export class MyActionItems {
   }
   getActionItem(id: string) {
     this.commonHttp
-      .getCourse(`/eduforge/api/action-items/${id}`)
+      .getCourse(`/action-items/${id}`)
       .subscribe({
         next: (res: any) => {
           this.editData?.set(res?.data);
@@ -478,7 +478,7 @@ export class MyActionItems {
 
     this.commonHttp
       .putCourse(
-        `/eduforge/api/update-assigned-action-status/${this.userId}`,
+        `/update-assigned-action-status/${this.userId}`,
         payload,
       )
       .subscribe({
@@ -498,7 +498,7 @@ export class MyActionItems {
     const assigned_action_item_id = card?.id;
     this.commonHttp
       .delete(
-        `/eduforge/api/delete-attachments/${assigned_action_item_id}`,
+        `/delete-attachments/${assigned_action_item_id}`,
         {
           delete_keys: [fileKey],
         },
@@ -531,7 +531,7 @@ export class MyActionItems {
     };
 
     this.commonHttp
-      .postCourse(`/eduforge/api/assignment/publish`, payload)
+      .postCourse(`/assignment/publish`, payload)
       .subscribe({
         next: () => {
           this.toastr?.success(

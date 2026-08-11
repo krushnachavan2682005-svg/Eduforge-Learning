@@ -204,7 +204,7 @@ export class ActionItems {
     this.actionLoaded.set(false);
     this.commonHttp
       .getCourse(
-        `/eduforge/api/action-items?page=${page}&limit=${this.pageSize}`,
+        `/action-items?page=${page}&limit=${this.pageSize}`,
       )
       .subscribe({
         next: (res: any) => {
@@ -327,7 +327,7 @@ export class ActionItems {
   }
   getActionItem(id: string) {
     this.commonHttp
-      .getCourse(`/eduforge/api/action-items/${id}`)
+      .getCourse(`/action-items/${id}`)
       .subscribe({
         next: (res: any) => {
           this.editData?.set(res?.data);
@@ -340,7 +340,7 @@ export class ActionItems {
   deleteActionItem() {
     this.commonHttp
       .delete(
-        `/eduforge/api/action-items/${this.selectedCard?.id}`,
+        `/action-items/${this.selectedCard?.id}`,
         {},
       )
       .subscribe(() => {

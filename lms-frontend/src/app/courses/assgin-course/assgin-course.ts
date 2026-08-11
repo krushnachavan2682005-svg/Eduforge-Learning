@@ -116,7 +116,7 @@ export class AssginCourse {
 
     this.commonHttp
       .getCourse(
-        `/eduforge/api/all-courses?page=${this.coursePage()}&limit=${this.limit}`,
+        `/all-courses?page=${this.coursePage()}&limit=${this.limit}`,
       )
       .subscribe((res: any) => {
         const coursesData = res?.items || [];
@@ -180,7 +180,7 @@ export class AssginCourse {
     );
     const requests = this.selectedCourses().map((course) =>
       this.commonHttp
-        .postCourse(`/eduforge/api/assign-course`, {
+        .postCourse(`/assign-course`, {
           course_id: [course.id],
           [payloadKey]: targetIds,
         })

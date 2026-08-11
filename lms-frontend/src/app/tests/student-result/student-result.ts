@@ -103,7 +103,7 @@ export class StudentResult implements OnInit {
 
     this.http
       .getCourse(
-        `/eduforge/api/get-all-results?page=${this.currentPage}&limit=${this.pageSize}&search=${search}`,
+        `/get-all-results?page=${this.currentPage}&limit=${this.pageSize}&search=${search}`,
       )
       .subscribe({
         next: (res: any) => {

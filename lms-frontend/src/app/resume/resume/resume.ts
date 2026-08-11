@@ -96,7 +96,7 @@ export class Resume implements OnInit, OnDestroy {
 
   getResume() {
     this.commoHttp
-      .getCourse(`/eduforge/api/resume/user/${this.userId}`)
+      .getCourse(`/resume/user/${this.userId}`)
       .subscribe(
         (res: any) => {
           const data = res?.data;

@@ -66,7 +66,7 @@ export class SubmittedActionItems {
     this.isLoadingActionItems?.set(true);
     this.http
       .getCourse(
-        `/eduforge/api/reviewer-action-items/${this.user_id}?page=${this.currentPage}&limit=${this.pageSize}`,
+        `/reviewer-action-items/${this.user_id}?page=${this.currentPage}&limit=${this.pageSize}`,
       )
       .subscribe({
         next: (res: any) => {
