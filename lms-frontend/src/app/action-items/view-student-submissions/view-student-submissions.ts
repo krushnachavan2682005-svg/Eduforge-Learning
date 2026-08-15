@@ -42,8 +42,7 @@ export class SafeUrlPipe implements PipeTransform {
   styleUrl: './view-student-submissions.scss',
 })
 export class ViewStudentSubmissions {
-  user_id = '';
-  client_id = '';
+  user_id = '';
   approveScore = '';
   rejectComment = '';
   scoreError = false;
@@ -86,8 +85,7 @@ export class ViewStudentSubmissions {
   public sidebarService = inject(SidebarService);
 
   ngOnInit() {
-    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
-    this.client_id = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.assignment = history.state.assignment;
 
     console.log('Assignment:', this.assignment);

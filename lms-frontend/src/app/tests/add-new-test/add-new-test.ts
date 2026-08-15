@@ -144,9 +144,7 @@ export class AddNewTest {
     fiveYearsLater.setFullYear(today.getFullYear() + 5);
     const toYmd = (d: Date) => d.toISOString().slice(0, 10);
     this.minExamDate = toYmd(today);
-    this.maxExamDate = toYmd(fiveYearsLater);
-
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+    this.maxExamDate = toYmd(fiveYearsLater);
     this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.loadReviewers();
     this.form = this.fb.group({

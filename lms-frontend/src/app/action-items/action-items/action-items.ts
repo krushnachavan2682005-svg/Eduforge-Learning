@@ -38,8 +38,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   templateUrl: './action-items.html',
   styleUrl: './action-items.scss',
 })
-export class ActionItems {
-  client_ID = '';
+export class ActionItems {
   pageSize = 10;
   totalPages = 1;
   currentPage = 1;
@@ -77,8 +76,7 @@ export class ActionItems {
   private workspaceNav = inject(WorkspaceNavigationService);
   public sidebarService = inject(SidebarService);
 
-  ngOnInit() {
-    this.client_ID = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
     this.PageLimit();
     this.getAllActionItem(this.currentPage);
@@ -197,8 +195,7 @@ export class ActionItems {
     }
   }
 
-  getAllActionItem(page: number = this.currentPage) {
-    if (!this.client_ID) return;
+  getAllActionItem(page: number = this.currentPage) {
 
     this.isLoadingAction.set(true);
     this.actionLoaded.set(false);

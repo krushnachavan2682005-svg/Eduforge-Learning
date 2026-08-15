@@ -95,3 +95,6 @@ OrganizationUser.belongsTo(Organization, {
   foreignKey: "organization_id",
   as: "organization",
 });
+
+User.belongsTo(Organization, { foreignKey: "organization_id", as: "organization" });
+Organization.hasMany(User, { foreignKey: "organization_id", as: "users" });

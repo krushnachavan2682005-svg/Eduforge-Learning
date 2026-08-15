@@ -43,9 +43,7 @@ export class LeaderView implements OnInit {
   private commonHttp = inject(CommonHttpService);
   private str = inject(StorageService);
   private router = inject(Router);
-  private userService = inject(UserLocalService);
-
-  clientId = '';
+  private userService = inject(UserLocalService);
   userId = '';
   
   profileImageError = signal<boolean>(false);
@@ -78,8 +76,7 @@ export class LeaderView implements OnInit {
     { id: '4', title: 'Responsive Web Design Assignment' }
   ]);
 
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID) || this.userService?.getUserId() || '';
   }
 

@@ -45,10 +45,7 @@ export class NavigationService {
     if (item.roles?.length && !this.session.hasRole(item.roles as any)) {
       return false;
     }
-    if (!item.permissions) return true;
-    const required = Array.isArray(item.permissions)
-      ? item.permissions
-      : item.permissions.split(',').map((p) => p.trim()).filter(Boolean);
-    return required.some((permission) => this.permissions.hasPermission(permission));
+    // Let the *authorize directive in the template handle permission checking dynamically
+    return true;
   }
 }

@@ -33,8 +33,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   styleUrl: './add-courses.scss',
 })
 export class AddCourses implements OnInit {
-  courses: any;
-  clientId = '';
+  courses: any;
   showModal = false;
   uploading = false;
   uploadProgress = 0;
@@ -86,8 +85,7 @@ export class AddCourses implements OnInit {
   }
 
   ngOnInit() {
-    this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+    this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
     this.route?.queryParamMap?.subscribe((queryParams: any) => {
       const editId = queryParams?.get('edit');
       if (editId) {

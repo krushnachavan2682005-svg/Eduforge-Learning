@@ -4,6 +4,7 @@ import {
   TemplateRef,
   ViewContainerRef,
   effect,
+  signal,
 } from '@angular/core';
 import { PermissionStore } from './permission.service';
 
@@ -12,7 +13,7 @@ import { PermissionStore } from './permission.service';
   standalone: true,
 })
 export class PermissionDirective {
-  private requiredPermissions: string[] = [];
+  private requiredPermissions = signal<string[]>([]);
 
   constructor(
     private templateRef: TemplateRef<any>,
@@ -20,7 +21,13 @@ export class PermissionDirective {
     private permissionStore: PermissionStore,
   ) {
     effect(() => {
-      const hasPermission = this.requiredPermissions?.some((p) =>
+      const reqPerms = this.requiredPermissions();
+      if (!reqPerms || reqPerms.length === 0) {
+        this.viewContainer?.clear();
+        return;
+      }
+
+      const hasPermission = reqPerms.some((p) =>
         this.permissionStore?.hasPermission(p),
       );
 
@@ -35,13 +42,13 @@ export class PermissionDirective {
 
   @Input() set authorize(value: string | string[] | null | undefined) {
     if (!value) {
-      this.requiredPermissions = [];
+      this.requiredPermissions.set([]);
       return;
     }
     if (Array.isArray(value)) {
-      this.requiredPermissions = value;
+      this.requiredPermissions.set(value);
     } else {
-      this.requiredPermissions = value?.split(',')?.map((v) => v?.trim());
+      this.requiredPermissions.set(value?.split(',')?.map((v) => v?.trim()) || []);
     }
   }
 }

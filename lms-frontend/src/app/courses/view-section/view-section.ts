@@ -54,8 +54,7 @@ export class SafeHtmlPipe implements PipeTransform {
   styleUrl: './view-section.scss',
 })
 export class ViewSection implements OnInit {
-  [x: string]: any;
-  clientId = '';
+  [x: string]: any;
   lessonId: string = '';
   courseId: string = '';
   showDeleteModal = false;
@@ -71,8 +70,7 @@ export class ViewSection implements OnInit {
   private commonHttp = inject(CommonHttpService);
   private workspaceNav = inject(WorkspaceNavigationService);
 
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     combineLatest([this.route.params, this.route.queryParams]).subscribe(
       ([params, queryParams]) => {
         this.lessonId = params['id'];

@@ -17,7 +17,7 @@ export interface IExam {
   duration_minutes: number;
   exam_date?: string | Date; // General date
   exam_start_time: string | Date; // Specific start time
-  client_id?: string;
+  organization_id?: string;
   is_completed?: boolean;
   is_published?: boolean;
   created_on?: Date;
@@ -36,7 +36,7 @@ export interface IQuestion {
   is_mandatory: boolean;
   correct_answer?: string;
   options?: any;
-  client_id?: string;
+  organization_id?: string;
   created_on?: Date;
   updated_on?: Date;
 }
@@ -55,7 +55,7 @@ export interface IExamUpdate {
   duration_minutes?: number;
   exam_date?: string | Date; // General date
   exam_start_time?: string | Date;
-  client_id?: string;
+  organization_id?: string;
   is_completed?: boolean;
   updated_by: string; // Always require who updated it
   updated_on?: Date;
@@ -71,7 +71,7 @@ export interface IQuestionUpdate {
   is_mandatory?: boolean;
   correct_answer?: string;
   options?: any;
-  client_id?: string;
+  organization_id?: string;
 }
 
 export interface IExamWithQuestions extends IExam {
@@ -90,7 +90,7 @@ export interface IExamCreateRequest {
   duration_minutes: number;
   exam_date?: string | Date; // General date
   exam_start_time: string | Date; // Specific start time
-  client_id?: string;
+  organization_id?: string;
   created_by: string;
   updated_by: string;
   questions: Omit<IQuestion, "id" | "exam_id" | "created_on">[];
@@ -109,7 +109,7 @@ export interface IExamSession {
   completed_at?: Date | null;
   is_completed: boolean;
   answers_data: any;
-  client_id?: string;
+  organization_id?: string;
   reviewers?: Reviewer[] | null; // NEW (copied from exam)
   created_on?: Date;
   updated_on?: Date;
@@ -121,7 +121,7 @@ export interface IExamSessionCreate {
   exam_id: string;
   user_id: string;
   current_question_index?: number;
-  client_id?: string;
+  organization_id?: string;
   answers_data?: IAnswerData[];
   reviewers?: Reviewer[] | null;
 }
@@ -161,7 +161,7 @@ export interface IExamUserMapping {
   review_status: "pending_review" | "completed";
   reviewed_by?: string | null;
   reviewed_at?: Date | null;
-  client_id?: string;
+  organization_id?: string;
   created_on?: Date;
   reviewers?: Reviewer[] | null; // NEW
 }
@@ -305,7 +305,7 @@ export interface IExamAssignment {
   id?: string;
   exam_id: string;
   user_id: string;
-  client_id?: string;
+  organization_id?: string;
 }
 
 // ===========================================================
@@ -321,7 +321,7 @@ export interface ExamModelAttributes {
   duration_minutes: number;
   exam_date: Date; // General date
   exam_start_time: Date; // Specific start time
-  client_id?: string;
+  organization_id?: string;
   is_completed: boolean;
   created_on: Date;
   updated_on: Date;
@@ -338,7 +338,7 @@ export interface QuestionModelAttributes {
   is_mandatory: boolean;
   correct_answer?: string;
   options?: any;
-  client_id?: string;
+  organization_id?: string;
   created_on: Date;
   updated_on: Date;
 }
@@ -353,7 +353,7 @@ export interface ExamSessionModelAttributes {
   is_completed: boolean;
   answers_data: any;
   reviewers?: Reviewer[] | null;
-  client_id?: string;
+  organization_id?: string;
   created_on: Date;
   updated_on: Date;
   exam?: ExamModelAttributes;
@@ -376,7 +376,7 @@ export interface ExamUserMappingModelAttributes {
   review_status: "pending_review" | "completed";
   reviewed_by?: string | null;
   reviewed_at?: Date | null;
-  client_id?: string;
+  organization_id?: string;
   reviewers?: Reviewer[] | null;
   created_on: Date;
 }

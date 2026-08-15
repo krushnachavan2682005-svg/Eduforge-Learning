@@ -73,7 +73,6 @@ export class SelectClient {
     }
 
     this.str?.setItem(STORAGEENUMS?.CLIENT, JSON?.stringify(data));
-    this.str?.setItem(STORAGEENUMS?.CLIENT_ID, clientId);
 
     this.commonHttpService
       .getPermissions('')

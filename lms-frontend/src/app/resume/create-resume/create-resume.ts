@@ -43,8 +43,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
 })
 export class CreateResume implements OnInit {
   todayYear = new Date().getFullYear();
-  years: number[] = [];
-  clientId = '';
+  years: number[] = [];
   headerTitle = '';
   isGeocoding = false;
   resumeForm!: FormGroup;
@@ -121,8 +120,7 @@ export class CreateResume implements OnInit {
   ngOnInit() {
     for (let y = this.todayYear + 10; y >= 1900; y--) {
       this.years.push(y);
-    }
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+    }
     this.resumeForm = this.fb?.group({
       name: ['', Validators?.required],
       label: ['', Validators?.required],

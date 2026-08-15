@@ -4,17 +4,21 @@ import { StudentResultsRepository } from "./studentResults.repository";
 import { ResumeRepository } from "./resumes.repositorie";
 import { sequelize } from "../config/database";
 import { QueryTypes } from "sequelize";
+import { asyncLocalStorage as cls } from "../constants/request-context";
 
 export class DashboardRepository {
   private courseRepo = new AssiginCourseRepositorie();
   private actionRepo = new AssiginActionItemsrepositorie();
   private resultsRepo = new StudentResultsRepository();
 
-  async getUserDashboard(client_id: string, user_id: string) {
+  async getUserDashboard(organizationId: string, user_id: string) {
+    const store = cls.getStore();
+    organizationId = store?.organizationId || organizationId;
+    
     const [courses, testsResult, actionItems] = await Promise.all([
-      this.courseRepo.getCourseByUserId(client_id, user_id),
-      this.resultsRepo.getResultsByUserId(user_id, client_id),
-      this.actionRepo.getApprovedActionItemsByUserId(user_id, client_id),
+      this.courseRepo.getCourseByUserId(organizationId, user_id),
+      this.resultsRepo.getResultsByUserId(user_id),
+      this.actionRepo.getApprovedActionItemsByUserId(user_id),
     ]);
 
     const tests = testsResult?.data || [];
@@ -23,7 +27,7 @@ export class DashboardRepository {
       name: studentName,
       location: studentLocation,
       role: studentRole,
-    } = await this.resultsRepo.getStudentName(user_id, client_id);
+    } = await this.resultsRepo.getStudentName(user_id);
 
     const profile = {
       name: studentName || "",
@@ -115,10 +119,13 @@ export class DashboardRepository {
     };
   }
 
-  async getTutorCounts(client_id: string, user_id: string): Promise<any> {
+  async getTutorCounts(organizationId: string, user_id: string): Promise<any> {
+    const store = cls.getStore();
+    organizationId = store?.organizationId || organizationId;
+    
     // profile section
     let profile: any = { name: "", role: "", location: "" };
-    profile = await this.resultsRepo.getStudentName(user_id, client_id);
+    profile = await this.resultsRepo.getStudentName(user_id);
 
     if (!profile?.name) {
       const resumeRepo = new ResumeRepository();
@@ -153,11 +160,11 @@ export class DashboardRepository {
     const examsCreatedSql = `
       SELECT id
       FROM exams
-      WHERE client_id = :client_id
+      WHERE organizationId = :organizationId
       ${user_id && hasCreatedByExam ? "AND created_by = :user_id" : ""}
     `;
     const examRows: any[] = await sequelize.query(examsCreatedSql, {
-      replacements: { client_id, user_id },
+      replacements: { organization_id: organizationId, user_id },
       type: QueryTypes.SELECT,
     });
     const examIds = examRows.map((r) => r?.id);
@@ -235,11 +242,11 @@ export class DashboardRepository {
     if (user_id) {
       const ids: any[] = await sequelize.query(
         `SELECT id FROM action_items
-         WHERE client_id = :client_id
+         WHERE organizationId = :organizationId
            AND reviewer @> :userFilter::jsonb`,
         {
           replacements: {
-            client_id,
+            organizationId,
             userFilter: JSON.stringify([{ id: user_id }]),
           },
           type: QueryTypes.SELECT,
@@ -261,8 +268,8 @@ export class DashboardRepository {
     if (actionItemIds.length > 0) {
       const aRows: any[] = await sequelize.query(
         `SELECT action_item_id, user_id, status FROM assigned_action_items
-         WHERE client_id = :client_id`,
-        { replacements: { client_id }, type: QueryTypes.SELECT },
+         WHERE organizationId = :organizationId`,
+        { replacements: { organization_id: organizationId }, type: QueryTypes.SELECT },
       );
 
       aRows.forEach((r) => {
@@ -287,9 +294,9 @@ export class DashboardRepository {
 
     // use pre-computed hasCreatedByCourse
     const courseCountRow: any[] = await sequelize.query(
-      `SELECT COUNT(*) as cnt FROM courses WHERE client_id = :client_id
+      `SELECT COUNT(*) as cnt FROM courses WHERE organizationId = :organizationId
            ${user_id && hasCreatedByCourse ? "AND created_by = :user_id" : ""}`,
-      { replacements: { client_id, user_id }, type: QueryTypes.SELECT },
+      { replacements: { organization_id: organizationId, user_id }, type: QueryTypes.SELECT },
     );
     const createdCourses = Number(courseCountRow[0]?.cnt || 0);
 
@@ -298,9 +305,9 @@ export class DashboardRepository {
     if (user_id && hasCreatedByCourse) {
       const courseRows: any[] = await sequelize.query(
         `SELECT id FROM courses
-               WHERE client_id = :client_id
+               WHERE organizationId = :organizationId
                AND created_by = :user_id`,
-        { replacements: { client_id, user_id }, type: QueryTypes.SELECT },
+        { replacements: { organization_id: organizationId, user_id }, type: QueryTypes.SELECT },
       );
       tutorCourseIds = courseRows.map((r) => r.id);
     }
@@ -308,8 +315,8 @@ export class DashboardRepository {
     let courseAssignRows: any[] = await sequelize.query(
       `SELECT course_id, user_id
        FROM course_user_mapping
-       WHERE client_id = :client_id`,
-      { replacements: { client_id }, type: QueryTypes.SELECT },
+       WHERE organizationId = :organizationId`,
+      { replacements: { organization_id: organizationId }, type: QueryTypes.SELECT },
     );
     if (tutorCourseIds.length > 0) {
       courseAssignRows = courseAssignRows.filter((r) =>
@@ -334,8 +341,8 @@ export class DashboardRepository {
       let sectionRows: any[] = await sequelize.query(
         `SELECT course_id, user_id, is_completed
          FROM section_user_mapping
-         WHERE client_id = :client_id`,
-        { replacements: { client_id }, type: QueryTypes.SELECT },
+         WHERE organizationId = :organizationId`,
+        { replacements: { organization_id: organizationId }, type: QueryTypes.SELECT },
       );
       if (tutorCourseIds.length > 0) {
         sectionRows = sectionRows.filter((r) =>

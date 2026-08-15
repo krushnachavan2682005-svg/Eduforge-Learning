@@ -39,7 +39,6 @@ export class SafeHtmlPipe implements PipeTransform {
 export class StudentView {
   @ViewChild(LessonsMenu) lessonsMenu!: LessonsMenu;
   data: any;
-  clientId = '';
   isSidebarOpen = true;
   is_completed = false;
   currentQuizIndex = 0;
@@ -62,7 +61,6 @@ export class StudentView {
   videoUrls: Map<string, SafeResourceUrl> = new Map();
 
   ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
     this.route?.paramMap?.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.courseId = params?.get('id') || '';
     });

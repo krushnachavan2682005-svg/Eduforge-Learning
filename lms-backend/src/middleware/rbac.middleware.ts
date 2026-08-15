@@ -59,8 +59,8 @@ export function requireRole(roleCode: string) {
 }
 
 function isSameOrganization(req: FastifyRequest) {
-  const params = req.params as { client_id?: string; organization_id?: string };
-  const scopedOrganizationId = params?.organization_id || params?.client_id;
+  const params = req.params as { organization_id?: string };
+  const scopedOrganizationId = params?.organization_id;
 
   if (!scopedOrganizationId || !req.user) return true;
 

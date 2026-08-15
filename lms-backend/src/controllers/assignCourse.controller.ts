@@ -2,6 +2,7 @@ import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, Conf
 import { FastifyReply, FastifyRequest } from "fastify";
 import { AssiginCourseRepositorie } from "../repositories/assignCourse.repositorie";
 import { AssignedCourseModel } from "../models/assignCourse.model";
+import { OrganizationUser } from "../modules/roles/role.model";
 import { Op } from "sequelize";
 
 const repositorie = new AssiginCourseRepositorie();
@@ -9,8 +10,8 @@ const repositorie = new AssiginCourseRepositorie();
 
 export class AssiginCourseController {
   async createAssiginCourse(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
+      const organizationId = req.user?.organization_id as string;
       const { course_id, user_id, class_id } = req.body as {
         course_id: string[];
         user_id?: string[];
@@ -28,7 +29,7 @@ export class AssiginCourseController {
       for (const selectedClassId of classIds) {
         const classUserIds = await repositorie.getUsersByClassId(
           selectedClassId,
-          client_id
+          organizationId
         );
         finalUserIds.push(...classUserIds);
         classUserIds.forEach((user) => {
@@ -40,8 +41,19 @@ export class AssiginCourseController {
         throw new ValidationError("No users found to assign.");
       }
 
+      const validMembers = await OrganizationUser.findAll({
+        where: {
+          organization_id: organizationId,
+          user_id: { [Op.in]: finalUserIds },
+          is_active: true
+        }
+      });
+      if (validMembers.length !== finalUserIds.length) {
+        throw new ValidationError("One or more users do not belong to this organization or are inactive.");
+      }
+
       const existingRecords = await AssignedCourseModel.findAll({
-        where: { user_id: { [Op.overlap]: finalUserIds }, client_id },
+        where: { user_id: { [Op.overlap]: finalUserIds }, organization_id: organizationId },
       });
 
       const userCourseMap = new Map<string, Set<string>>();
@@ -63,13 +75,13 @@ export class AssiginCourseController {
           course_id,
           user_id: [user],
           class_id: userClassMap.get(user),
-          client_id,
+          organization_id: organizationId,
         });
 
         // Local SaaS compatibility: keep local student_enrollments in sync
         // while the legacy course_user_mapping assignment table remains active.
         await repositorie.createLocalEnrollmentsForUserCourses(
-          client_id,
+          organizationId,
           user,
           course_id,
         );
@@ -87,12 +99,10 @@ export class AssiginCourseController {
 
   async getCourseByUserId(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, user_id } = req.params as {
-        client_id: string;
-        user_id: string;
-      };
+      const { user_id } = req.params as { user_id: string; };
+      const organizationId = req.user?.organization_id as string;
 
-      const course = await repositorie.getCourseByUserId(client_id, user_id);
+      const course = await repositorie.getCourseByUserId(organizationId, user_id);
 
       if (!course || course.length === 0) {
         return reply.code(200).send({
@@ -112,12 +122,10 @@ export class AssiginCourseController {
 
   async getCourse(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, course_id } = req.params as {
-        client_id: string;
-        course_id: string;
-      };
+      const { course_id } = req.params as { course_id: string; };
+      const organizationId = req.user?.organization_id as string;
 
-      const course = await repositorie.getCourseById(client_id, course_id);
+      const course = await repositorie.getCourseById(organizationId, course_id);
 
       if (!course || course.length === 0) {
         return reply.code(200).send({

@@ -37,8 +37,7 @@ import { catchError } from 'rxjs/operators';
 })
 export class AssginCourse {
   limit = 10;
-  user_id = '';
-  clientId = '';
+  user_id = '';
   showModal = false;
   classes: any[] = [];
   userPage = signal(1);
@@ -73,8 +72,7 @@ export class AssginCourse {
     { id: 2, name: 'Student' },
   ];
 
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.getUsers();
     this.getCourses();

@@ -9,7 +9,7 @@ const lessonRepo = new lessonRepsitory();
 export class lessonController {
   async getAllLesson(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id } = req.params as { client_id: string };
+      // client_id is safely extracted from context inside the repo
       const { page, limit, course_id } = req.query as {
         page?: string;
         limit?: string;
@@ -17,7 +17,6 @@ export class lessonController {
       };
 
       const lessons = await lessonRepo.getLesson(Number(page), Number(limit), {
-        client_id,
         course_id,
       });
 
@@ -30,8 +29,9 @@ export class lessonController {
 
   async getLessonById(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, id } = req.params as { id: string; client_id: string };
-      const lesson = await lessonRepo.getlessonById(client_id, id);
+      const { id } = req.params as { id: string };
+      // client_id is extracted inside the repo
+      const lesson = await lessonRepo.getlessonById("", id);
 
       if (!lesson) {
         throw new InternalServerError("Lesson not found");
@@ -47,9 +47,9 @@ export class lessonController {
 
   async createLesson(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id } = req.params as { client_id: string };
       const body = req.body as lessonInterface;
-      const data = { ...body, client_id };
+      // client_id is injected inside the repository
+      const data = { ...body };
       const lesson = await lessonRepo.createLesson(data);
       return reply.code(201).send({
         data: {
@@ -69,10 +69,11 @@ export class lessonController {
 
   async updateLesson(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, id } = req.params as { id: string; client_id: string };
+      const { id } = req.params as { id: string };
       const body = req.body as Partial<lesson>;
 
-      const updateData = { ...body, client_id };
+      // client_id is injected inside the repository
+      const updateData = { ...body };
       const updated = await lessonRepo.updateLesson(id, updateData);
 
       if (!updated) {

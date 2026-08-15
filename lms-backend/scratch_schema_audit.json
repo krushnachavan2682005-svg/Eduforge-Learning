@@ -1,0 +1,72 @@
+[
+  {
+    "file": "auth.schemas.ts",
+    "hasClientId": false,
+    "hasClient": false,
+    "hasOrganizationId": false,
+    "hasAdditionalPropertiesTrue": false,
+    "hasAdditionalPropertiesFalse": true,
+    "hasUserIdArray": false,
+    "hasActionItemIdArray": false
+  },
+  {
+    "file": "member.schemas.ts",
+    "hasClientId": false,
+    "hasClient": false,
+    "hasOrganizationId": false,
+    "hasAdditionalPropertiesTrue": false,
+    "hasAdditionalPropertiesFalse": true,
+    "hasUserIdArray": false,
+    "hasActionItemIdArray": false
+  },
+  {
+    "file": "assignActionItems.schema.ts",
+    "hasClientId": false,
+    "hasClient": true,
+    "hasOrganizationId": false,
+    "hasAdditionalPropertiesTrue": false,
+    "hasAdditionalPropertiesFalse": true,
+    "hasUserIdArray": true,
+    "hasActionItemIdArray": true
+  },
+  {
+    "file": "assignCourse.schema.ts",
+    "hasClientId": false,
+    "hasClient": false,
+    "hasOrganizationId": false,
+    "hasAdditionalPropertiesTrue": false,
+    "hasAdditionalPropertiesFalse": true,
+    "hasUserIdArray": true,
+    "hasActionItemIdArray": false
+  },
+  {
+    "file": "exam.schema.ts",
+    "hasClientId": false,
+    "hasClient": false,
+    "hasOrganizationId": false,
+    "hasAdditionalPropertiesTrue": true,
+    "hasAdditionalPropertiesFalse": true,
+    "hasUserIdArray": true,
+    "hasActionItemIdArray": false
+  },
+  {
+    "file": "resumes.schema.ts",
+    "hasClientId": false,
+    "hasClient": false,
+    "hasOrganizationId": false,
+    "hasAdditionalPropertiesTrue": false,
+    "hasAdditionalPropertiesFalse": true,
+    "hasUserIdArray": true,
+    "hasActionItemIdArray": false
+  },
+  {
+    "file": "reviews.schema.ts",
+    "hasClientId": false,
+    "hasClient": false,
+    "hasOrganizationId": false,
+    "hasAdditionalPropertiesTrue": false,
+    "hasAdditionalPropertiesFalse": true,
+    "hasUserIdArray": false,
+    "hasActionItemIdArray": false
+  }
+]

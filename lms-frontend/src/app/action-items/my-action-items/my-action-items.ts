@@ -42,8 +42,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   templateUrl: './my-action-items.html',
   styleUrl: './my-action-items.scss',
 })
-export class MyActionItems {
-  client_ID = '';
+export class MyActionItems {
   pageSize = 10;
   totalPages = 1;
   currentPage = 1;
@@ -89,8 +88,7 @@ export class MyActionItems {
     },
   ];
 
-  ngOnInit() {
-    this.client_ID = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
     this.PageLimit();
     this.getActionItems(this.currentPage);

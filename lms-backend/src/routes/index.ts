@@ -30,18 +30,12 @@ export default async function routes(
   fastify.register(lessonRoutes);
   fastify.register(sectionRoutes);
   fastify.register(assignCourseRoutes);
-  fastify.register(completedAssignCourseRoutes, {
-    prefix: "/client/:client_id",
-  });
+  fastify.register(completedAssignCourseRoutes);
   fastify.register(resumeRoutes);
   fastify.register(examRoutes);
   fastify.register(actionItemsRoute);
   fastify.register(assignActionItemsRoutes);
-  // fastify.register(creditRoutes, { prefix: "/client/:client_id" });
   fastify.register(levelRoute);
   fastify.register(studentResultsRoutes);
   fastify.register(dashboardRoutes);
-  // fastify.register(enrollmentRoutes, { prefix: "/client/:client_id" });
-  // fastify.register(quizRoutes, { prefix: "/client/:client_id" });
-  // fastify.register(reviewsRoutes, { prefix: "/client/:client_id" });
 }

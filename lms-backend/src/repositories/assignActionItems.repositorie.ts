@@ -5,25 +5,39 @@ import { AssignedActionItemsTimelineModel } from "../models/assignedActionItemsT
 import { StudentClass } from "../modules/students/class.model";
 import { Student } from "../modules/students/student.model";
 import { StudentRepository } from "../modules/students/student.repository";
+import { asyncLocalStorage as cls } from "../constants/request-context";
+import { ActionItems } from "../models/actionItems.model";
 
 const studentRepository = new StudentRepository();
 
 export class AssiginActionItemsrepositorie {
   async createAssignCourse(data: Partial<AssignedActionItemsModel>) {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    if (organizationId) {
+      data.organization_id = organizationId;
+      // Phase 7: Validate that ALL action_item_ids belong to the current organization
+      if (data.action_item_id && data.action_item_id.length > 0) {
+        const count = await ActionItems.count({ where: { id: data.action_item_id, organization_id: organizationId } });
+        if (count !== data.action_item_id.length) {
+          throw new Error("One or more action items do not belong to the current organization");
+        }
+      }
+    }
     return AssignedActionItemsModel.create(data as any);
   }
 
-  async getUsersByClassId(class_id: string, client_id: string) {
+  async getUsersByClassId(class_id: string, organizationId: string) {
     const localUserIds = await studentRepository.getUserIdsByClassId(
-      client_id,
+      organizationId,
       class_id,
     );
 
     return localUserIds;
   }
 
-  async getUsersByClientId(client_id: string) {
-    const localStudents = await studentRepository.listStudents(client_id);
+  async getUsersByClientId(organizationId: string) {
+    const localStudents = await studentRepository.listStudents(organizationId);
     const localUserIds = localStudents
       .map((student) => student.user_id)
       .filter(Boolean);
@@ -46,19 +60,22 @@ export class AssiginActionItemsrepositorie {
   }
 
   async getActionItemsByUserId(
-    client_id: string,
+    organizationId: string,
     user_id: string,
     class_id?: string | string[],
   ): Promise<any[]> {
+    const store = cls.getStore();
+    organizationId = store?.organizationId as string;
+    if (!organizationId) throw new Error("Tenant context missing");
     try {
       const checkQuery = `
         SELECT count(*) as count
         FROM assigned_action_items
-        WHERE client_id = :client_id
+        WHERE organizationId = :organizationId
           AND :user_id = ANY(user_id)
       `;
       const [countResult]: any[] = await sequelize.query(checkQuery, {
-        replacements: { client_id, user_id },
+        replacements: { organization_id: organizationId, user_id },
         type: QueryTypes.SELECT,
       });
 
@@ -67,10 +84,10 @@ export class AssiginActionItemsrepositorie {
           `
             SELECT action_item_id 
             FROM assigned_action_items 
-            WHERE client_id = :client_id AND :user_id = ANY(user_id)
+            WHERE organizationId = :organizationId AND :user_id = ANY(user_id)
          `,
           {
-            replacements: { client_id, user_id },
+            replacements: { organization_id: organizationId, user_id },
             type: QueryTypes.SELECT,
           },
         );
@@ -118,11 +135,11 @@ export class AssiginActionItemsrepositorie {
       ON tat.assigned_id = aai.id
       AND tat.assignment_id = unnested_item.item_id
       AND tat.user_id = :user_id
-    WHERE aai.client_id = :client_id
+    WHERE aai.organization_id = :organizationId
       AND :user_id = ANY(aai.user_id)
     `;
 
-    const replacements: any = { client_id, user_id };
+    const replacements: any = { organization_id: organizationId, user_id };
 
     if (class_id) {
       const classIds = Array.isArray(class_id) ? class_id : [class_id];
@@ -171,6 +188,8 @@ export class AssiginActionItemsrepositorie {
     user_id?: string,
     publishOnly: boolean = false,
   ) {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
     let sql = `
       SELECT
         tat.id,
@@ -203,6 +222,10 @@ export class AssiginActionItemsrepositorie {
       conditions.push(`tat.user_id = :user_id`);
       replacements.user_id = user_id;
     }
+    if (organizationId) {
+      conditions.push(`aai.organization_id = :organizationId`);
+      replacements.organization_id = organizationId;
+    }
 
     if (publishOnly) {
       conditions.push(`tat.publish = true`);
@@ -221,7 +244,10 @@ export class AssiginActionItemsrepositorie {
     return results;
   }
 
-  async getApprovedActionItemsByUserId(user_id: string, client_id: string) {
+  async getApprovedActionItemsByUserId(user_id: string) {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    if (!organizationId) throw new Error("Tenant context missing");
     const query = `
     SELECT 
       aai.id AS id,
@@ -244,13 +270,13 @@ export class AssiginActionItemsrepositorie {
       ON ai.id = unnested_item.item_id
     WHERE :user_id = ANY(aai.user_id)
       AND aai.status = 'APPROVED'
-      AND aai.client_id = :client_id
+      AND aai.organization_id = :organizationId
     ORDER BY aai.updated_at DESC
   `;
 
     try {
       const rows = await sequelize.query(query, {
-        replacements: { user_id, client_id },
+        replacements: { user_id, organization_id: organizationId },
         type: QueryTypes.SELECT,
       });
       return rows as any[];
@@ -258,7 +284,10 @@ export class AssiginActionItemsrepositorie {
       throw error;
     }
   }
-  async getApprovedActionItemsWithStudentName(client_id: string) {
+  async getApprovedActionItemsWithStudentName() {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    if (!organizationId) throw new Error("Tenant context missing");
     const actionItems = await sequelize.query(
       `
     SELECT 
@@ -276,12 +305,12 @@ export class AssiginActionItemsrepositorie {
     JOIN LATERAL unnest(aai.user_id) AS au(user_id) ON true
     LEFT JOIN action_items ai 
       ON ai.id = ANY(aai.action_item_id)
-    WHERE aai.client_id = :client_id
+    WHERE aai.organization_id = :organizationId
       AND aai.status = 'APPROVED'
     ORDER BY aai.updated_at DESC
     `,
       {
-        replacements: { client_id },
+        replacements: { organization_id: organizationId },
         type: QueryTypes.SELECT,
       },
     );
@@ -292,7 +321,7 @@ export class AssiginActionItemsrepositorie {
 
     const studentMap = new Map(
       Object.entries(
-        await studentRepository.getStudentNamesByUserIds(client_id, userIds),
+        await studentRepository.getStudentNamesByUserIds(organizationId, userIds),
       ),
     );
 

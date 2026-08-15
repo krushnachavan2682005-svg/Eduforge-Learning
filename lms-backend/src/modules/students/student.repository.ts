@@ -323,7 +323,7 @@ export class StudentRepository {
       return [student.first_name, student.last_name].filter(Boolean).join(" ");
     }
 
-    const user = await User.findOne({ where: { id: userId } });
+    const user = await User.findOne({ where: { id: userId, organization_id: organizationId } });
     if (!user) return "";
 
     return [user.first_name, user.last_name].filter(Boolean).join(" ");
@@ -336,7 +336,7 @@ export class StudentRepository {
       Student.findAll({
         where: { organization_id: organizationId, user_id: { [Op.in]: userIds } },
       }),
-      User.findAll({ where: { id: { [Op.in]: userIds } } }),
+      User.findAll({ where: { id: { [Op.in]: userIds }, organization_id: organizationId } }),
     ]);
 
     const names: Record<string, string> = {};
@@ -368,7 +368,7 @@ export class StudentRepository {
     const courses = await Course.findAll({
       where: {
         id: { [Op.in]: courseIds },
-        client_id: organizationId,
+        organization_id: organizationId,
       },
       attributes: ["id", "title", "description", "level", "is_published"],
     });

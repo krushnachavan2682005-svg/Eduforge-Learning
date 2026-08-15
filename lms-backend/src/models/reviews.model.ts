@@ -24,7 +24,7 @@ Reviews.init(
       type: DataTypes.UUID,
       allowNull: false,
     },
-    client_id: {
+    organization_id: {
       type: DataTypes.UUID,
       allowNull: false,
     },

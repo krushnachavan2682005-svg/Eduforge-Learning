@@ -7,7 +7,7 @@ export class AssignedActionItemsModel extends Model {
   public status!: "ASSIGNED" | "SUBMITTED" | "APPROVED" | "REJECTED";
   public class_id!: string | null;
   public user_id!: string[];
-  public client_id!: string;
+  public organization_id!: string;
   public attachment!: string[] | null;
   public comment!: string | null;
   public score!: number | null;
@@ -37,7 +37,7 @@ AssignedActionItemsModel.init(
       allowNull: false,
     },
 
-    client_id: {
+    organization_id: {
       type: DataTypes.UUID,
       allowNull: false,
     },

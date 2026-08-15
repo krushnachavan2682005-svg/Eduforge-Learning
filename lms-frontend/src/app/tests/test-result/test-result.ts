@@ -15,8 +15,7 @@ import { PaginationComponent } from '../../pagination/pagination';
   styleUrl: './test-result.scss',
 })
 export class TestResult {
-  user_Id = '';
-  client_Id = '';
+  user_Id = '';
   student = signal('');
   studentResult = signal<any[]>([]);
   isLoadingResults = signal(true);
@@ -43,8 +42,7 @@ export class TestResult {
   public skeletonService = inject(SkeletonTheme);
   
   ngOnInit() {
-    this.user_Id = this.str.getItem(STORAGEENUMS.USER_ID) || '';
-    this.client_Id = this.str?.getItem(STORAGEENUMS.CLIENT_ID) || '';
+    this.user_Id = this.str.getItem(STORAGEENUMS.USER_ID) || '';
     this.getStudentData();
   }
 

@@ -18,8 +18,7 @@ import { SkeletonTheme } from '../services/skeleton-theme';
 })
 export class DashboardComponent {
   user_Id = '';
-  address = signal<any>('--');
-  client_Id = '';
+  address = signal<any>('--');
   roleName = signal<string>('');
   userName = signal<any>(null);
   private route = inject(Router);
@@ -56,8 +55,7 @@ export class DashboardComponent {
       );
     });
   });
-  ngOnInit() {
-    this.client_Id = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.user_Id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.getUserName();
     this.getLocalDashboardData();

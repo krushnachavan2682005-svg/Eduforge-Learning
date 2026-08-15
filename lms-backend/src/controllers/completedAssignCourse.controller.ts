@@ -8,11 +8,9 @@ export class CompletedAssignCourseController {
   async addCompletedAssignCourse(req: FastifyRequest, reply: FastifyReply) {
     {
       try {
-        const { client_id } = req.params as { client_id: string };
         const body = req.body as ICompletedAssignCourse;
         const payload: ICompletedAssignCourse = {
           ...body,
-          client_id,
         };
 
         const data: any = await repositorie.saveCompletedAssignCourse(payload);
@@ -30,14 +28,12 @@ export class CompletedAssignCourseController {
 
   async getCompletedAssignCourse(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, user_id, course_id } = req.params as {
-        client_id: string;
+      const { user_id, course_id } = req.params as {
         user_id: string;
         course_id: string;
       };
 
       const course = await repositorie.getCompletedAssignCourse(
-        client_id,
         user_id,
         course_id
       );

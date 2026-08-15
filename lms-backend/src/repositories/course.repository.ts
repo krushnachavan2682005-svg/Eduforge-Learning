@@ -6,23 +6,25 @@ import { FastifyReply, FastifyInstance, FastifyRequest } from "fastify";
 import S3_FOLDER from "../constants/s3-folder-constant";
 import { handleFileUpload } from "../utils/s3-upload-utility";
 import { ALLOWED_MIME_TYPES } from "../constants/mimeType";
+import { asyncLocalStorage as cls } from "../constants/request-context";
 
 export class CourseRepository {
- 
   // private fastify?: FastifyInstance;
   // static initialize: any;
   // initialize(fastify: FastifyInstance) {
   //   this.fastify = fastify;
   //   return this;
   // }
-  
+
   async getAllCourses(
     page: number,
     limit: number,
     filters?: Record<string, any>,
-    title?: string
+    title?: string,
   ) {
-    const where: any = { ...filters };
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    const where: any = { ...filters, organization_id: organizationId };
 
     if (title) {
       where.title = { [Op.iLike]: `%${title}%` };
@@ -31,6 +33,7 @@ export class CourseRepository {
       page: Number(page),
       limit: Number(limit),
       filters: where,
+
       attributes: [
         "id",
         "title",
@@ -40,20 +43,28 @@ export class CourseRepository {
         "thumbnail_url",
         "level",
         "tags",
-      ],
+
+        [
+          sequelize.literal(`
+        (
+          SELECT COUNT(*)
+          FROM lessons
+          WHERE lessons.course_id = courses.id
+        )
+      `),
+          "lessonCount",
+        ],
+      ] as any,
+
       order: [["created_at", "DESC"]],
     });
     return result;
   }
 
-  // async getCourseById(client_id: string, id: string) {
-  //   return Course.findOne({
-  //     where: { id, client_id },
-  //     attributes: ["id", "title", "description", "language", "created_at",'tags', 'thumbnail_url','level'],
-  //   });
-  // }
 
-  async getCourseById(client_id: string, course_id: string) {
+  async getCourseById(organizationId: string, course_id: string) {
+    const store = cls.getStore();
+    organizationId = store?.organizationId || organizationId;
     const sql = `
     SELECT jsonb_build_object(
       'id', c.id,
@@ -106,36 +117,46 @@ export class CourseRepository {
     ) AS lessons
   FROM courses c
     LEFT JOIN lessons l ON l.course_id = c.id
-  WHERE c.client_id = :client_id
+  WHERE c.organization_id = :organizationId
     AND c.id = :course_id
   GROUP BY c.id, c.title, c.description, c.language, c.thumbnail_url, c.tags, c.level;
   `;
 
     return await sequelize?.query(sql, {
-      replacements: { client_id, course_id },
+      replacements: { organization_id: organizationId, course_id },
       type: QueryTypes?.SELECT,
     });
   }
 
   async createCourse(data: Partial<Course>) {
+    const store = cls.getStore();
+    if (store?.organizationId) {
+      data.organization_id = store.organizationId;
+    }
     return Course.create(data as any);
   }
 
   async updateCourse(id: string, data: Partial<Course>) {
-    const course = await Course.findByPk(id);
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    const course = await Course.findOne({ where: { id, organization_id: organizationId } });
     if (!course) return null;
     return course.update(data);
   }
 
   async deleteCourse(id: string) {
-    const course = await Course.findByPk(id);
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    const course = await Course.findOne({ where: { id, organization_id: organizationId } });
     if (!course) return null;
     await course.destroy();
     return course;
   }
 
-  async uploadImage(req: FastifyRequest, client_id: string, id: string) {
-    const folder = S3_FOLDER.COURSR_FOLDER(client_id, id);
+  async uploadImage(req: FastifyRequest, organizationId: string, id: string) {
+    const store = cls.getStore();
+    organizationId = store?.organizationId || organizationId;
+    const folder = S3_FOLDER.COURSR_FOLDER(organizationId, id);
 
     const result = await handleFileUpload(req, {
       folder,

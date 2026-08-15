@@ -5,6 +5,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { Op, QueryTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import { StudentRepository } from "../modules/students/student.repository";
+import { OrganizationUser } from "../modules/roles/role.model";
 
 const repositorie = new AssiginActionItemsrepositorie();
 const studentRepository = new StudentRepository();
@@ -29,7 +30,7 @@ export class AssiginActionItemsController {
           : [class_id]
         : [];
 
-      let resolvedClientId: string | null = client ?? null;
+      let resolvedClientId: string | null = req.user?.organization_id || null;
       let newAssignments = 0;
 
       // Assign to specific users
@@ -40,11 +41,22 @@ export class AssiginActionItemsController {
         if (!resolvedClientId)
           throw new ValidationError("Invalid user_id");
 
+        const validMembers = await OrganizationUser.findAll({
+          where: {
+            organization_id: resolvedClientId,
+            user_id: { [Op.in]: user_id },
+            is_active: true
+          }
+        });
+        if (validMembers.length !== user_id.length) {
+          throw new ValidationError("One or more users do not belong to this organization or are inactive.");
+        }
+
         for (const user of user_id) {
           for (const itemId of action_item_id) {
             const exists = await AssignedActionItemsModel.findOne({
               where: {
-                client_id: resolvedClientId,
+                organization_id: resolvedClientId,
                 user_id: { [Op.contains]: [user] },
                 action_item_id: { [Op.contains]: [itemId] },
               },
@@ -53,7 +65,7 @@ export class AssiginActionItemsController {
               await repositorie.createAssignCourse({
                 action_item_id: [itemId],
                 user_id: [user],
-                client_id: resolvedClientId,
+                organization_id: resolvedClientId,
                 status: "ASSIGNED",
               });
               newAssignments++;
@@ -84,7 +96,7 @@ export class AssiginActionItemsController {
             for (const itemId of action_item_id) {
               const exists = await AssignedActionItemsModel.findOne({
                 where: {
-                  client_id: classClientId,
+                  organization_id: classClientId,
                   class_id: cid,
                   user_id: { [Op.contains]: [user] },
                   action_item_id: { [Op.contains]: [itemId] },
@@ -95,7 +107,7 @@ export class AssiginActionItemsController {
                   action_item_id: [itemId],
                   user_id: [user],
                   class_id: cid,
-                  client_id: classClientId,
+                  organization_id: classClientId,
                   status: "ASSIGNED",
                 });
                 newAssignments++;
@@ -115,7 +127,7 @@ export class AssiginActionItemsController {
           for (const itemId of action_item_id) {
             const exists = await AssignedActionItemsModel.findOne({
               where: {
-                client_id: client,
+                organization_id: client,
                 user_id: { [Op.contains]: [user] },
                 action_item_id: { [Op.contains]: [itemId] },
               },
@@ -124,7 +136,7 @@ export class AssiginActionItemsController {
               await repositorie.createAssignCourse({
                 action_item_id: [itemId],
                 user_id: [user],
-                client_id: client,
+                organization_id: client,
                 status: "ASSIGNED",
               });
               newAssignments++;
@@ -166,10 +178,10 @@ export class AssiginActionItemsController {
           .send({ data: [], message: "No action items assigned" });
       }
 
-      const client_id = assignedRecords[0].client_id;
+      const organization_id = assignedRecords[0].organization_id;
 
       const actionItems = await repositorie.getActionItemsByUserId(
-        client_id,
+        organization_id,
         user_id,
         class_id,
       );
@@ -215,10 +227,16 @@ export class AssiginActionItemsController {
       if (!status) {
         throw new ValidationError("status is required");
       }
+      
+      const storeClientId = req.user?.organization_id;
 
       // Record check (user_id + assigned_action_item_id)
       const record = await AssignedActionItemsModel.findOne({
-        where: {
+        where: storeClientId ? {
+          id: assigned_action_item_id,
+          user_id: { [Op.contains]: [user_id] },
+          organization_id: storeClientId
+        } : {
           id: assigned_action_item_id,
           user_id: { [Op.contains]: [user_id] },
         },
@@ -560,10 +578,8 @@ export class AssiginActionItemsController {
         const uniqueUserIds = [
           ...new Set(rawTimeline.map((item: any) => item.user_id)),
         ];
-        const orgId =
-          (req.user?.organization_id as string | undefined) ||
-          (rawTimeline[0] as any)?.client_id ||
-          "";
+        const orgId = req.user?.organization_id as string;
+        if (!orgId) throw new Error("Tenant context missing");
         studentNameMap = await studentRepository.getStudentNamesByUserIds(
           orgId,
           uniqueUserIds,
@@ -622,18 +638,16 @@ export class AssiginActionItemsController {
     reply: FastifyReply,
   ) {
     try {
-      const { user_id, client_id } = req.params as {
-        user_id: string;
-        client_id: string;
-      };
+      const { user_id } = req.params as { user_id: string; };
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new Error("Tenant context missing");
 
-      if (!user_id || !client_id) {
-        throw new ValidationError("user_id and client_id are required");
+      if (!user_id || !organization_id) {
+        throw new ValidationError("user_id and organization_id are required");
       }
 
       const rawItems = await repositorie.getApprovedActionItemsByUserId(
-        user_id,
-        client_id,
+        user_id
       );
       if (!rawItems.length) {
         return reply.code(200).send({
@@ -692,15 +706,16 @@ export class AssiginActionItemsController {
     req: FastifyRequest,
     reply: FastifyReply,
   ) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new Error("Tenant context missing");
 
-      if (!client_id) {
-        throw new ValidationError("client_id is required");
+      if (!organization_id) {
+        throw new ValidationError("organization_id is required");
       }
 
       const rawItems =
-        await repositorie.getApprovedActionItemsWithStudentName(client_id);
+        await repositorie.getApprovedActionItemsWithStudentName();
 
       if (!rawItems.length) {
         return reply.code(200).send({

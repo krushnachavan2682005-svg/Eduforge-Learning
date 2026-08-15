@@ -16,8 +16,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   styleUrl: './reviewer.scss',
 })
 export class Reviewer {
-  userId = '';
-  clientId = '';
+  userId = '';
   examId: string = '';
   examData = signal<any>({});
   cancelExam: boolean = false;
@@ -38,8 +37,7 @@ export class Reviewer {
   reviewMarks = signal<number[]>([]);
   reviewIsCorrect = signal<boolean[]>([]);
   reviewerComments = signal<string[]>([]);
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.route?.queryParams?.subscribe((params: any) => {
       this.examId = params['examId'];

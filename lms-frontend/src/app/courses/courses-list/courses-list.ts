@@ -31,8 +31,7 @@ import { PaginationComponent } from '../../pagination/pagination';
   styleUrl: './courses-list.scss',
 })
 export class CoursesList {
-  pageSize = 10;
-  clientId = '';
+  pageSize = 10;
   totalPages = 1;
   currentPage = 1;
   isDropdownOpen = false;
@@ -53,8 +52,7 @@ export class CoursesList {
   public sidebarService = inject(SidebarService);
   @ViewChild(AddCourses) addCoursesComponent?: AddCourses;
 
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.PageLimit();
     this.getCourses(this.currentPage);
   }

@@ -31,8 +31,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   styleUrl: './test.scss',
 })
 export class Test {
-  user_id = '';
-  clientId = '';
+  user_id = '';
   showModal = false;
   examId: string = '';
   isCollapsed = false;
@@ -64,8 +63,7 @@ export class Test {
   ];
   toastOptions: Partial<IndividualConfig<any>> | undefined;
   ngOnInit() {
-    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.route?.params?.subscribe((params: any) => {
       this.examId = params['id'];
     });

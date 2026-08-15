@@ -18,9 +18,9 @@ export class QuizRepsitory {
     return data;
   }
 
-  async getQuizById(client_id: string, id: string) {
+  async getQuizById(organizationId: string, id: string) {
     return Quiz.findOne({
-      where: { id, client_id },
+      where: { id, organization_id: organizationId },
       attributes: ["id",  "lesson_id", "question","options", "created_at"],
     });
   }

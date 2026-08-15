@@ -219,8 +219,7 @@ export class CommonHttpService {
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
-  getCoursesForEnrollment(page = 1, limit = 100): Observable<any> {
-    const clientId = this.str?.getItem<string>(STORAGEENUMS.CLIENT_ID) || '';
+  getCoursesForEnrollment(page = 1, limit = 100): Observable<any> {
     return this.getCourse(`/all-courses?page=${page}&limit=${limit}`);
   }
 
@@ -344,8 +343,7 @@ export class CommonHttpService {
     if (!organization) return null;
     return {
       ...organization,
-      id: organization?.id || organization?.client_id,
-      client_id: organization?.client_id || organization?.id,
+      id: organization?.id,
       name: organization?.name || 'Local LMS Organization',
       slug: organization?.slug || 'local-lms-organization',
       orgn_details: organization?.orgn_details || [
@@ -361,19 +359,16 @@ export class CommonHttpService {
     const organizationId = this.str?.getItem<string>(
       STORAGEENUMS.ORGANIZATION_ID,
     );
-    const clientId =
-      this.str?.getItem<string>(STORAGEENUMS.CLIENT_ID) || organizationId;
     const storedClient = this.str?.getItem<any>(STORAGEENUMS.CLIENT);
 
-    if (storedClient?.id || storedClient?.client_id) {
+    if (storedClient?.id) {
       return storedClient;
     }
 
-    if (!clientId) return null;
+    if (!organizationId) return null;
 
     return {
-      id: clientId,
-      client_id: clientId,
+      id: organizationId,
       name: 'Local LMS Organization',
       slug: 'local-lms-organization',
       orgn_details: [

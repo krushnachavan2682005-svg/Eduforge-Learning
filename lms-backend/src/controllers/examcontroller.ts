@@ -31,23 +31,22 @@ export class ExamController {
         created_by: string;
         updated_by: string;
         exam_start_time: string;
-      };
-      const { client_id } = req.params as { client_id: string };
-      const organizationId = req.user?.organization_id || client_id;
+      };
+      const organizationId = req.user?.organization_id as string;
 
-      if (client_id && organizationId && client_id !== organizationId) {
+      if (!organizationId) {
         return reply.code(403).send({
           success: false,
           message: "Cross-organization access is forbidden",
         });
       }
 
-      const examData = { ...body, client_id } as IExamCreateRequest & {
-        client_id: string;
+      const examData = { ...body, organization_id: organizationId } as IExamCreateRequest & {
+        organization_id: string;
         created_by: string;
         updated_by: string;
       };
-      examData.client_id = organizationId;
+      examData.organization_id = organizationId;
       examData.created_by = req.user?.sub || body.created_by;
       examData.updated_by = req.user?.sub || body.updated_by || body.created_by;
 
@@ -138,9 +137,9 @@ export class ExamController {
 
   async updateExam(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, id } = req.params as { client_id: string; id: string };
-      const organizationId = req.user?.organization_id || client_id;
-      if (client_id && organizationId && client_id !== organizationId) {
+      const { organization_id, id } = req.params as { organization_id: string; id: string };
+      const organizationId = req.user?.organization_id as string;
+      if (!organizationId) {
         return reply.code(403).send({
           success: false,
           message: "Cross-organization access is forbidden",
@@ -152,7 +151,7 @@ export class ExamController {
       };
       const updated = await repository.updateExam(id, {
         ...body,
-        client_id: organizationId,
+        organization_id: organizationId,
         updated_by: req.user?.sub || body.updated_by,
       });
       return reply.send({
@@ -183,16 +182,12 @@ export class ExamController {
 
   async startExam(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, user_id, exam_id } = req.params as {
-        client_id: string;
-        user_id: string;
-        exam_id: string;
-      };
-      const organizationId = req.user?.organization_id || client_id;
+      const { user_id, exam_id } = req.params as { user_id: string; exam_id: string; };
+      const organizationId = req.user?.organization_id as string;
       if (!req.user) {
         return reply.code(401).send({ success: false, message: "Authentication required" });
       }
-      if (client_id && client_id !== organizationId) {
+      if (!organizationId) {
         return reply.code(403).send({
           success: false,
           message: "Cross-organization access is forbidden",
@@ -211,7 +206,7 @@ export class ExamController {
         where: {
           exam_id,
           user_id,
-          client_id: organizationId,
+          organization_id: organizationId,
         },
       });
       if (!assignment) {
@@ -219,14 +214,14 @@ export class ExamController {
       }
 
       const submitted = await ExamUserMapping.findOne({
-        where: { exam_id, user_id, client_id: organizationId, is_completed: true },
+        where: { exam_id, user_id, organization_id: organizationId, is_completed: true },
       });
       if (submitted) {
         return this.examRuleError(reply, 409, "TEST_ALREADY_SUBMITTED", "You have already submitted this test.");
       }
 
       const activeSession = await ExamSession.findOne({
-        where: { exam_id, user_id, client_id: organizationId, is_completed: false },
+        where: { exam_id, user_id, organization_id: organizationId, is_completed: false },
       });
       if (activeSession) {
         let snapshot = repository.getSessionSnapshot(activeSession);
@@ -248,7 +243,7 @@ export class ExamController {
       }
 
       const exam = await repository.getExamById(exam_id);
-      if ((exam as any).client_id && (exam as any).client_id !== organizationId) {
+      if ((exam as any).organization_id && (exam as any).organization_id !== organizationId) {
         return reply.code(404).send({ success: false, message: "Exam not found" });
       }
       const startAt = this.getExamStartAt(exam as any);
@@ -268,7 +263,7 @@ export class ExamController {
       const session = await repository.startExamSession({
         exam_id,
         user_id,
-        client_id: organizationId,
+        organization_id: organizationId,
         current_question_index: 0,
         reviewers: (exam as any).reviewers || [],
       });
@@ -745,10 +740,9 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
   }
 
   async assignExam(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
-      const organizationId = req.user?.organization_id || client_id;
-      if (client_id && client_id !== organizationId) {
+    try {
+      const organizationId = req.user?.organization_id as string;
+      if (!organizationId) {
         return reply.code(403).send({
           success: false,
           message: "Cross-organization access is forbidden",
@@ -769,7 +763,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
         if (!exam) {
           throw new NotFoundError(`Exam with ID '${examId}' not found.`);
         }
-        if ((exam as any).client_id && (exam as any).client_id !== organizationId) {
+        if ((exam as any).organization_id && (exam as any).organization_id !== organizationId) {
           throw new ForbiddenError(`Exam with ID '${examId}' does not belong to this organization.`);
         }
 
@@ -921,7 +915,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
         const uniqueUserIds = [...new Set(raw.map((r: any) => r.user_id))];
         const orgId =
           (req.user?.organization_id as string | undefined) ||
-          (raw[0] as any)?.client_id ||
+          (raw[0] as any)?.organization_id ||
           "";
         studentNameMap = await studentRepository.getStudentNamesByUserIds(
           orgId,
@@ -1005,13 +999,10 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
 
   async getStudentExamReview(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { user_id, exam_id, client_id } = req.params as {
-        user_id: string;
-        exam_id: string;
-        client_id: string;
-      };
+      const { user_id, exam_id } = req.params as { user_id: string; exam_id: string; };
 
-      if (!user_id || !exam_id || !client_id)
+      const organization_id = req.user?.organization_id as string;
+      if (!user_id || !exam_id || !organization_id)
         throw new ValidationError("User ID, Exam ID, and Client ID are required.");
       if (!req.user) return reply.code(401).send({ success: false, message: "Authentication required" });
       if (req.user.sub !== user_id) {
@@ -1024,7 +1015,7 @@ async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
       const review = await repository.getStudentExamReview(
         exam_id,
         user_id,
-        client_id,
+        organization_id,
       );
 
       return reply.code(200).send({

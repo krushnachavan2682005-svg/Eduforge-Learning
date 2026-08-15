@@ -28,8 +28,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
 })
 export class Resume implements OnInit, OnDestroy {
   @ViewChild('resumeContent', { static: false }) resumeContent!: ElementRef;
-  userId: any;
-  clientId = '';
+  userId: any;
   skills = signal<any[]>([]);
   profile = signal<any>(null);
   contact = signal<any>(null);
@@ -45,8 +44,7 @@ export class Resume implements OnInit, OnDestroy {
   private workspaceNav = inject(WorkspaceNavigationService);
 
   ngOnInit() {
-    this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+    this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
     this.getResume();
     this.setupDownloadListener();
   }
@@ -81,8 +79,7 @@ export class Resume implements OnInit, OnDestroy {
   }
 
   private buildShareableUrl(token: string): string {
-    const baseUrl = `${window.location.origin}/resume/shared/${this.userId}/${token}`;
-    return this.clientId ? `${baseUrl}?clientId=${this.clientId}` : baseUrl;
+    return `${window.location.origin}/resume/shared/${this.userId}/${token}`;
   }
 
   private async copyLinkToClipboard(shareableUrl: string): Promise<void> {

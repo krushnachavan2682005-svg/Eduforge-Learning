@@ -25,8 +25,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   styleUrl: './submitted-action-items.scss',
 })
 export class SubmittedActionItems {
-  user_id = '';
-  clientId = '';
+  user_id = '';
   isCollapsed = false;
   selectedItem: any = null;
   isLoadingAction = signal(false);
@@ -55,13 +54,11 @@ export class SubmittedActionItems {
   ];
 
   ngOnInit() {
-    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.getAllActionItems();
   }
 
-  getAllActionItems() {
-    if (!this.clientId) return;
+  getAllActionItems() {
     this.actionItemsLoaded?.set(false);
     this.isLoadingActionItems?.set(true);
     this.http

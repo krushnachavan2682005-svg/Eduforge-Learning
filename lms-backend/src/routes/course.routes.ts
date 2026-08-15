@@ -10,8 +10,7 @@ import { verifyToken } from "../utils/auth";
 import { requirePermission } from "../middleware/rbac.middleware";
 
 const courseController = new CourseController();
-type ClientParams = { client_id: string };
-type ClientIdParams = { client_id: string; id: string };
+
 type CreateCourseBody = Partial<Course>;
 
 export default async function courseRoutes(fastify: FastifyInstance) {
@@ -22,7 +21,10 @@ export default async function courseRoutes(fastify: FastifyInstance) {
     (req, reply) => courseController.createCourse(req, reply)
   );
 
-  fastify.get("/all-courses", { preHandler: verifyToken }, (req, reply) =>
+  fastify.get("/all-courses", 
+    // { preHandler: verifyToken }
+    // ,
+     (req, reply) =>
     courseController.getAllCourses(req, reply)
   );
 

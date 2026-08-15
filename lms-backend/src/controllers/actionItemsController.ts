@@ -8,8 +8,9 @@ const actionRep = new ActionItemRepository();
 
 export class ActionItemsController {
   async getAllActionItems(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new Error("Tenant context missing");
       const { page = "1", limit = "10" } = req.query as {
         page?: string;
         limit?: string;
@@ -19,7 +20,7 @@ export class ActionItemsController {
         Number(page),
         Number(limit),
         {
-          client_id,
+          organization_id,
         }
       );
 
@@ -35,8 +36,10 @@ export class ActionItemsController {
 
   async getActionItemById(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { id, client_id } = req.params as { id: string; client_id: string };
-      const item = await actionRep.getActionItemById(client_id, id);
+      const { id, organization_id: req_organization_id } = req.params as { id: string; organization_id: string };
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new Error("Tenant context missing");
+      const item = await actionRep.getActionItemById(organization_id, id);
 
       if (!item)
         throw new NotFoundError("Action item not found");
@@ -51,13 +54,14 @@ export class ActionItemsController {
   }
 
   async createActionItem(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new Error("Tenant context missing");
       const body = req.body as ActionItemsInterface;
-      const data = { ...body, client_id };
+      const data = { ...body, organization_id };
 
       const existing = await ActionItems.findOne({
-        where: { client_id, task_name: body.task_name },
+        where: { organization_id, task_name: body.task_name },
       });
 
       if (existing) {
@@ -103,17 +107,16 @@ export class ActionItemsController {
 
   async getReviewerDashboard(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, reviewer_id } = req.params as {
-        client_id: string;
-        reviewer_id: string;
-      };
+      const { reviewer_id } = req.params as { reviewer_id: string; };
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new Error("Tenant context missing");
 
-      if (!client_id || !reviewer_id) {
-        throw new ValidationError("client_id and reviewer_id are required");
+      if (!organization_id || !reviewer_id) {
+        throw new ValidationError("organization_id and reviewer_id are required");
       }
 
       const items = await actionRep.getReviewerActionItems(
-        client_id,
+        organization_id,
         reviewer_id
       );
 

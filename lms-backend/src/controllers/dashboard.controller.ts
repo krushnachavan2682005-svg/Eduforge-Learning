@@ -7,16 +7,16 @@ const dashboardRepo = new DashboardRepository();
 export class DashboardController {
   async getDashboard(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, user_id } = req.params as {
-        client_id: string;
+      const { user_id } = req.params as {
         user_id: string;
       };
 
-      if (!client_id || !user_id) {
-        throw new ValidationError("client_id and user_id required");
+      if (!user_id) {
+        throw new ValidationError("user_id required");
       }
 
-      const data = await dashboardRepo.getUserDashboard(client_id, user_id);
+      // client_id is safely extracted from context inside the repo
+      const data = await dashboardRepo.getUserDashboard("", user_id);
       return reply.code(200).send({
         success: true,
         message: "Dashboard data fetched successfully",
@@ -30,12 +30,12 @@ export class DashboardController {
 
   async getTutorDashboard(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, user_id } = req.params as {
-        client_id: string;
+      const { user_id } = req.params as {
         user_id: string; 
       };
 
-      const data = await dashboardRepo.getTutorCounts(client_id, user_id);
+      // client_id is safely extracted from context inside the repo
+      const data = await dashboardRepo.getTutorCounts("", user_id);
       return reply.code(200).send({
         success: true,
         message: "Tutor dashboard data fetched successfully",

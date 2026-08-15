@@ -4,7 +4,7 @@ import { sequelize } from "../config/database";
 export interface StudentResultsAttributes {
     id: string;
     user_id: string;
-    client_id: string;
+    organization_id: string;
     test_name: string;
     achieved_marks: number | null;
     total_marks: number | null;
@@ -22,7 +22,7 @@ export class StudentResults
     implements StudentResultsAttributes {
     public id!: string;
     public user_id!: string;
-    public client_id!: string;
+    public organization_id!: string;
     public test_name!: string;
     public achieved_marks!: number | null;
     public total_marks!: number | null;
@@ -43,10 +43,10 @@ StudentResults.init(
             type: DataTypes.UUID,
             allowNull: false,
         },
-        client_id: {
+        organization_id: {
             type: DataTypes.UUID,
             allowNull: false,
-        },
+    },
         test_name: {
             type: DataTypes.STRING,
             allowNull: false,

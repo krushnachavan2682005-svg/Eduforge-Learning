@@ -54,8 +54,7 @@ export class AssignTest implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit(): void {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.getClasses();
     this.loadTests();
@@ -77,8 +76,7 @@ export class AssignTest implements OnInit {
   return examDate < today;
   }
 
-  loadTests() {
-    if (!this.clientId) return;
+  loadTests() {
     const endpoint = `/all-exams`;
     this.commonHttp.getCourse(endpoint).subscribe({
       next: (res: any) => {

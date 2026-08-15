@@ -15,7 +15,7 @@ export class lesson extends Model implements ModelWithId {
   public section_id?: string;
   public course_id!: string;
   public seq_no!: number;
-  public client_id!: string;
+  public organization_id!: string;
   public created_at?: Date;
   public updated_at?: Date;
 }
@@ -40,7 +40,8 @@ lesson.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    client_id: { type: DataTypes.UUID, allowNull: false },
+    organization_id: { type: DataTypes.UUID, allowNull: false,
+    },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
@@ -68,16 +69,15 @@ lesson.init(
         beforeSave(instance);
       },
       beforeCreate: uniqueTitleCheckHook({
-        uniqueTitle: ["title", "client_id", "course_id"],
+        uniqueTitle: ["title", "organization_id", "course_id"],
         errorMessage: "Lesson name already exists",
         caseInsensitive: true,
       }),
       beforeUpdate: uniqueTitleCheckHook({
-        uniqueTitle: ["title", "client_id", "course_id"],
+        uniqueTitle: ["title", "organization_id", "course_id"],
         errorMessage: "Lesson name already exists",
         caseInsensitive: true,
       }),
     },
   }
 );
-// lesson.belongsTo(Course, { foreignKey: "course_id" });

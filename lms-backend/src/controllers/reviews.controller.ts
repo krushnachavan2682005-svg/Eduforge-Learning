@@ -21,9 +21,8 @@ export class ReviewsController {
 
   async createReview(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const body = req.body as ReviewsInterface;
-      const { client_id } = req.params as { client_id: string };
-      const data = { ...body, client_id };
+      const body = req.body as ReviewsInterface;
+      const data = { ...body, organization_id: req.user?.organization_id as string };
       const review = await reviewRepo.createReview(data);
       return reply.code(201).send({
         data: { id: review?.id },
@@ -74,14 +73,13 @@ export class ReviewsController {
 
 
   async getAllReviews(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
       const { page, limit } = req.query as { page?: string; limit?: string };
 
       const reviews = await reviewRepo.getAllReviews(
         Number(page),
         Number(limit),
-        { client_id }
+        { organization_id: req.user?.organization_id as string }
       );
 
       return reply.status(200).send(reviews);

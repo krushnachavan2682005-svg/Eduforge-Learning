@@ -54,10 +54,8 @@ export class TeacherDashboard {
     { label: 'AI Tools Coming Soon', description: 'Prepare AI-assisted teacher workflows', icon: 'auto_awesome', route: '/teacher/ai-tools' },
   ];
 
-  ngOnInit() {
-    const clientId = this.storage.getItem<string>(STORAGEENUMS.CLIENT_ID) || '';
-    const userId = this.storage.getItem<string>(STORAGEENUMS.USER_ID) || '';
-    if (!clientId) return;
+  ngOnInit() {
+    const userId = this.storage.getItem<string>(STORAGEENUMS.USER_ID) || '';
     this.http.getCourse(`/all-courses?page=1&limit=1`).subscribe((res: any) => this.courses.set(res?.pagination?.total || res?.items?.length || 0));
     this.http.getCourse(`/all-exams?page=1&limit=1`).subscribe((res: any) => this.tests.set(res?.total || res?.data?.length || res?.exams?.length || 0));
     this.http.getCourse(`/action-items?page=1&limit=1`).subscribe((res: any) => this.actionItems.set(res?.data?.pagination?.total || res?.data?.items?.length || 0));

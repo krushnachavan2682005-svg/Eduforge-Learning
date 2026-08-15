@@ -27,8 +27,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   styleUrl: './review-list.scss',
 })
 export class ReviewList {
-  user_id = '';
-  clientId = '';
+  user_id = '';
   examId: string = '';
   isCollapsed = false;
   testsLoaded = signal(false);
@@ -55,8 +54,7 @@ export class ReviewList {
   ];
 
   ngOnInit() {
-    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.route?.params?.subscribe((params: any) => {
       this.examId = params['id'];
     });

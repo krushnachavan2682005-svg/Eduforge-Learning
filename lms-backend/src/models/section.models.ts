@@ -19,7 +19,7 @@ export class Section extends Model implements ModelWithId {
   public lesson_id!: string;
   public content_type?: any;
   public quizzes?: any;
-  public client_id!: string;
+  public organization_id!: string;
   public created_at?: Date;
   public updated_at?: Date;
 }
@@ -58,7 +58,8 @@ Section.init(
       references: { model: "lessons", key: "id" },
       allowNull: false,
     },
-    client_id: { type: DataTypes.UUID, allowNull: false },
+    organization_id: { type: DataTypes.UUID, allowNull: false,
+    },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
@@ -87,7 +88,7 @@ Section.init(
         beforeSave(instance);
       },
       beforeCreate: uniqueTitleCheckHook({
-        uniqueTitle: ["title", "client_id", "course_id"],
+        uniqueTitle: ["title", "organization_id", "course_id"],
         errorMessage: "Section with this title already exists",
         caseInsensitive: true,
       }),

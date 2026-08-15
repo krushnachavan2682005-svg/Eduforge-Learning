@@ -53,8 +53,7 @@ export class AdminDashboard {
 
   operationCards = signal<any[]>([]);
 
-  ngOnInit() {
-    const clientId = this.storage.getItem<string>(STORAGEENUMS.CLIENT_ID) || '';
+  ngOnInit() {
     this.http.getLocalDashboardMe().subscribe((res: any) => {
       this.stats.set(res?.data?.stats || {});
       this.refreshCards();
@@ -67,14 +66,6 @@ export class AdminDashboard {
       this.classes.set((res?.data || []).length);
       this.refreshCards();
     });
-    if (clientId) {
-      this.http.getCourse(`/all-courses?page=1&limit=1`).subscribe({
-        next: (res: any) => {
-          this.courses.set(res?.pagination?.total || res?.items?.length || 0);
-          this.refreshCards();
-        },
-        error: () => this.refreshCards(),
-      });
       this.http.getCourse(`/all-exams?page=1&limit=1`).subscribe({
         next: (res: any) => {
           this.tests.set(res?.total || res?.data?.length || res?.exams?.length || 0);
@@ -82,7 +73,6 @@ export class AdminDashboard {
         },
         error: () => this.refreshCards(),
       });
-    }
     this.refreshCards();
   }
 
