@@ -4,7 +4,7 @@ import { beforeSave } from "../db/hooks/time_format_hook";
 
 export interface LevelInterface {
   id?: string;
-  client_id: string;
+  organization_id: string;
   level_name: string;
   start_date: Date;
   end_date: Date;
@@ -22,7 +22,7 @@ export class Level
   implements LevelInterface
 {
   public id?: string;
-  public client_id!: string;
+  public organization_id!: string;
   public level_name!: string;
   public start_date!: Date;
   public end_date!: Date;
@@ -37,7 +37,8 @@ Level.init(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    client_id: { type: DataTypes.UUID, allowNull: false },
+    organization_id: { type: DataTypes.UUID, allowNull: false,
+    },
     level_name: { type: DataTypes.STRING, allowNull: false },
     start_date: { type: DataTypes.DATE, allowNull: true },
     end_date: { type: DataTypes.DATE, allowNull: true },
@@ -48,7 +49,7 @@ Level.init(
     sequelize,
     tableName: "levels",
     timestamps: false,
-    indexes: [{ unique: true, fields: ["client_id", "level_name"] }],
+    indexes: [{ unique: true, fields: ["organization_id", "level_name"] }],
     hooks: {
       beforeSave: (instance) => {
         beforeSave(instance);

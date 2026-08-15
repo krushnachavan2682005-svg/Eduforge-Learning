@@ -6,7 +6,7 @@ const levelRep = new LevelRepository();
 export class LevelController {
   async createLevel(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id } = req.params as { client_id: string };
+      const organization_id = req.user?.organization_id as string;
       const { level_name, start_date, end_date } = req.body as {
         level_name: string;
         start_date?: string;
@@ -14,7 +14,7 @@ export class LevelController {
       };
 
       const data: any = {
-        client_id,
+        organization_id,
         level_name,
       };
 
@@ -46,15 +46,15 @@ export class LevelController {
   }
 
   async getAllLevels(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
       const { page = "1", limit = "10" } = req.query as {
         page?: string;
         limit?: string;
       };
 
+      const organization_id = req.user?.organization_id as string;
       const items = await levelRep.getLevels(Number(page), Number(limit), {
-        client_id,
+        organization_id,
       });
 
       return reply.code(200).send({
@@ -69,8 +69,8 @@ export class LevelController {
 
   async getLevelById(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { id, client_id } = req.params as { id: string; client_id: string };
-      const item = await levelRep.getLevelById(client_id, id);
+      const { id } = req.params as { id: string; };
+      const item = await levelRep.getLevelById(req.user?.organization_id as string, id);
 
       if (!item) throw new NotFoundError("Level not found");
 

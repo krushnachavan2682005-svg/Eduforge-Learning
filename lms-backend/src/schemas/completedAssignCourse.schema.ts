@@ -10,11 +10,4 @@ export const completedAssignCourseSchema = {
       is_completed: { type: "boolean" },
     },
   },
-  params: {
-    type: "object",
-    required: ["client_id"],
-    properties: {
-      client_id: { type: "string", format: "uuid" },
-    },
-  },
 };

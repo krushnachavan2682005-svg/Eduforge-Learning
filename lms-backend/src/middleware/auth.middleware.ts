@@ -11,6 +11,13 @@ export async function authenticate(
 
   try {
     req.user = req.server.verifyAccessToken(token);
+    
+    // Inject organization ID into the tenant context
+    const { asyncLocalStorage } = require("../constants/request-context");
+    const store = asyncLocalStorage.getStore();
+    if (store && req.user.organization_id) {
+      store.organizationId = req.user.organization_id;
+    }
   } catch (error) {
     if (error instanceof TokenExpiredError) {
       return reply.code(401).send({

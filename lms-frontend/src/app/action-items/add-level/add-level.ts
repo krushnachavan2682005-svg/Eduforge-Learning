@@ -32,8 +32,7 @@ import { Tooltip } from '../../shared/tooltip';
 export class AddLevel implements OnInit, OnChanges {
   @Input() show = false;
   @Output() closePopUp = new EventEmitter<void>();
-  @Output() levelAdded = new EventEmitter<any>();
-  clientId = '';
+  @Output() levelAdded = new EventEmitter<any>();
   showModal = false;
   isLoading = false;
   isSidebarOpen = false;
@@ -47,8 +46,7 @@ export class AddLevel implements OnInit, OnChanges {
   private toastr = inject(ToastrService);
   private commonHttp = inject(CommonHttpService);
 
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS.CLIENT_ID) || '';
+  ngOnInit() {
     this.levelForm = this.fb.group({
       level_name: [
         '',

@@ -15,7 +15,7 @@ export interface ExamAttributes {
   duration_minutes: number;
   exam_date: Date; // This seems to be a general date for the exam
   exam_start_time: Date; // Specific start time
-  client_id?: string;
+  organization_id?: string;
   is_completed: boolean;
   created_on: Date;
   updated_on: Date;
@@ -38,7 +38,7 @@ export interface QuestionAttributes {
   is_mandatory: boolean;
   correct_answer?: string;
   options?: any;
-  client_id?: string;
+  organization_id?: string;
   created_on: Date;
   updated_on: Date;
 }
@@ -55,7 +55,7 @@ export interface ExamSessionAttributes {
   completed_at?: Date | null;
   is_completed: boolean;
   answers_data: any;
-  client_id?: string;
+  organization_id?: string;
   reviewers?: Reviewer[] | null;
   created_on: Date;
   updated_on: Date;
@@ -79,7 +79,7 @@ export interface ExamUserMappingAttributes {
   review_status: "pending_review" | "completed";
   reviewed_by?: string | null;
   reviewed_at?: Date | null;
-  client_id?: string;
+  organization_id?: string;
   reviewers?: Reviewer[] | null;
   created_on: Date;
 }
@@ -102,7 +102,7 @@ export interface ExamUserMappingPublicAttributes {
   time_taken_minutes?: number;
   final_answers?: any;
 
-  client_id?: string;
+  organization_id?: string;
   created_on: Date;
 }
 
@@ -111,7 +111,7 @@ export type ExamUserMappingPublicCreationAttributes = Optional<
   ExamUserMappingPublicAttributes,
   "id" | "created_on" | "name" | "email"  | "total_marks_obtained" |
   "total_possible_marks" | "percentage" | "passed" |
-  "submitted_at" | "time_taken_minutes" | "final_answers" | "client_id"
+  "submitted_at" | "time_taken_minutes" | "final_answers" | "organization_id"
 >;
 export interface ExamReviewAttributes {
   id: string;
@@ -123,7 +123,7 @@ export interface ExamReviewAttributes {
   total_marks_obtained: number;
   percentage: number;
   passed: boolean;
-  client_id?: string;
+  organization_id?: string;
   created_on: Date;
   updated_on: Date;
 }
@@ -141,7 +141,7 @@ class Exam
   public passing_marks!: number;
   public duration_minutes!: number;
   public exam_date!: Date;
-  public client_id?: string;
+  public organization_id?: string;
   public exam_start_time!: Date;
   public created_by!: string;
   public updated_by!: string;
@@ -187,7 +187,7 @@ Exam.init(
       allowNull: false,
       defaultValue: false,
     },
-    client_id: {
+    organization_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },
@@ -242,7 +242,7 @@ class Question
   public is_mandatory!: boolean;
   public correct_answer?: string;
   public options?: any;
-  public client_id?: string;
+  public organization_id?: string;
   public created_on!: Date;
   public updated_on!: Date;
 }
@@ -279,7 +279,7 @@ Question.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    client_id: {
+    organization_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },
@@ -322,7 +322,7 @@ class ExamSession
   public completed_at?: Date | null;
   public is_completed!: boolean;
   public answers_data!: any;
-  public client_id?: string;
+  public organization_id?: string;
   public reviewers?: Reviewer[] | null;
   public created_on!: Date;
   public updated_on!: Date;
@@ -373,7 +373,7 @@ ExamSession.init(
       type: DataTypes.JSONB,
       allowNull: true,
     },
-    client_id: {
+    organization_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },
@@ -420,7 +420,7 @@ class ExamUserMapping
   public review_status!: "pending_review" | "completed";
   public reviewed_by?: string | null;
   public reviewed_at?: Date | null;
-  public client_id?: string;
+  public organization_id?: string;
   public reviewers?: Reviewer[] | null;
   public created_on!: Date;
 }
@@ -502,7 +502,7 @@ ExamUserMapping.init(
       type: DataTypes.DATE,
       allowNull: true,
     },
-    client_id: {
+    organization_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },
@@ -554,7 +554,7 @@ class ExamUserMappingPublic
 
   public final_answers?: any;
 
-  public client_id?: string;
+  public organization_id?: string;
   public created_on!: Date;
 }
 
@@ -633,7 +633,7 @@ ExamUserMappingPublic.init(
       defaultValue: false, 
     },
 
-    client_id: {
+    organization_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },
@@ -664,7 +664,7 @@ class ExamReview
   public total_marks_obtained!: number;
   public percentage!: number;
   public passed!: boolean;
-  public client_id?: string;
+  public organization_id?: string;
   public created_on!: Date;
   public updated_on!: Date;
 }
@@ -711,7 +711,7 @@ ExamReview.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
     },
-    client_id: {
+    organization_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },
@@ -731,7 +731,7 @@ class ExamAssignment extends Model {
   public id!: string;
   public exam_id!: string;
   public user_id!: string;
-  public client_id?: string;
+  public organization_id?: string;
   public class_info?: { id: string; name?: string } | null;
   public created_on!: Date;
   public updated_on?: Date;
@@ -753,7 +753,7 @@ ExamAssignment.init(
       type: DataTypes.UUID,
       allowNull: false,
     },
-    client_id: {
+    organization_id: {
       type: DataTypes.UUID,
       allowNull: true,
     },

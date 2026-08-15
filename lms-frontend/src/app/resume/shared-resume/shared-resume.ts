@@ -23,7 +23,7 @@ export class SharedResume implements OnInit {
   @ViewChild('resumeContent', { static: false }) resumeContent!: ElementRef;
   userId: any;
   token: any;
-  clientId = '';
+  resumeId: string = '';
   skills = signal<any[]>([]);
   profile = signal<any>(null);
   contact = signal<any>(null);
@@ -38,8 +38,7 @@ export class SharedResume implements OnInit {
     this.route.params.subscribe((params) => {
       this.userId = params['userId'];
       this.token = params['token'];
-      // Try to get clientId from query params
-      this.clientId = this.route.snapshot.queryParams['clientId'] || '';
+      this.resumeId = params['resumeId'];
       this.getResume();
     });
   }
@@ -51,9 +50,7 @@ export class SharedResume implements OnInit {
     }
 
     // If no clientId, try to get it from the API without client prefix
-    const endpoint = this.clientId
-      ? `/resume/user/${this.userId}`
-      : `/resume/user/${this.userId}`;
+    const endpoint = `/resumes/${this.resumeId}`;
 
     // Use public method that doesn't require authentication
     this.commoHttp

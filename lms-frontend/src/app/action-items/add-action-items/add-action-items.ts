@@ -29,8 +29,7 @@ import { Tooltip } from '../../shared/tooltip';
   styleUrl: './add-action-items.scss',
 })
 export class AddActionItems implements OnInit {
-  limit = 10;
-  client_Id = '';
+  limit = 10;
   uploading = false;
   showModal = false;
   isLoading = false;
@@ -57,8 +56,7 @@ export class AddActionItems implements OnInit {
   uploadStatus: 'success' | 'error' | null = null;
   @Output() closePopUp = new EventEmitter<void>();
 
-  ngOnInit() {
-    this.client_Id = this.str?.getItem(STORAGEENUMS.CLIENT_ID) || '';
+  ngOnInit() {
     this.userId = this.str?.getItem(STORAGEENUMS.USER_ID);
     this.actionForm = this.fb.group({
       task_name: ['', Validators.required],

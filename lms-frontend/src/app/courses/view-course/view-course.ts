@@ -16,8 +16,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   styleUrl: './view-course.scss',
 })
 export class ViewCourse {
-  showLessonModal = false;
-  clientId = '';
+  showLessonModal = false;
   showModal = false;
   courses: any[] = [];
   course = signal<any>({});
@@ -41,8 +40,7 @@ export class ViewCourse {
     } as { page?: string; limit?: string };
   }
  
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS.CLIENT_ID) || '';
+  ngOnInit() {
     this.route?.params?.subscribe((params: any) => {
       const courseId = params['id'];
       if (!courseId) {

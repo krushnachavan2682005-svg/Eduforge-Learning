@@ -29,8 +29,7 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
   styleUrl: './public-test-start.scss',
 })
 export class PublicTestStart {
-  userId = '';
-  clientId = '';
+  userId = '';
   examId: string = '';
   message: string = '';
   isSidebarOpen = true;
@@ -88,8 +87,7 @@ export class PublicTestStart {
     }
   }
 
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.route?.params?.subscribe((params: any) => {
       this.examId = params['id'];

@@ -21,7 +21,7 @@ export class Course extends Model implements ModelWithId {
   public level!: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
   public thumbnail_url?: string;
   public is_published?: boolean;
-  public client_id!: string;
+  public organization_id!: string;
   public created_at?: Date;
   public updated_at?: Date;
 }
@@ -47,7 +47,8 @@ Course.init(
     },
     thumbnail_url: { type: DataTypes.TEXT },
     is_published: { type: DataTypes.BOOLEAN, defaultValue: false },
-    client_id: { type: DataTypes.UUID, allowNull: false },
+    organization_id: { type: DataTypes.UUID, allowNull: false,
+    },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
@@ -63,16 +64,15 @@ Course.init(
         beforeSave(instance);
       },
       beforeCreate: uniqueTitleCheckHook({
-        uniqueTitle: ["title", "client_id"],
+        uniqueTitle: ["title", "organization_id"],
         errorMessage: "Course with this title already exists",
         caseInsensitive: true,
       }),
       beforeUpdate: uniqueTitleCheckHook({
-        uniqueTitle: ["title", "client_id"],
+        uniqueTitle: ["title", "organization_id"],
         errorMessage: "Course with this title already exists",
         caseInsensitive: true,
       }),
     },
   }
 );
-Course.hasMany(lesson, { foreignKey: "course_id" });

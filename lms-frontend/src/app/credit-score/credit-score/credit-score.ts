@@ -31,8 +31,7 @@ export class CreditScore {
   user = {
     class: 'FY BCA',
   };
-  user_Id = '';
-  client_Id = '';
+  user_Id = '';
   student = signal<any>(null);
   creditLoaded = signal(false);
   allLevels = signal<any[]>([]);
@@ -43,8 +42,7 @@ export class CreditScore {
   private commonHttp = inject(CommonHttpService);
   public skeletonService = inject(SkeletonTheme);
 
-  ngOnInit() {
-    this.client_Id = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.user_Id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.fetchAndSetUser();
     this.getLevels();

@@ -84,8 +84,7 @@ export class MyLearning {
     },
   ];
 
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this?.getAssignCourses();
     this.assignForm = this.fb?.group({

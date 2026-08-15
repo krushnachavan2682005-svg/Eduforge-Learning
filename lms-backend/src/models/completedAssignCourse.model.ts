@@ -5,7 +5,7 @@ export class AssignedCourseModel extends Model {
   public course_id!: string;
   public section_id!: string;
   public lesson_id!: string;
-  public client_id!: string;
+  public organization_id!: string;
   public user_id!: string;
   public is_completed!: boolean;
 }
@@ -16,7 +16,8 @@ const CompletedAssignCourse = sequelize.define(
     course_id: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true },
     section_id: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true },
     lesson_id: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true },
-    client_id: { type: DataTypes.INTEGER, allowNull: false },
+    organization_id: { type: DataTypes.INTEGER, allowNull: false,
+    },
     user_id: { type: DataTypes.INTEGER, allowNull: false },
     is_completed: {
       type: DataTypes.BOOLEAN,

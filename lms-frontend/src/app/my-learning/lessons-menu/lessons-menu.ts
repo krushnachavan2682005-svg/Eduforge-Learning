@@ -22,7 +22,6 @@ import { Tooltip } from '../../shared/tooltip';
 })
 export class LessonsMenu implements OnInit {
   userId = '';
-  clientId = '';
   course = signal<any>([]);
   lessons = signal<any[]>([]);
   isLoading = signal<boolean>(true);
@@ -37,7 +36,6 @@ export class LessonsMenu implements OnInit {
 
   ngOnInit() {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
 
     if (this.courseId) {
       this.getLessons(this.courseId);

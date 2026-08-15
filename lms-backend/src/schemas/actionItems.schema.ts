@@ -2,7 +2,6 @@ export const actionItemSchema = {
   body: {
     type: "object",
     properties: {
-      client_id: { type: "string" },
       task_name: { type: "string" },
       total_score: { type: "string" },
       description: { type: "string" },

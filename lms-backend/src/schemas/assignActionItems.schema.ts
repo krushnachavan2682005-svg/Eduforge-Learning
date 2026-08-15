@@ -3,7 +3,6 @@ export const assignActionItems = {
     type: "object",
     required: ["action_item_id"],
     properties: {
-      client: { type: "string", format: "uuid" },
       action_item_id: {
         type: "array",
         minItems: 1,
@@ -28,7 +27,6 @@ export const assignActionItems = {
     anyOf: [
       { required: ["user_id"] },
       { required: ["class_id"] },
-      { required: ["client"] },
       { required: ["user_id", "class_id"] },
     ],
     additionalProperties: false,

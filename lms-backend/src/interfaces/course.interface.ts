@@ -10,7 +10,7 @@ export interface CourseInterface {
   level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
   thumbnail_url?: string;
   is_published?: boolean;
-  client_id: string;
+  organization_id: string;
   created_at?: Date;
   updated_at?: Date;
 }

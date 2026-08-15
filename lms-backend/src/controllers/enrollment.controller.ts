@@ -9,8 +9,8 @@ const enrollmentRepo = new EnrollmentRepsitory();
 export class EnrollmentController {
   async getEnrollmentById(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, id } = req.params as { id: string; client_id: string };
-      const enrollment = await enrollmentRepo.getEnrollmentById(client_id, id);
+      const { organization_id, id } = req.params as { id: string; organization_id: string };
+      const enrollment = await enrollmentRepo.getEnrollmentById(req.user?.organization_id as string, id);
 
       if (!enrollment) {
         return reply.code(200).send({ message: "Enrollment not found" });
@@ -25,10 +25,9 @@ export class EnrollmentController {
   }
 
   async createEnrollment(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
       const body = req.body as EnrollmentInterface;
-      const data = { ...body, client_id };
+      const data = { ...body, organization_id: req.user?.organization_id as string };
 
       if (data.enrolled_at) {
         const [day, month, year] = data.enrolled_at?.split(/[\/\-]/)?.map(Number);
@@ -89,14 +88,13 @@ export class EnrollmentController {
   }
 
   async getAllEnrollment(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
       const { page, limit } = req.query as { page?: string; limit?: string };
 
       const Enrollment = await enrollmentRepo.getEnrollment(
         Number(page),
         Number(limit),
-        { client_id }
+        { organization_id: req.user?.organization_id as string }
       );
 
       return reply.status(200).send(Enrollment);

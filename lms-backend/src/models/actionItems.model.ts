@@ -13,7 +13,7 @@ export class ActionItems
   implements ActionItemsInterface
 {
   public id?: string;
-  public client_id!: string;
+  public organization_id!: string;
   public task_name?: string;
   public total_score?: string;
   public description?: string;
@@ -31,7 +31,8 @@ ActionItems.init(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
-    client_id: { type: DataTypes.UUID, allowNull: false },
+    organization_id: { type: DataTypes.UUID, allowNull: false,
+    },
     task_name: { type: DataTypes.STRING, allowNull: false },
     total_score: { type: DataTypes.STRING },
     description: { type: DataTypes.TEXT },
@@ -46,7 +47,7 @@ ActionItems.init(
     sequelize,
     tableName: "action_items",
     timestamps: false,
-    indexes: [{ unique: true, fields: ["task_name", "client_id"] }],
+    indexes: [{ unique: true, fields: ["task_name", "organization_id"] }],
     hooks: {
       beforeValidate: (instance) => {
         convertEmptyStringsToNull(instance);

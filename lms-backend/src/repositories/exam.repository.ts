@@ -8,6 +8,7 @@ import {
   ExamReview,
 } from "../models/exam.model";
 import { AssignedActionItemsTimelineModel } from "../models/assignedActionItemsTimeline.model";
+import { OrganizationUser } from "../modules/roles/role.model";
 import { sequelize } from "../config/database";
 import { paginate } from "../utils/pagination";
 import {
@@ -27,6 +28,7 @@ import {
 } from "../interfaces/exam.interface";
 import { QueryTypes } from "sequelize";
 import { StudentRepository } from "../modules/students/student.repository";
+import { asyncLocalStorage as cls } from "../constants/request-context";
 
 const studentRepository = new StudentRepository();
 
@@ -92,8 +94,7 @@ export class ExamRepository {
       total_marks: Number(exam?.total_marks) || 0,
       passing_marks: Number(exam?.passing_marks) || 0,
       reviewer_type: "teacher",
-      reviewers: exam?.reviewers || [],
-      client_id: exam?.client_id,
+      reviewers: exam?.reviewers || [], organization_id: exam?.organization_id,
       questions: (exam?.questions || []).map((question: any) => {
         const q = question?.toJSON ? question.toJSON() : question;
         return {
@@ -129,8 +130,7 @@ export class ExamRepository {
           passing_marks: data.passing_marks,
           duration_minutes: data.duration_minutes,
           exam_date: data.exam_date ? new Date(data.exam_date) : new Date(), // Keep existing logic for exam_date
-          exam_start_time: new Date(data.exam_start_time!),
-          client_id: data.client_id,
+          exam_start_time: new Date(data.exam_start_time!), organization_id: cls.getStore()?.organizationId || data.organization_id,
           created_by: data.created_by!,
           updated_by: data.updated_by!,
           is_completed: false,
@@ -150,8 +150,7 @@ export class ExamRepository {
             marks: q.marks,
             is_mandatory: q.is_mandatory,
             correct_answer: q.correct_answer,
-            options: q.options,
-            client_id: data.client_id,
+            options: q.options, organization_id: cls.getStore()?.organizationId || data.organization_id,
             created_on: new Date(),
             updated_on: new Date(),
           })),
@@ -180,7 +179,11 @@ export class ExamRepository {
   }
 
   async getExamById(examId: string) {
-    const exam = await Exam.findByPk(examId, {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    
+    const exam = await Exam.findOne({
+      where: organizationId? { id: examId, organization_id: organizationId } : { id: examId },
       include: [
         {
           model: Question,
@@ -193,11 +196,13 @@ export class ExamRepository {
   }
 
   async getAllExams(limit: number, skip: number, userId?: string) {
-    const includeOptions = [{ model: Question, as: "questions" }];
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    const includeOptions = [{ model: Question, as: "questions",separate:true }];
 
     if (userId) {
       const assignments = await ExamAssignment.findAll({
-        where: { user_id: userId },
+        where: organizationId? { user_id: userId, organization_id: organizationId } : { user_id: userId },
         attributes: ["exam_id"],
       });
 
@@ -208,10 +213,8 @@ export class ExamRepository {
       const examIds = assignments.map((a) => a.exam_id);
 
       const { count, rows } = await Exam.findAndCountAll({
-        where: { id: examIds },
+        where: organizationId? { id: examIds, organization_id: organizationId } : { id: examIds },
         include: includeOptions,
-        distinct: true,
-        col: "id",
         limit,
         offset: skip,
         order: [["created_on", "DESC"]],
@@ -220,19 +223,20 @@ export class ExamRepository {
     }
 
     const { count, rows } = await Exam.findAndCountAll({
+      where: organizationId? { organization_id: organizationId } : undefined,
       include: includeOptions,
       limit,
-      distinct: true,
       offset: skip,
-      col:"id",
       order: [["created_on", "DESC"]],
     });
     return { exams: rows, total: count };
   }
 
   async getExamsByCreator(userId: string, limit: number, skip: number) {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
     const { count, rows } = await Exam.findAndCountAll({
-      where: { created_by: userId },
+      where: organizationId? { created_by: userId, organization_id: organizationId } : { created_by: userId },
       include: [
         {
           model: Question,
@@ -247,9 +251,11 @@ export class ExamRepository {
   }
 
   async updateExam(examId: string, data: IExamUpdate) {
+    const store = cls.getStore();
+    const organizationId_context = store?.organizationId;
     const transaction = await sequelize.transaction();
     try {
-      const exam = await Exam.findByPk(examId, { transaction });
+      const exam = await Exam.findOne({ where: organizationId_context ? { id: examId, organization_id: organizationId_context } : { id: examId }, transaction });
       if (!exam) {
         throw new Error(`Exam with id ${examId} not found`);
       }
@@ -272,8 +278,8 @@ export class ExamRepository {
       if (data.updated_by !== undefined) {
         examUpdateData.updated_by = data.updated_by;
       }
-      if (data.client_id !== undefined)
-        examUpdateData.client_id = data.client_id;
+      if (data.organization_id !== undefined)
+        examUpdateData.organization_id = data.organization_id;
 
       await exam.update(examUpdateData, { transaction });
 
@@ -318,8 +324,7 @@ export class ExamRepository {
                 marks: questionData.marks,
                 is_mandatory: questionData.is_mandatory,
                 correct_answer: questionData.correct_answer,
-                options: questionData.options,
-                client_id: data.client_id,
+                options: questionData.options, organization_id: organizationId_context || data.organization_id,
                 updated_on: new Date(),
               },
               {
@@ -336,8 +341,7 @@ export class ExamRepository {
                 marks: questionData.marks!,
                 is_mandatory: questionData.is_mandatory!,
                 correct_answer: questionData.correct_answer,
-                options: questionData.options,
-                client_id: data.client_id,
+                options: questionData.options, organization_id: organizationId_context || data.organization_id,
                 created_on: new Date(),
                 updated_on: new Date(),
               },
@@ -356,9 +360,11 @@ export class ExamRepository {
   }
 
   async deleteExam(examId: string) {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
     const transaction = await sequelize.transaction();
     try {
-      const exam = await Exam.findByPk(examId, { transaction });
+      const exam = await Exam.findOne({ where: organizationId? { id: examId, organization_id: organizationId } : { id: examId }, transaction });
       if (!exam) {
         return false;
       }
@@ -380,10 +386,31 @@ async assignExamToUsers(
   clientId: string,
   classInfo?: { id: string; name?: string }
 ): Promise<ExamAssignment[]> {
+  const store = cls.getStore();
+  const context_organizationId = store?.organizationId || clientId;
+
+  // Security Verification: Ensure all exams belong to the organization
+  const exams = await Exam.findAll({ where: { id: examIds, organization_id: context_organizationId } });
+  if (exams.length !== examIds.length) {
+    throw new Error("One or more exams do not exist or access is denied");
+  }
+
+  // Security Verification: Ensure all users belong to the organization
+  const validMembers = await OrganizationUser.findAll({
+    where: {
+      organization_id: context_organizationId,
+      user_id: userIds,
+      is_active: true
+    }
+  });
+  if (validMembers.length !== userIds.length) {
+    throw new Error("One or more users do not belong to this organization or are inactive.");
+  }
+
   const assignmentsToCreate: {
     exam_id: string;
     user_id: string;
-    client_id: string;
+    organization_id: string;
     class_info: { id: string; name?: string } | null;
   }[] = [];
 
@@ -391,8 +418,7 @@ async assignExamToUsers(
     for (const userId of userIds) {
       assignmentsToCreate.push({
         exam_id: examId,
-        user_id: userId,
-        client_id: clientId,
+        user_id: userId, organization_id: context_organizationId,
         class_info: classInfo || null,
       });
     }
@@ -423,10 +449,10 @@ async assignExamToUsers(
 
   async getUsersByClassId(
     class_id: string,
-    client_id: string,
+    organizationId: string,
   ): Promise<string[]> {
     const localUserIds = await studentRepository.getUserIdsByClassId(
-      client_id,
+      organizationId,
       class_id,
     );
 
@@ -435,10 +461,10 @@ async assignExamToUsers(
 
   async getClassDetailsById(
     class_id: string,
-    client_id: string,
+    organizationId: string,
   ): Promise<{ id: string; name: string } | null> {
     const localClass = await studentRepository.getClassById(
-      client_id,
+      organizationId,
       class_id,
     );
 
@@ -446,8 +472,19 @@ async assignExamToUsers(
   }
 
   async assignExamToUser(data: IExamAssignment): Promise<IExamAssignment> {
+    const store = cls.getStore();
+    const context_organizationId = store?.organizationId || data.organization_id;
+    
+    // Security Verification: Ensure exam belongs to the organization
+    const exam = await Exam.findOne({ where: { id: data.exam_id, organization_id: context_organizationId } });
+    if (!exam) {
+      throw new Error("Exam not found or access is denied");
+    }
+    
+    const assignData = { ...data, organization_id: context_organizationId };
+    
     const created = (
-      await ExamAssignment.create(data as any)
+      await ExamAssignment.create(assignData as any)
     ).toJSON() as IExamAssignment;
 
     if (created?.id) {
@@ -470,7 +507,10 @@ async assignExamToUsers(
     examId: string,
     userAnswers: Array<{ question_id: string; user_answer: any }>,
   ) {
-    const exam = await Exam.findByPk(examId, {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    const exam = await Exam.findOne({
+      where: organizationId? { id: examId, organization_id: organizationId } : { id: examId },
       include: [{ model: Question, as: "questions" }],
     });
     if (!exam) throw new Error(`Exam with id ${examId} not found`);
@@ -645,7 +685,11 @@ async assignExamToUsers(
         return existingSession.toJSON() as IExamSession;
       }
 
-      const exam = await Exam.findByPk(data.exam_id, {
+      const store = cls.getStore();
+      const organizationId = store?.organizationId;
+      
+      const exam = await Exam.findOne({
+        where: organizationId? { id: data.exam_id, organization_id: organizationId } : { id: data.exam_id },
         include: [{ model: Question, as: "questions" }],
         transaction,
       });
@@ -656,8 +700,7 @@ async assignExamToUsers(
         {
           exam_id: data?.exam_id,
           user_id: data?.user_id,
-          current_question_index: data?.current_question_index || 0,
-          client_id: data?.client_id,
+          current_question_index: data?.current_question_index || 0, organization_id: data?.organization_id,
           answers_data: {
             answers: data?.answers_data || [],
             exam_snapshot: snapshot,
@@ -907,8 +950,7 @@ async resumePublicExamSession(session_id:string){
           is_completed: true,
           review_status: hasManualReviewQuestions
             ? "pending_review"
-            : "completed",
-          client_id: session.client_id,
+            : "completed", organization_id: session.organization_id,
           reviewers: snapshot.reviewers || exam.reviewers || [],
           created_on: new Date(),
         } as any,
@@ -1032,8 +1074,7 @@ async resumePublicExamSession(session_id:string){
           reviewed_answers: updatedFinalAnswers,
           total_marks_obtained: totalMarksObtained,
           percentage: Math.round(percentage * 100) / 100,
-          passed,
-          client_id: mapping.client_id,
+          passed, organization_id: mapping.organization_id,
         },
         transaction,
       });
@@ -1188,7 +1229,7 @@ async resumePublicExamSession(session_id:string){
           eum.is_completed,
           eum.review_status,
           eum.reviewed_at,
-          eum.client_id,
+          eum.organization_id,
           e.id AS exam_id,
           e.title,
           e.subject,
@@ -1221,12 +1262,12 @@ async resumePublicExamSession(session_id:string){
 
       if (results.length === 0) return [];
       const namesByOrg = new Map<string, Record<string, string>>();
-      const orgIds = [...new Set(results.map((r) => r?.client_id).filter(Boolean))];
+      const orgIds = [...new Set(results.map((r) => r?.organization_id).filter(Boolean))];
       for (const organizationId of orgIds) {
         const userIds = [
           ...new Set(
             results
-              .filter((r) => r?.client_id === organizationId)
+              .filter((r) => r?.organization_id === organizationId)
               .map((r) => r?.user_id)
               .filter(Boolean),
           ),
@@ -1239,7 +1280,7 @@ async resumePublicExamSession(session_id:string){
 
       return results.map((r) => ({
         ...r,
-        student_name: namesByOrg.get(r?.client_id)?.[r?.user_id] || "",
+        student_name: namesByOrg.get(r?.organization_id)?.[r?.user_id] || "",
       }));
     } catch (error) {
       console.error("Error fetching reviewer dashboard exams:", error);
@@ -1260,7 +1301,7 @@ async resumePublicExamSession(session_id:string){
       );
 
     const studentName = await studentRepository.getStudentDisplayName(
-      mapping.client_id || "",
+      mapping.organization_id || "",
       mapping.user_id,
     );
 
@@ -1304,10 +1345,10 @@ async resumePublicExamSession(session_id:string){
   async getStudentExamReview(
     exam_id: string,
     user_id: string,
-    client_id: string,
+    organizationId: string,
   ): Promise<any> {
     const mapping = await ExamUserMapping.findOne({
-      where: { exam_id: exam_id, user_id: user_id, client_id: client_id },
+      where: { exam_id: exam_id, user_id: user_id, organization_id: organizationId },
     });
 
     if (!mapping) {
@@ -1323,7 +1364,7 @@ async resumePublicExamSession(session_id:string){
     }
 
     const studentName = await studentRepository.getStudentDisplayName(
-      mapping?.client_id || client_id,
+      mapping?.organization_id || organizationId,
       mapping?.user_id,
     );
 
@@ -1374,7 +1415,7 @@ async resumePublicExamSession(session_id:string){
     if (mapping?.reviewed_by) {
       try {
         reviewerName = await studentRepository.getStudentDisplayName(
-          mapping?.client_id || client_id,
+          mapping?.organization_id || organizationId,
           mapping?.reviewed_by,
         );
       } catch (e) {

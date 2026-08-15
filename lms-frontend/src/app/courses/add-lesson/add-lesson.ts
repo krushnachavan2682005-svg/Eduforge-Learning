@@ -48,8 +48,7 @@ export class SafeUrlPipe implements PipeTransform {
   styleUrl: './add-lesson.scss',
 })
 export class AddLesson implements OnChanges {
-  lessonForm!: FormGroup;
-  clientId = '';
+  lessonForm!: FormGroup;
   courseId: any;
   course_data: any;
   showModal = false;
@@ -75,8 +74,7 @@ export class AddLesson implements OnChanges {
   private commonHttp = inject(CommonHttpService);
   private workspaceNav = inject(WorkspaceNavigationService);
   public skeletonService = inject(SkeletonTheme);
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.route?.params?.subscribe((params: any) => {
       this.courseId = params['id'];
       this.sectionId = params['sectionId'];

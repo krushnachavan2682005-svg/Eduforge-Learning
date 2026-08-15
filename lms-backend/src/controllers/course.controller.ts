@@ -9,8 +9,9 @@ const courseRepo = new CourseRepository();
 export class CourseController {
   async getCourse(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, id } = req.params as { id: string; client_id: string };
-      const course = await courseRepo.getCourseById(client_id, id);
+      const { id } = req.params as { id: string };
+      // client_id is safely extracted from context inside the repo
+      const course = await courseRepo.getCourseById("", id);
 
       if (!course || !course.length) {
         throw new InternalServerError("Course not found");
@@ -26,9 +27,9 @@ export class CourseController {
 
   async createCourse(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id } = req.params as { client_id: string };
       const body = req.body as CourseInterface;
-      const data = { ...body, client_id };
+      // client_id is injected inside the repository
+      const data = { ...body };
       const course = await courseRepo.createCourse(data);
       return reply.code(201).send({
         data: {
@@ -48,9 +49,10 @@ export class CourseController {
 
   async updateCourse(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, id } = req.params as { id: string; client_id: string };
+      const { id } = req.params as { id: string };
       const body = req.body as Partial<Course>;
-      const updateData = { ...body, client_id };
+      // client_id is injected inside the repository
+      const updateData = { ...body };
       const updated = await courseRepo.updateCourse(id, updateData);
       if (!updated) {
         throw new InternalServerError("Course not found");
@@ -88,17 +90,17 @@ export class CourseController {
 
   async getAllCourses(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id } = req.params as { client_id: string };
-      const { page, limit, title } = req.query as {
+      // const { organization_id } = req.params as { organization_id: string };
+      const { page, limit, title } = (req.query || {}) as {
         page?: string;
         limit?: string;
         title?: string;
       };
 
       const courses = await courseRepo.getAllCourses(
-        Number(page),
-        Number(limit),
-        { client_id },
+        page ? Number(page) : 1,
+        limit ? Number(limit) : 10,
+        {},
         title
       );
 
@@ -111,9 +113,9 @@ export class CourseController {
 
   async courceImageUpload(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, id } = req.params as { client_id: string; id: string };
-
-      const courses = await courseRepo.uploadImage(req, client_id, id);
+      const { id } = req.params as { id: string };
+      // client_id is extracted inside the repo
+      const courses = await courseRepo.uploadImage(req, "", id);
 
       return reply.status(200).send({
         message: "Image uploded sucessfully",

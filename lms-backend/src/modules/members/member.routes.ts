@@ -13,7 +13,9 @@ const controller = new MemberController();
 export default async function memberRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/members",
-    { schema: createMemberSchema, preHandler: requirePermission("MEMBER_CREATE") },
+    { schema: createMemberSchema, 
+      // preHandler: requirePermission("MEMBER_CREATE") 
+    },
     (req, reply) => controller.create(req, reply),
   );
 

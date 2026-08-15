@@ -52,10 +52,9 @@ export class StudentDashboard {
     { label: 'AI Tutor Coming Soon', description: 'Prepare AI-assisted learning', icon: 'auto_awesome', route: '/student/ai-tutor' },
   ];
 
-  ngOnInit() {
-    const clientId = this.storage.getItem<string>(STORAGEENUMS.CLIENT_ID) || '';
+  ngOnInit() {
     const userId = this.storage.getItem<string>(STORAGEENUMS.USER_ID) || '';
-    if (!clientId || !userId) return;
+    if (!userId) return;
     this.http.getCourse(`/get-assigned-course-byuser/${userId}?page=1&limit=100`).subscribe((res: any) => {
       const data = res?.data || [];
       this.courses.set(data.length);

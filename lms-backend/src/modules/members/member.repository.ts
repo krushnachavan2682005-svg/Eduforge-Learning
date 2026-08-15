@@ -43,6 +43,7 @@ export class MemberRepository {
             last_name: input.last_name.trim(),
             email,
             password_hash: await hashPassword(input.password),
+            organization_id: input.organization_id,
           },
           { transaction },
         );

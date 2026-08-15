@@ -2,17 +2,31 @@ import { sequelize } from "../config/database";
 import { AssignedCourseModel } from "../models/assignCourse.model";
 import { QueryTypes } from "sequelize";
 import { StudentRepository } from "../modules/students/student.repository";
+import { asyncLocalStorage as cls } from "../constants/request-context";
+import { Course } from "../models/course.model";
 
 const studentRepository = new StudentRepository();
 
 export class AssiginCourseRepositorie {
   async createAssignCourse(data: Partial<AssignedCourseModel>) {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    if (organizationId) {
+      data.organization_id = organizationId;
+      // Phase 6F: Validate that ALL course_ids belong to the current organization
+      if (data.course_id && data.course_id.length > 0) {
+        const count = await Course.count({ where: { id: data.course_id, organization_id: organizationId } });
+        if (count !== data.course_id.length) {
+          throw new Error("One or more courses do not belong to the current organization");
+        }
+      }
+    }
     return AssignedCourseModel.create(data as any);
   }
 
-  async getUsersByClassId(class_id: string, client_id: string) {
+  async getUsersByClassId(class_id: string, organizationId: string) {
     const localUserIds = await studentRepository.getUserIdsByClassId(
-      client_id,
+      organizationId,
       class_id,
     );
 
@@ -43,7 +57,9 @@ export class AssiginCourseRepositorie {
     );
   }
 
-  async getCourseByUserId(client_id: string, user_id: string) {
+  async getCourseByUserId(organizationId: string, user_id: string) {
+    const store = cls.getStore();
+    organizationId = store?.organizationId || organizationId;
     return sequelize.query(
       `
     SELECT 
@@ -82,16 +98,18 @@ export class AssiginCourseRepositorie {
     FROM course_user_mapping ac
     JOIN LATERAL unnest(ac.course_id) AS cid ON TRUE
     JOIN courses c ON c.id = cid
-    WHERE ac.client_id = :client_id
+    WHERE ac.organization_id = :organizationId
       AND :user_id = ANY(ac.user_id)
     `,
       {
-        replacements: { client_id, user_id },
+        replacements: { organization_id: organizationId, user_id },
         type: QueryTypes.SELECT,
       }
     );
   }
-  async getCourseById(client_id: string, course_id: string) {
+  async getCourseById(organizationId: string, course_id: string) {
+    const store = cls.getStore();
+    organizationId = store?.organizationId || organizationId;
     const sql = `
     SELECT 
       jsonb_build_object(
@@ -128,13 +146,13 @@ export class AssiginCourseRepositorie {
       ) AS lessons
     FROM courses c
     LEFT JOIN lessons l ON l.course_id = c.id
-    WHERE c.client_id = :client_id
+    WHERE c.organization_id = :organizationId
       AND c.id = :course_id
     GROUP BY c.id, c.title;
   `;
 
     return await sequelize?.query(sql, {
-      replacements: { client_id, course_id },
+      replacements: { organization_id: organizationId, course_id },
       type: QueryTypes?.SELECT,
     });
   }

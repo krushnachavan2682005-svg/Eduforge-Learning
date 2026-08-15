@@ -75,8 +75,7 @@ interface Question {
   templateUrl: './add-section.html',
   styleUrl: './add-section.scss',
 })
-export class AddSection implements OnInit, OnDestroy {
-  clientId = '';
+export class AddSection implements OnInit, OnDestroy {
   aiPrompt = '';
   editor: Editor;
   uploading = false;
@@ -192,8 +191,7 @@ export class AddSection implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+    this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
     combineLatest([this.route?.params, this.route.queryParams]).subscribe(
       ([params, queryParams]) => {
         this.sectionId = params['section_id'];

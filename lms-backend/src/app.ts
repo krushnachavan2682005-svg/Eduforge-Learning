@@ -15,6 +15,7 @@ import memberRoutes from "./modules/members/member.routes";
 import { seedRbac } from "./modules/rbac/rbac.seed";
 import "./modules/roles/role.model";
 import "./modules/sessions/session.model";
+import './models/model_join_association'
 import { asyncLocalStorage as cls} from "./constants/request-context";
 export const buildApp = async () => {
   const app = Fastify({ logger: true });

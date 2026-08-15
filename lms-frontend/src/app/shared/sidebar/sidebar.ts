@@ -15,6 +15,7 @@ import { CommonHttpService } from '../../services/common-http.service';
 import { PermissionDirective } from '../../services/permission-directive';
 import { NavigationService } from '../../core/navigation/navigation.service';
 import { NavConfig, NavItem } from '../../core/navigation/navigation.types';
+import { SidebarService } from '../../services/sidebar.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -26,10 +27,12 @@ export class Sidebar implements OnInit {
   user_id: any;
   clientId: any;
   clientData: any;
-  isCollapsed = false;
+  get isCollapsed(): boolean {
+    return !this.sidebarService.isOpen();
+  }
   showThemeSelector = false;
   isOpened: boolean = false;
-  isPermitted = signal(false);
+  isPermitted = signal(true);
   canSwitchOrg = signal(false);
   currentTheme: Theme = 'dark';
   logoUrl: string | null = null;
@@ -47,10 +50,10 @@ export class Sidebar implements OnInit {
   private themeService = inject(ThemeService);
   private commonHttp = inject(CommonHttpService);
   private navigationService = inject(NavigationService);
+  private sidebarService = inject(SidebarService);
   availableThemes = this.themeService?.getAvailableThemes();
 
-  ngOnInit() {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.loadSidebarConfig();
     this.subscribeToTheme();
@@ -71,14 +74,6 @@ export class Sidebar implements OnInit {
       this.canSwitchOrg?.set(canSwitch);
       this.cdr?.detectChanges();
     });
-    const intervalId = setInterval(() => {
-      const userPermission = localStorage?.getItem('permissions');
-      const user: any = userPermission ? JSON?.parse(userPermission) : null;
-      if (user) {
-        this.isPermitted.set(true);
-        clearInterval(intervalId);
-      }
-    }, 100);
     // Only access localStorage in browser
     if (typeof window !== 'undefined' && window?.localStorage) {
       const storedClient = window?.localStorage?.getItem('client');
@@ -101,8 +96,7 @@ export class Sidebar implements OnInit {
         const organization = res?.data;
         this.canSwitchOrg?.set(false);
         this.str?.setItem(STORAGEENUMS?.CAN_SWITCH_ORG, false);
-        if (organization?.id) {
-          this.str?.setItem(STORAGEENUMS?.CLIENT_ID, organization.id);
+        if (organization) {
           this.str?.setItem(STORAGEENUMS?.ORGANIZATION_ID, organization.id);
           this.str?.setItem(STORAGEENUMS?.CLIENT, organization);
         }
@@ -186,37 +180,19 @@ export class Sidebar implements OnInit {
   }
 
   
-  //  setActiveMenuItem() {
-  //   if (!this.sidebarConfig) return;
+  isMobile(): boolean {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth <= 768; // Adjust threshold as needed
+  }
 
-  //   const currentRoute = this.router?.url;
-
-  //   // Create new objects to avoid mutation issues
-  //   this.sidebarConfig = {
-  //     ...this.sidebarConfig,
-  //     menuItems: this.sidebarConfig?.menuItems?.map((item) => ({
-  //       ...item,
-  //       active: item?.route === currentRoute,
-  //     })),
-  //     footerItems: this.sidebarConfig?.footerItems?.map((item) => ({
-  //       ...item,
-  //       active: item?.route === currentRoute,
-  //     })),
-  //   };
-  // }
-
-  // onMenuLabelClick(item: MenuItem) {
-  //   if (item?.route) {
-  //     this.router?.navigate([item?.route]);
-  //   }
-  // }
-
-  // toggleSubmenu(event: Event, item: MenuItem) {
-  //   event.stopPropagation();
-  //   if (item?.subItems && item?.subItems?.length > 0) {
-  //     this.openMenuId = this.openMenuId === item?.id ? null : item?.id;
-  //   }
-  // }
+  @HostListener('window:resize')
+  onResize() {
+    if (this.isMobile()) {
+      this.sidebarService.isOpen.set(false);
+    } else {
+      this.sidebarService.isOpen.set(true);
+    }
+  }
 
   toggleSubmenu(item: any) {
     if (this.openMenuId === item?.id) {
@@ -231,7 +207,11 @@ export class Sidebar implements OnInit {
     if (item.subItems?.length > 0) {
       this.toggleSubmenu(item);
     } else {
-      this.router?.navigate([item?.route]);
+      this.router?.navigate([item?.route])?.then(() => {
+        if (this.isMobile()) {
+          this.sidebarService.closeSidebar();
+        }
+      });
     }
   }
 
@@ -252,11 +232,9 @@ export class Sidebar implements OnInit {
 
     if (item?.route) {
       this.router?.navigate([item?.route])?.then(() => {
-        // Optional: close sidebar on mobile after navigation
-        // if (this.isMobile()) {
-        //   this.isCollapsed = true;
-        //   localStorage?.setItem('userCollapsed', 'true');
-        // }
+        if (this.isMobile()) {
+          this.sidebarService.closeSidebar();
+        }
       });
     }
   }
@@ -267,22 +245,6 @@ export class Sidebar implements OnInit {
     this.str?.logout();
     this.router?.navigate(['/login'])?.then(() => {});
   }
-
-  // toggleSidebar() {
-  //   this.isCollapsed = !this.isCollapsed;
-  //   if (this.isMobile())
-  //     localStorage.setItem('userCollapsed', this.isCollapsed?.toString());
-  // }
-
-  // @HostListener('window:resize')
-  // onResize() {
-  //   if (this.isMobile()) {
-  //     const savedState = localStorage?.getItem('userCollapsed');
-  //     this.isCollapsed = savedState === 'true' ? true : false;
-  //   } else {
-  //     this.isCollapsed = false; // Desktop always open
-  //   }
-  // }
 
   toggleThemeSelector() {
     this.showThemeSelector = !this.showThemeSelector;

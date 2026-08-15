@@ -8,21 +8,23 @@ export class StudentResultsController {
     async getStudentResults(req: FastifyRequest, reply: FastifyReply) {
         try {
             const { user_id } = req.params as { user_id: string };
-            const { client_id } = req.params as { client_id: string };
             const { page = 1, limit = 10, review_status } = req.query as {
                 page?: number;
                 limit?: number;
                 review_status?: string;
             };
 
-            if (!user_id || !client_id) {
-                throw new ValidationError("user_id and client_id are required");
+            const storeClientId = req.user?.organization_id;
+            if (!storeClientId) {
+                throw new UnauthorizedError("Tenant context missing");
+            }
+            if (!user_id) {
+                throw new ValidationError("user_id is required");
             }
 
-            const studentName = await resultsRepo.getStudentName(user_id, client_id);
+            const studentName = await resultsRepo.getStudentName(user_id);
             const result = await resultsRepo.getResultsByUserId(
                 user_id, 
-                client_id, 
                 Number(page), 
                 Number(limit),
                 review_status
@@ -42,19 +44,18 @@ export class StudentResultsController {
 
     async getAllResults(req: FastifyRequest, reply: FastifyReply) {
         try {
-            const { client_id } = req.params as { client_id: string };
             const { page = 1, limit = 10, review_status } = req.query as {
                 page?: number;
                 limit?: number;
                 review_status?: string;
             };
-
-            if (!client_id) {
-                throw new ValidationError("client_id is required");
+            
+            const storeClientId = req.user?.organization_id;
+            if (!storeClientId) {
+                throw new UnauthorizedError("Tenant context missing");
             }
 
             const result = await resultsRepo.getAllResults(
-                client_id, 
                 Number(page), 
                 Number(limit),
                 review_status
@@ -64,7 +65,7 @@ export class StudentResultsController {
             const userIds = [
                 ...new Set(result.data.map((r: any) => r.user_id).filter(Boolean)),
             ];
-            const nameMap = await resultsRepo.getStudentNamesBulk(userIds, client_id);
+            const nameMap = await resultsRepo.getStudentNamesBulk(userIds as string[]);
 
             const data = result.data.map((r: any) => ({
                 ...r,

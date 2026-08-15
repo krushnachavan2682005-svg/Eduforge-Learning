@@ -13,8 +13,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './student-review-test.scss',
 })
 export class StudentReviewTest {
-  user_id = '';
-  client_id = '';
+  user_id = '';
   exam_id: string = '';
   examData = signal<any>({});
   questions = signal<any[]>([]);
@@ -23,8 +22,7 @@ export class StudentReviewTest {
   selectedOptions = signal<string[]>([]);
   private route = inject(ActivatedRoute);
   private http = inject(CommonHttpService);
-  ngOnInit() {
-    this.client_id = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit() {
     this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
 
     this.route?.params?.subscribe((params: any) => {

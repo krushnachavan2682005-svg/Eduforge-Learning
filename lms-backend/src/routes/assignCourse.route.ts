@@ -7,8 +7,7 @@ import { verifyToken } from "../utils/auth";
 import { requirePermission } from "../middleware/rbac.middleware";
 
 const assignCourseController = new AssiginCourseController();
-type ClientParams = { client_id: string };
-type ClientIdParams = { client_id: string; id: string };
+
 type CreateCourseBody = Partial<AssignedCourseModel>;
 
 export default async function assignCourseRoutes(fastify: FastifyInstance) {

@@ -1,13 +1,18 @@
 import { Sequelize } from "sequelize";
 import { Section } from "../models/section.models";
 import { paginate } from "../utils/pagination";
+import { asyncLocalStorage as cls } from "../constants/request-context";
 
 export class sectionRepository {
   async getSection(page: number, limit: number, filters: Record<string, any>) {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    const finalFilters = { ...filters, organization_id: organizationId };
+    
     const data = await paginate(Section, {
       page: Number(page),
       limit: Number(limit),
-      filters,
+      filters: finalFilters,
       attributes: [
         "id",
         "title",
@@ -42,9 +47,12 @@ export class sectionRepository {
     return data;
   }
 
-  async getSectionById(client_id: string, id: string) {
+  async getSectionById(organizationId: string, id: string) {
+    const store = cls.getStore();
+    organizationId = store?.organizationId || organizationId;
+    
     return Section.findOne({
-      where: { client_id, id },
+      where: { organization_id: organizationId, id },
       attributes: [
         "title",
         "id",
@@ -72,17 +80,25 @@ export class sectionRepository {
   }
 
   async createSection(data: Partial<Section>) {
+    const store = cls.getStore();
+    if (store?.organizationId) {
+      data.organization_id = store.organizationId;
+    }
     return Section.create(data as any);
   }
 
   async updateSection(id: string, data: Partial<Section>) {
-    const lesson = await Section.findByPk(id);
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    const lesson = await Section.findOne({ where: { id, organization_id: organizationId } });
     if (!lesson) return null;
     return lesson.update(data);
   }
 
   async delete(id: string) {
-    const lesson = await Section.findByPk(id);
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    const lesson = await Section.findOne({ where: { id, organization_id: organizationId } });
     if (!lesson) return null;
     await lesson?.destroy();
     return lesson;

@@ -59,8 +59,7 @@ export class AssignActionItems implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.clientId = this.str?.getItem(STORAGEENUMS?.CLIENT_ID) || '';
+  ngOnInit(): void {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
     this.getClasses();
     this.loadActionItems();
@@ -70,8 +69,7 @@ export class AssignActionItems implements OnInit {
 
   classes: any[] = [];
 
-  loadActionItems() {
-    if (!this.clientId) return;
+  loadActionItems() {
     const endpoint = `/action-items`;
     this.commonHttp.getCourse(endpoint).subscribe({
       next: (res: any) => {

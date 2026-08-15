@@ -17,9 +17,9 @@ export class EnrollmentRepsitory {
     return data;
   }
 
-  async getEnrollmentById(client_id: string, id: string) {
+  async getEnrollmentById(organizationId: string, id: string) {
     return Enrollment.findOne({
-      where: { id, client_id },
+      where: { id, organization_id: organizationId },
       attributes: ["id", "enrolled_at", "course_id", "user_id", "created_at"],
     });
   }

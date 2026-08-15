@@ -9,7 +9,7 @@ export interface ReviewerObject {
 }
 export interface ActionItemsInterface {
   id?: string;
-  client_id: string;
+  organization_id: string;
   task_name?: string;
   total_score?: string;
   description?: string;

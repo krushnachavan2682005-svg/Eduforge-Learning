@@ -7,7 +7,7 @@ export class LevelRepository {
     // Check if level_name already exists for this client
     const existing = await Level.findOne({
       where: {
-        client_id: data.client_id,
+        organization_id: data.organization_id,
         level_name: data.level_name
       },
     });
@@ -31,9 +31,9 @@ export class LevelRepository {
     });
   }
 
-  async getLevelById(client_id: string, id: string) {
+  async getLevelById(organizationId: string, id: string) {
     return await Level.findOne({
-      where: { id, client_id },
+      where: { id, organization_id: organizationId },
     });
   }
 
@@ -44,7 +44,7 @@ export class LevelRepository {
       FROM assigned_action_items aai
       INNER JOIN action_items ai ON ai.id = ANY(aai.action_item_id)
       WHERE ai.level = :levelName
-        AND aai.client_id = :clientId
+        AND aai.organization_id = :clientId
         AND array_length(aai.user_id, 1) > 0
     `;
 
@@ -61,7 +61,7 @@ export class LevelRepository {
     if (!item) return null;
 
     // Check if level is assigned to users
-    const isAssigned = await this.isLevelAssignedToUsers(item.level_name, item.client_id);
+    const isAssigned = await this.isLevelAssignedToUsers(item.level_name, item.organization_id);
     if (isAssigned) {
       const error = new Error("Level cannot be updated because it is assigned to a user.");
       (error as any).statusCode = 403;
@@ -76,7 +76,7 @@ export class LevelRepository {
     if (!item) return null;
 
     // Check if level is assigned to users
-    const isAssigned = await this.isLevelAssignedToUsers(item.level_name, item.client_id);
+    const isAssigned = await this.isLevelAssignedToUsers(item.level_name, item.organization_id);
     if (isAssigned) {
       const error = new Error("Level cannot be deleted because it is assigned to a user.");
       (error as any).statusCode = 403;

@@ -6,10 +6,9 @@ import { ResumeInterface } from "..//interfaces/resumes.interface";
 const repository = new ResumeRepository();
 export class ResumeController {
   async createResume(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
       const body = req.body as ResumeInterface;
-      const data = { ...body, client_id };
+      const data = { ...body, organization_id: req.user?.organization_id as string };
       const record = await repository.createResume(data);
 
       return reply.code(201).send({

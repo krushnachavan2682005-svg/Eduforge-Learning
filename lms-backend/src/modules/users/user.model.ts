@@ -3,6 +3,7 @@ import { sequelize } from "../../config/database";
 
 export interface UserAttributes {
   id: string;
+  organization_id?: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -13,13 +14,14 @@ export interface UserAttributes {
 }
 
 export interface UserCreationAttributes
-  extends Optional<UserAttributes, "id" | "is_active" | "created_at" | "updated_at"> {}
+  extends Optional<UserAttributes, "id" | "organization_id" | "is_active" | "created_at" | "updated_at"> {}
 
 export class User
   extends Model<UserAttributes, UserCreationAttributes>
   implements UserAttributes
 {
   public id!: string;
+  public organization_id?: string;
   public first_name!: string;
   public last_name!: string;
   public email!: string;
@@ -35,6 +37,12 @@ User.init(
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
+    },
+    organization_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      references: { model: "organizations", key: "id" },
+      onDelete: "SET NULL",
     },
     first_name: {
       type: DataTypes.STRING(100),

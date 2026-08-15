@@ -1,4 +1,6 @@
 import { AsyncLocalStorage } from "async_hooks";
-     type QueryStore = {
-    queryCount: number;};
+export type QueryStore = {
+  queryCount: number;
+  organizationId?: string;
+};
 export const asyncLocalStorage = new AsyncLocalStorage<QueryStore>();

@@ -1,24 +1,27 @@
 import { QueryTypes } from "sequelize";
 import { sequelize } from "../config/database";
 import { StudentRepository } from "../modules/students/student.repository";
+import { asyncLocalStorage as cls } from "../constants/request-context";
 
 const studentRepository = new StudentRepository();
 
 export class StudentResultsRepository {
   async getResultsByUserId(
     user_id: string,
-    client_id: string,
     page: number = 1,
     limit: number = 10,
     review_status?: string
   ) {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    if (!organizationId) throw new Error("Tenant context missing");
     const offset = (page - 1) * limit;
 
     let whereClause = `WHERE eum.user_id = :user_id
-      AND eum.client_id = :client_id
+      AND eum.organization_id = :organizationId
       AND eum.is_completed = true`;
 
-    const replacements: any = { user_id, client_id, limit, offset };
+    const replacements: any = { user_id, organizationId, limit, offset };
 
     if (review_status === 'completed') {
       whereClause += ` AND eum.review_status = :review_status`;
@@ -82,17 +85,19 @@ END AS achieved_marks,
   }
 
   async getAllResults(
-    client_id: string,
     page: number = 1,
     limit: number = 10,
     review_status?: string
   ) {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    if (!organizationId) throw new Error("Tenant context missing");
     const offset = (page - 1) * limit;
 
-    let whereClause = `WHERE eum.client_id = :client_id
+    let whereClause = `WHERE eum.organization_id = :organizationId
       AND eum.is_completed = true`;
 
-    const replacements: any = { client_id, limit, offset };
+    const replacements: any = { organization_id: organizationId, limit, offset };
 
     if (review_status === 'completed') {
       whereClause += ` AND eum.review_status = :review_status`;
@@ -156,17 +161,22 @@ END AS achieved_marks,
     };
   }
 
-  async getStudentName(user_id: string, client_id: string): Promise<{ name: string; location: string; role: string }> {
-    const name = await studentRepository.getStudentDisplayName(client_id, user_id);
+  async getStudentName(user_id: string): Promise<{ name: string; location: string; role: string }> {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    if (!organizationId) throw new Error("Tenant context missing");
+    const name = await studentRepository.getStudentDisplayName(organizationId, user_id);
     return { name, location: "", role: "" };
   }
 
   async getStudentNamesBulk(
-    user_ids: string[],
-    client_id: string,
+    user_ids: string[]
   ): Promise<Record<string, string>> {
+    const store = cls.getStore();
+    const organizationId = store?.organizationId;
+    if (!organizationId) throw new Error("Tenant context missing");
     if (!user_ids.length) return {};
 
-    return studentRepository.getStudentNamesByUserIds(client_id, user_ids);
+    return studentRepository.getStudentNamesByUserIds(organizationId, user_ids);
   }
 }

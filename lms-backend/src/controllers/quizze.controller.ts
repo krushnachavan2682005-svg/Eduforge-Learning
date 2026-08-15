@@ -9,8 +9,8 @@ const QuizRepo = new QuizRepsitory();
 export class QuizController {
   async getQuizById(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { client_id, id } = req.params as { id: string; client_id: string };
-      const quiz = await QuizRepo.getQuizById(client_id, id);
+      const { organization_id, id } = req.params as { id: string; organization_id: string };
+      const quiz = await QuizRepo.getQuizById(req.user?.organization_id as string, id);
 
       if (!quiz) {
         return reply.code(200).send({ message: "Quiz not found" });
@@ -25,10 +25,9 @@ export class QuizController {
   }
 
   async createQuiz(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
       const body = req.body as QuizzeInterface;
-      const data = { ...body, client_id };
+      const data = { ...body, organization_id: req.user?.organization_id as string };
       const quiz = await QuizRepo.createQuiz(data);
       return reply.code(201).send({
         data: {
@@ -80,14 +79,13 @@ export class QuizController {
   }
 
   async getAllQuiz(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { client_id } = req.params as { client_id: string };
+    try {
       const { page, limit } = req.query as { page?: string; limit?: string };
 
       const quiz = await QuizRepo.getQuiz(
         Number(page),
         Number(limit),
-        { client_id }
+        { organization_id: req.user?.organization_id as string }
       );
 
       return reply.status(200).send(quiz);

@@ -1,5 +1,4 @@
 export enum STORAGEENUMS {
-  CLIENT_ID = 'client_id',
   CLIENT = 'client',
   IS_AUTHENTICATED = 'isAuthenticated',
   USER_EMAIL = 'userEmail',

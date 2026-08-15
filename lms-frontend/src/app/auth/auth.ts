@@ -62,8 +62,6 @@ export class Auth {
     }
     if (organization?.id) {
       this.str.setItem(STORAGEENUMS.ORGANIZATION_ID, organization.id);
-      // Temporary compatibility: existing LMS modules still read client_id.
-      this.str.setItem(STORAGEENUMS.CLIENT_ID, organization.id);
       this.str.setItem(STORAGEENUMS.CLIENT, organization);
     }
     if (role) {

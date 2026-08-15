@@ -85,8 +85,7 @@ export class StudentResult implements OnInit {
     },
   ];
 
-  ngOnInit() {
-    this.clientId = this.str.getItem(STORAGEENUMS.CLIENT_ID) || '';
+  ngOnInit() {
     if (this.clientId) {
       this.getAllResults();
     }
