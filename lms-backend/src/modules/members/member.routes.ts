@@ -14,7 +14,7 @@ export default async function memberRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/members",
     { schema: createMemberSchema, 
-      // preHandler: requirePermission("MEMBER_CREATE") 
+      preHandler: requirePermission("MEMBER_CREATE") 
     },
     (req, reply) => controller.create(req, reply),
   );

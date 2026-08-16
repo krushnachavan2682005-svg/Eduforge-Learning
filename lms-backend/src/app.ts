@@ -20,9 +20,7 @@ import { asyncLocalStorage as cls} from "./constants/request-context";
 export const buildApp = async () => {
   const app = Fastify({ logger: true });
   app.addHook("onRequest",(request,reply,done)=>{
-    cls.run({queryCount:0},()=>{
-      done()
-    })
+    cls.run({queryCount:0}, done);
   })
 app.addHook("onResponse",(request,reply,done)=>{
 const store=cls.getStore();
