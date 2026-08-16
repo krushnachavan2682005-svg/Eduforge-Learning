@@ -7,7 +7,7 @@ import S3_FOLDER from "../constants/s3-folder-constant";
 import { handleFileUpload } from "../utils/s3-upload-utility";
 import { ALLOWED_MIME_TYPES } from "../constants/mimeType";
 import { asyncLocalStorage as cls } from "../constants/request-context";
-
+import { lesson } from "../models/lesson.model";
 export class CourseRepository {
   // private fastify?: FastifyInstance;
   // static initialize: any;
@@ -20,15 +20,32 @@ export class CourseRepository {
     page: number,
     limit: number,
     filters?: Record<string, any>,
-    title?: string,
+    parsed_skipped_lesson?: boolean,
   ) {
     const store = cls.getStore();
     const organizationId = store?.organizationId;
-    const where: any = { ...filters, organization_id: organizationId };
+    console.log(`================${organizationId}=============`);
+    console.log(`================${store}=============`);
 
-    if (title) {
-      where.title = { [Op.iLike]: `%${title}%` };
+    const where: any = {
+      ...filters,
+      organization_id: organizationId,
+    };
+
+    const include: any[] = [];
+
+    if (parsed_skipped_lesson === true) {
+      include.push({
+        model: lesson,
+        as: "lessons",
+        where: {
+          seq_no: {
+            [Op.gt]: 1,
+          },
+        },
+      });
     }
+
     const result = await paginate(Course, {
       page: Number(page),
       limit: Number(limit),
@@ -46,21 +63,23 @@ export class CourseRepository {
 
         [
           sequelize.literal(`
-        (
-          SELECT COUNT(*)
-          FROM lessons
-          WHERE lessons.course_id = courses.id
-        )
-      `),
+          (
+            SELECT COUNT(*)
+            FROM lessons
+            WHERE lessons.course_id = "Course".id
+          )
+        `),
           "lessonCount",
         ],
       ] as any,
 
+      include,
+
       order: [["created_at", "DESC"]],
     });
+
     return result;
   }
-
 
   async getCourseById(organizationId: string, course_id: string) {
     const store = cls.getStore();
@@ -139,7 +158,9 @@ export class CourseRepository {
   async updateCourse(id: string, data: Partial<Course>) {
     const store = cls.getStore();
     const organizationId = store?.organizationId;
-    const course = await Course.findOne({ where: { id, organization_id: organizationId } });
+    const course = await Course.findOne({
+      where: { id, organization_id: organizationId },
+    });
     if (!course) return null;
     return course.update(data);
   }
@@ -147,7 +168,9 @@ export class CourseRepository {
   async deleteCourse(id: string) {
     const store = cls.getStore();
     const organizationId = store?.organizationId;
-    const course = await Course.findOne({ where: { id, organization_id: organizationId } });
+    const course = await Course.findOne({
+      where: { id, organization_id: organizationId },
+    });
     if (!course) return null;
     await course.destroy();
     return course;

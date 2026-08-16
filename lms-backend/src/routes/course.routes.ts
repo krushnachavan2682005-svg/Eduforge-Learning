@@ -22,8 +22,7 @@ export default async function courseRoutes(fastify: FastifyInstance) {
   );
 
   fastify.get("/all-courses", 
-    // { preHandler: verifyToken }
-    // ,
+    { preHandler: verifyToken },
      (req, reply) =>
     courseController.getAllCourses(req, reply)
   );

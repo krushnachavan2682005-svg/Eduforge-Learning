@@ -3,6 +3,8 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { CourseRepository } from "../repositories/course.repository";
 import { Course } from "../models/course.model";
 import { CourseInterface } from "../interfaces/course.interface";
+import { parse } from "path";
+import { Json } from "sequelize/types/utils";
 
 const courseRepo = new CourseRepository();
 
@@ -90,18 +92,20 @@ export class CourseController {
 
   async getAllCourses(req: FastifyRequest, reply: FastifyReply) {
     try {
-      // const { organization_id } = req.params as { organization_id: string };
-      const { page, limit, title } = (req.query || {}) as {
+      
+      const { page, limit, title ,skipFirstLesson} = (req.query || {}) as {
         page?: string;
         limit?: string;
         title?: string;
+        skipFirstLesson?: string
       };
-
+   const parsed_skipped_lesson: boolean = skipFirstLesson === "true";
       const courses = await courseRepo.getAllCourses(
         page ? Number(page) : 1,
         limit ? Number(limit) : 10,
         {},
-        title
+        // title,
+        parsed_skipped_lesson
       );
 
       return reply.status(200).send(courses);
