@@ -4,7 +4,7 @@ import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import fastifyMultipart from "@fastify/multipart";
 import s3Plugin from "./plugins/s3-upload-plugins";
-import publicExamRoutes from "./routes/publicExam.route";
+import publicExamRoutes from "./modules/exam/publicExam.routes";
 import jwtPlugin from "./plugins/jwt.plugin";
 import authRoutes from "./modules/auth/auth.routes";
 import userRoutes from "./modules/users/user.routes";

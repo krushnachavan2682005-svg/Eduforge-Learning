@@ -141,7 +141,7 @@ export class AddLesson implements OnChanges {
             this.selectedSection = null;
           },
           error: (err) => {
-            this.toastr.error(err?.error?.error, '', {
+            this.toastr.error(err?.error?.message || err?.error?.error || 'Failed to update lesson', '', {
               // closeButton: true,
               timeOut: 2000,
               progressBar: true,
@@ -164,7 +164,7 @@ export class AddLesson implements OnChanges {
             this.initializeLessonForm();
           },
           error: (err) => {
-            this.toastr?.error(err?.error?.error, '', {
+            this.toastr?.error(err?.error?.message || err?.error?.error || 'Failed to create lesson', '', {
               // closeButton: true,
               timeOut: 2000,
               progressBar: true,

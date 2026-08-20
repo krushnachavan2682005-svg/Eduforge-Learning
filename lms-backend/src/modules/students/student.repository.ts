@@ -5,7 +5,7 @@ import { LocalEnrollment, LocalEnrollmentStatus } from "./enrollment.model";
 import { Student } from "./student.model";
 import { OrganizationUser } from "../roles/role.model";
 import { User } from "../users/user.model";
-import { Course } from "../../models/course.model";
+import { Course } from "../course/course.model";
 
 type EnrollmentListFilters = {
   organizationId: string;
