@@ -1,21 +1,21 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import courseRoutes from "./course.routes";
-import sectionRoutes from "./section.routes";
-import lessonRoutes from "./lesson.routes";
-import enrollmentRoutes from "./enrollment.routes";
-import quizRoutes from "./quizze.routes";
-import reviewsRoutes from "./reviews.routes";
-import assignCourseRoutes from "./assignCourse.route";
-import completedAssignCourseRoutes from "./completedAssignCourse.routes";
-import resumeRoutes from "./resumes.route";
-import examRoutes from "./exam.routes";
-import actionItemsRoute from "./actionItems.route";
-import assignActionItemsRoutes from "./assignActionItems.route";
-import uploadRoutes from "./upload.routes";
+import courseRoutes from "../modules/course/course.routes";
+import sectionRoutes from "../modules/section/section.routes";
+import lessonRoutes from "../modules/lesson/lesson.routes";
+import enrollmentRoutes from "../modules/enrollment/enrollment.routes";
+import quizRoutes from "../modules/quizze/quizze.routes";
+import reviewsRoutes from "../modules/reviews/reviews.routes";
+import assignCourseRoutes from "../modules/assignCourse/assignCourse.routes";
+import completedAssignCourseRoutes from "../modules/completedAssignCourse/completedAssignCourse.routes";
+import resumeRoutes from "../modules/resumes/resumes.routes";
+import examRoutes from "../modules/exam/exam.routes";
+import actionItemsRoute from "../modules/actionItems/actionItems.routes";
+import assignActionItemsRoutes from "../modules/assignActionItems/assignActionItems.routes";
+import uploadRoutes from "../modules/upload/upload.routes";
 // import creditRoutes from "./credit.route";
-import levelRoute from "./level.route";
-import studentResultsRoutes from "./studentResults.route";
-import dashboardRoutes from "./dashboard.routes";
+import levelRoute from "../modules/level/level.routes";
+import studentResultsRoutes from "../modules/studentResults/studentResults.routes";
+import { dashboardRoutes } from "../modules/dashboard/dashboard.routes";
 
 export default async function routes(
   fastify: FastifyInstance,

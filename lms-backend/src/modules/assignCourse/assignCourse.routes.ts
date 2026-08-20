@@ -1,0 +1,31 @@
+import { FastifyInstance } from "fastify";
+import { AssiginCourseController } from "./assignCourse.controller";
+// import { AssiginCourseController } from "@src/controllers/assignCourse.controller";
+import { assignCourse } from "./assignCourse.schema";
+import { AssignedCourseModel } from "./assignCourse.model";
+import { verifyToken } from "../../utils/auth";
+import { requirePermission } from "../../middleware/rbac.middleware";
+
+const assignCourseController = new AssiginCourseController();
+
+type CreateCourseBody = Partial<AssignedCourseModel>;
+
+export default async function assignCourseRoutes(fastify: FastifyInstance) {
+  fastify.post(
+    "/assign-course",
+    { schema: assignCourse, preHandler: requirePermission("COURSE_ASSIGN") },
+    (req, reply) => assignCourseController.createAssiginCourse(req, reply)
+  );
+
+  fastify.get(
+    "/get-assigned-course-byuser/:user_id",
+    { preHandler: verifyToken },
+    (req, reply) => assignCourseController.getCourseByUserId(req, reply)
+  );
+
+  fastify.get(
+    "/get-course-by-id/:course_id",
+    { preHandler: verifyToken },
+    (req, reply) => assignCourseController.getCourse(req, reply)
+  );
+}
