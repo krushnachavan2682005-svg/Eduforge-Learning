@@ -1,26 +1,28 @@
 import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Section } from "./section.model";
-import { sectionRepository } from "./section.repository";
+import { SectionService } from "./section.service";
 import { SectionInterface } from "./section.interface";
 
-const sectionRep = new sectionRepository();
+const service = new SectionService();
 
 export class sectionController {
   async getAllSection(req: FastifyRequest, reply: FastifyReply) {
     try {
-      // client_id is safely extracted from context inside the repo
-      const { page, limit } = req.query as { page?: string; limit?: string };
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new UnauthorizedError("Tenant context missing");
+      const { page = "1", limit = "10" } = req.query as { page?: string; limit?: string };
 
-      const sections = await sectionRep.getSection(
-        Number(page),
-        Number(limit),
-        {}
+      const sections = await service.getAllSection(
+        organization_id,
+        page,
+        limit
       );
 
       return reply.status(200).send(sections);
     } catch (error) {
       req.log.error(error);
+      if (error instanceof UnauthorizedError) throw error;
       throw new InternalServerError("Failed to fetch sections");
     }
   }
@@ -28,8 +30,10 @@ export class sectionController {
   async getSectionById(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = req.params as { id: string };
-      // client_id is extracted inside the repo
-      const section = await sectionRep.getSectionById("", id);
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new UnauthorizedError("Tenant context missing");
+
+      const section = await service.getSectionById(organization_id, id);
 
       if (!section) {
         throw new NotFoundError("Section not found");
@@ -39,6 +43,7 @@ export class sectionController {
         .send({ data: section, message: "Section fetched successfully" });
     } catch (error) {
       req.log.error(error);
+      if (error instanceof UnauthorizedError || error instanceof NotFoundError) throw error;
       throw new InternalServerError("Failed to fetch section");
     }
   }
@@ -46,18 +51,19 @@ export class sectionController {
   async createSection(req: FastifyRequest, reply: FastifyReply) {
     try {
       const body = req.body as SectionInterface;
-      // client_id is injected inside the repository
-      const data = { ...body };
-      const section = await sectionRep.createSection(data);
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new UnauthorizedError("Tenant context missing");
+
+      const section = await service.createSection(organization_id, body);
+      
       return reply.code(201).send({
         data: { id: section?.id },
         message: "Section created successfully",
       });
     } catch (error) {
-      if (error instanceof Error && error.message.includes("already exists")) {
-        throw new ConflictError("Failed to create section");
+      if (error instanceof ConflictError || error instanceof UnauthorizedError) {
+        throw error;
       }
-
       req.log.error(error);
       throw new InternalServerError("Failed to create section");
     }
@@ -67,10 +73,10 @@ export class sectionController {
     try {
       const { id } = req.params as { id: string };
       const body = req.body as Partial<Section>;
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new UnauthorizedError("Tenant context missing");
 
-      // client_id is injected inside the repository
-      const updateData = { ...body };
-      const updated = await sectionRep.updateSection(id, updateData);
+      const updated = await service.updateSection(organization_id, id, body);
 
       if (!updated) {
         throw new NotFoundError("Section not found");
@@ -81,10 +87,9 @@ export class sectionController {
         message: "Section updated successfully",
       });
     } catch (error) {
-      if (error instanceof Error && error.message.includes("already exists")) {
-        throw new ConflictError("Failed to update section");
+      if (error instanceof ConflictError || error instanceof UnauthorizedError || error instanceof NotFoundError) {
+        throw error;
       }
-
       req.log.error(error);
       throw new InternalServerError("Failed to update section");
     }
@@ -93,15 +98,19 @@ export class sectionController {
   async deleteSection(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = req.params as { id: string };
-      const deleted = await sectionRep.delete(id);
+      const organization_id = req.user?.organization_id;
+      if (!organization_id) throw new UnauthorizedError("Tenant context missing");
+
+      const deleted = await service.deleteSection(organization_id, id);
 
       if (!deleted) {
-        throw new InternalServerError("Section not found");
+        throw new NotFoundError("Section not found");
       }
 
       return reply.send({ message: "Section deleted" });
     } catch (error) {
       req.log.error(error);
+      if (error instanceof UnauthorizedError || error instanceof NotFoundError) throw error;
       throw new InternalServerError("Failed to delete section");
     }
   }

@@ -1,8 +1,8 @@
 import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { StudentResultsRepository } from "./studentResults.repository";
+import { StudentResultsService } from "./studentResults.service";
 
-const resultsRepo = new StudentResultsRepository();
+const service = new StudentResultsService();
 
 export class StudentResultsController {
     async getStudentResults(req: FastifyRequest, reply: FastifyReply) {
@@ -22,22 +22,23 @@ export class StudentResultsController {
                 throw new ValidationError("user_id is required");
             }
 
-            const studentName = await resultsRepo.getStudentName(user_id);
-            const result = await resultsRepo.getResultsByUserId(
-                user_id, 
-                Number(page), 
+            const result = await service.getStudentResults(
+                storeClientId,
+                user_id,
+                Number(page),
                 Number(limit),
                 review_status
             );
 
             return reply.code(200).send({
-                studentName,
+                studentName: result.studentName,
                 data: result.data,
                 pagination: result.pagination,
                 message: "Student results fetched successfully",
             });
         } catch (error) {
             req.log.error(error);
+            if (error instanceof UnauthorizedError || error instanceof ValidationError) throw error;
             throw new InternalServerError("Failed to fetch student results");
         }
     }
@@ -55,30 +56,21 @@ export class StudentResultsController {
                 throw new UnauthorizedError("Tenant context missing");
             }
 
-            const result = await resultsRepo.getAllResults(
-                Number(page), 
+            const result = await service.getAllResults(
+                storeClientId,
+                Number(page),
                 Number(limit),
                 review_status
             );
 
-            // Fetch names in bulk for all unique users in these results
-            const userIds = [
-                ...new Set(result.data.map((r: any) => r.user_id).filter(Boolean)),
-            ];
-            const nameMap = await resultsRepo.getStudentNamesBulk(userIds as string[]);
-
-            const data = result.data.map((r: any) => ({
-                ...r,
-                studentName: nameMap[r.user_id] || "",
-            }));
-
             return reply.code(200).send({
-                data,
+                data: result.data,
                 pagination: result.pagination,
                 message: "All student results fetched successfully",
             });
         } catch (error) {
             req.log.error(error);
+            if (error instanceof UnauthorizedError) throw error;
             throw new InternalServerError("Failed to fetch all student results");
         }
     }

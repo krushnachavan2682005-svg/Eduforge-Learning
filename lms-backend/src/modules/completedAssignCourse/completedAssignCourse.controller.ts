@@ -1,56 +1,48 @@
-import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CompletedAssignCours } from "./completedAssignCourse.repository";
+import { CompletedAssignCourseService } from "./completedAssignCourse.service";
 import { ICompletedAssignCourse } from "./completedAssignCourse.interface";
 
-const repositorie = new CompletedAssignCours();
+const service = new CompletedAssignCourseService();
+
 export class CompletedAssignCourseController {
   async addCompletedAssignCourse(req: FastifyRequest, reply: FastifyReply) {
-    {
-      try {
-        const body = req.body as ICompletedAssignCourse;
-        const payload: ICompletedAssignCourse = {
-          ...body,
-        };
+    const organizationId = req.user?.organization_id as string;
+    const body = req.body as ICompletedAssignCourse;
+    const payload: ICompletedAssignCourse = {
+      ...body,
+    };
 
-        const data: any = await repositorie.saveCompletedAssignCourse(payload);
+    const data: any = await service.saveCompletedAssignCourse(organizationId, payload);
 
-        return reply.status(201).send({
-          success: true,
-          message: "Course completion successfully",
-          data: { id: data?.id },
-        });
-      } catch (error) {
-        throw new InternalServerError("Something went wrong");
-      }
-    }
+    return reply.status(201).send({
+      success: true,
+      message: "Course completion successfully",
+      data: { id: data?.id },
+    });
   }
 
   async getCompletedAssignCourse(req: FastifyRequest, reply: FastifyReply) {
-    try {
-      const { user_id, course_id } = req.params as {
-        user_id: string;
-        course_id: string;
-      };
+    const organizationId = req.user?.organization_id as string;
+    const { user_id, course_id } = req.params as {
+      user_id: string;
+      course_id: string;
+    };
 
-      const course = await repositorie.getCompletedAssignCourse(
-        user_id,
-        course_id
-      );
+    const course = await service.getCompletedAssignCourse(
+      organizationId,
+      user_id,
+      course_id
+    );
 
-      if (!course) {
-        return reply.code(200).send({
-          message: "Assigned course not found for this user",
-        });
-      }
-
+    if (!course) {
       return reply.code(200).send({
-        data: course,
-        message: "Course fetched successfully",
+        message: "Assigned course not found for this user",
       });
-    } catch (error) {
-      req.log.error(error);
-      throw new InternalServerError("Failed to fetch assigned course");
     }
+
+    return reply.code(200).send({
+      data: course,
+      message: "Course fetched successfully",
+    });
   }
 }

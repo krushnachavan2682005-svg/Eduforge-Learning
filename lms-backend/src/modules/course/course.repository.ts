@@ -2,31 +2,16 @@ import { Course } from "./course.model";
 import { paginate } from "../../utils/pagination";
 import { Op, QueryTypes } from "sequelize";
 import { sequelize } from "../../config/database";
-import { FastifyReply, FastifyInstance, FastifyRequest } from "fastify";
-import S3_FOLDER from "../../constants/s3-folder-constant";
-import { handleFileUpload } from "../../utils/s3-upload-utility";
-import { ALLOWED_MIME_TYPES } from "../../constants/mimeType";
-import { asyncLocalStorage as cls } from "../../constants/request-context";
 import { lesson } from "../lesson/lesson.model";
-export class CourseRepository {
-  // private fastify?: FastifyInstance;
-  // static initialize: any;
-  // initialize(fastify: FastifyInstance) {
-  //   this.fastify = fastify;
-  //   return this;
-  // }
 
+export class CourseRepository {
   async getAllCourses(
+    organizationId: string,
     page: number,
     limit: number,
     filters?: Record<string, any>,
     parsed_skipped_lesson?: boolean,
   ) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    console.log(`================${organizationId}=============`);
-    console.log(`================${store}=============`);
-
     const where: any = {
       ...filters,
       organization_id: organizationId,
@@ -82,8 +67,6 @@ export class CourseRepository {
   }
 
   async getCourseById(organizationId: string, course_id: string) {
-    const store = cls.getStore();
-    organizationId = store?.organizationId || organizationId;
     const sql = `
     SELECT jsonb_build_object(
       'id', c.id,
@@ -147,46 +130,29 @@ export class CourseRepository {
     });
   }
 
-  async createCourse(data: Partial<Course>) {
-    const store = cls.getStore();
-    if (store?.organizationId) {
-      data.organization_id = store.organizationId;
-    }
+  async createCourse(organizationId: string, data: Partial<Course>) {
+    data.organization_id = organizationId;
     return Course.create(data as any);
   }
 
-  async updateCourse(id: string, data: Partial<Course>) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    const course = await Course.findOne({
+  async findById(organizationId: string, id: string) {
+    return Course.findOne({
       where: { id, organization_id: organizationId },
     });
-    if (!course) return null;
+  }
+
+  async countCoursesByIds(organizationId: string, courseIds: string[]) {
+    return Course.count({
+      where: { id: { [Op.in]: courseIds }, organization_id: organizationId },
+    });
+  }
+
+  async updateCourse(course: any, data: Partial<Course>) {
     return course.update(data);
   }
 
-  async deleteCourse(id: string) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    const course = await Course.findOne({
-      where: { id, organization_id: organizationId },
-    });
-    if (!course) return null;
+  async deleteCourse(course: any) {
     await course.destroy();
     return course;
-  }
-
-  async uploadImage(req: FastifyRequest, organizationId: string, id: string) {
-    const store = cls.getStore();
-    organizationId = store?.organizationId || organizationId;
-    const folder = S3_FOLDER.COURSR_FOLDER(organizationId, id);
-
-    const result = await handleFileUpload(req, {
-      folder,
-      allowedTypes: ALLOWED_MIME_TYPES,
-      maxSize: 5 * 1024 * 1024,
-    });
-
-    return result;
   }
 }

@@ -1,15 +1,15 @@
 import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { ResumeRepository } from "./resumes.repository";
+import { ResumeService } from "./resumes.service";
 import { ResumeInterface } from "./resumes.interface";
 
-const repository = new ResumeRepository();
+const resumeService = new ResumeService();
 export class ResumeController {
   async createResume(req: FastifyRequest, reply: FastifyReply) {
-    try {
+    try {
       const body = req.body as ResumeInterface;
-      const data = { ...body, organization_id: req.user?.organization_id as string };
-      const record = await repository.createResume(data);
+      const organization_id = req.user?.organization_id as string;
+      const record = await resumeService.createResume(body, organization_id);
 
       return reply.code(201).send({
         data: record,
@@ -27,10 +27,7 @@ export class ResumeController {
       const { userId } = req.params as { userId: string };
       const body = req.body as ResumeInterface;
 
-      const record = await repository.updateResume(userId , body);
-      if (!record) {
-        throw new NotFoundError("Resume not found");
-      }
+      const record = await resumeService.updateResume(userId , body);
 
       return reply.code(200).send({
         data: record,
@@ -38,6 +35,7 @@ export class ResumeController {
       });
     } catch (error) {
       req.log.error(error);
+      if (error instanceof NotFoundError) throw error;
       throw new InternalServerError("Failed to update resume");
     }
   }
@@ -47,16 +45,15 @@ export class ResumeController {
   async getResumeByUserId(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { userId } = req.params as { userId: string };
-      const resume = await repository.getResumeByUserId(userId);
-      if (!resume) {
-        throw new NotFoundError("Resume not found for this user");
-      }
+      const resume = await resumeService.getResumeByUserId(userId);
+      
       return reply.code(200).send({
         data: resume,
         message: "Resume fetched successfully",
       });
     } catch (error) {
       req.log.error(error);
+      if (error instanceof NotFoundError) throw error;
       throw new InternalServerError("Failed to fetch resume");
     }
   }
@@ -65,18 +62,16 @@ export class ResumeController {
   async deleteResume(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = req.params as { id: string };
-      const deleted = await repository.deleteResume(id);
-
-      if (!deleted) {
-        throw new NotFoundError("Resume not found");
-      }
+      await resumeService.deleteResume(id);
 
       return reply.code(200).send({
         message: "Resume deleted successfully",
       });
     } catch (error) {
       req.log.error(error);
+      if (error instanceof NotFoundError) throw error;
       throw new InternalServerError("Failed to delete resume");
     }
   }
 }
+

@@ -32,4 +32,4 @@ AssignedCourseModel.init(
   }
 );
 
-AssignedCourseModel.belongsTo(Course, { foreignKey: "course_id" });
+AssignedCourseModel.belongsTo(Course, { foreignKey: "course_id", constraints: false });

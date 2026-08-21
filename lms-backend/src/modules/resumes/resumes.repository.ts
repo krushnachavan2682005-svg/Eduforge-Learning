@@ -22,7 +22,7 @@ export class ResumeRepository {
       where: { user_id: userId },
     });
 
-    return { message: "Resume updated successfully" };
+    return count;
   }
 
 

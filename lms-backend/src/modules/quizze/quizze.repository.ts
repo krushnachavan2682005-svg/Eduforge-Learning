@@ -4,14 +4,14 @@ import { paginate } from "../../utils/pagination";
 
 export class QuizRepsitory {
   async getQuiz(
+    organizationId: string,
     page: number,
-    limit: number,
-    filters: Record<string, any>
+    limit: number
   ) {
     const data = await paginate(Quiz, {
       page: Number(page),
       limit: Number(limit),
-      filters,
+      filters: { organization_id: organizationId },
       attributes: ["id",  "lesson_id", "question","options", "created_at"],
       order: [["created_at", "DESC"]],
     });
@@ -25,20 +25,22 @@ export class QuizRepsitory {
     });
   }
 
+  async findById(organizationId: string, id: string) {
+    return Quiz.findOne({
+      where: { id, organization_id: organizationId },
+    });
+  }
+
   async createQuiz(data: Partial<Quiz>) {
     return Quiz.create(data as any);
   }
 
-  async updateQuiz(id: string, data: Partial<Quiz>) {
-    const result = await Quiz.findByPk(id);
-    if (!result) return null;
-    return result.update(data);
+  async updateQuiz(quizInstance: any, data: Partial<Quiz>) {
+    return quizInstance.update(data);
   }
 
-  async deleteQuiz(id: string) {
-    const data = await Quiz.findByPk(id);
-    if (!data) return null;
-    await data.destroy();
-    return data;
+  async deleteQuiz(quizInstance: any) {
+    await quizInstance.destroy();
+    return quizInstance;
   }
 }
