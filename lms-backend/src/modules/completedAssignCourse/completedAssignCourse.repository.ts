@@ -1,29 +1,18 @@
 import CompletedAssignCourse from "./completedAssignCourse.model";
 import { sequelize } from "../../config/database";
 import { QueryTypes } from "sequelize";
-import { asyncLocalStorage as cls } from "../../constants/request-context";
-import { Course } from "../course/course.model";
 
 export class CompletedAssignCours {
-  async saveCompletedAssignCourse(data: any) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    if (organizationId) {
-      data.organization_id = organizationId;
-      if (data.course_id) {
-        const course = await Course.findOne({ where: { id: data.course_id, organization_id: organizationId } });
-        if (!course) throw new Error("Course not found or access denied");
-      }
-    }
+  async saveCompletedAssignCourse(organizationId: string, data: any) {
+    data.organization_id = organizationId;
     return await CompletedAssignCourse.create(data);
   }
 
   async getCompletedAssignCourse(
+    organizationId: string,
     user_id: string,
     course_id: string
   ) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
     const sql = `
     SELECT jsonb_build_object(
       'id', c.id,
@@ -107,7 +96,7 @@ export class CompletedAssignCours {
   `;
 
     const rows = await sequelize.query(sql, {
-      replacements: { user_id, course_id, organization_id: organizationId },
+      replacements: { user_id, course_id, organizationId },
       type: QueryTypes.SELECT,
     });
 

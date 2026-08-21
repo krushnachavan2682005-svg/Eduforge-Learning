@@ -1,65 +1,31 @@
 import { sequelize } from "../../config/database";
 import { AssignedCourseModel } from "./assignCourse.model";
-import { QueryTypes } from "sequelize";
-import { StudentRepository } from "../students/student.repository";
-import { asyncLocalStorage as cls } from "../../constants/request-context";
-import { Course } from "../course/course.model";
-
-const studentRepository = new StudentRepository();
+import { OrganizationUser } from "../roles/role.model";
+import { QueryTypes, Op } from "sequelize";
 
 export class AssiginCourseRepositorie {
   async createAssignCourse(data: Partial<AssignedCourseModel>) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    if (organizationId) {
-      data.organization_id = organizationId;
-      // Phase 6F: Validate that ALL course_ids belong to the current organization
-      if (data.course_id && data.course_id.length > 0) {
-        const count = await Course.count({ where: { id: data.course_id, organization_id: organizationId } });
-        if (count !== data.course_id.length) {
-          throw new Error("One or more courses do not belong to the current organization");
-        }
-      }
-    }
     return AssignedCourseModel.create(data as any);
   }
 
-  async getUsersByClassId(class_id: string, organizationId: string) {
-    const localUserIds = await studentRepository.getUserIdsByClassId(
-      organizationId,
-      class_id,
-    );
-
-    return localUserIds;
+  async findAllAssignedCourses(organizationId: string, userIds: string[]) {
+    return AssignedCourseModel.findAll({
+      where: { user_id: { [Op.overlap]: userIds }, organization_id: organizationId },
+    });
   }
 
-  async createLocalEnrollmentsForUserCourses(
-    organizationId: string,
-    userId: string,
-    courseIds: string[],
-  ) {
-    const student = await studentRepository.findStudentByUserId(
-      organizationId,
-      userId,
-    );
-
-    if (!student) return;
-
-    await Promise.all(
-      courseIds.map((courseId) =>
-        studentRepository.createEnrollment({
-          organization_id: organizationId,
-          student_id: student.id,
-          course_id: courseId,
-          status: "assigned",
-        }),
-      ),
-    );
+  async countValidMembers(organizationId: string, userIds: string[]) {
+    const validMembers = await OrganizationUser.findAll({
+      where: {
+        organization_id: organizationId,
+        user_id: { [Op.in]: userIds },
+        is_active: true
+      }
+    });
+    return validMembers.length;
   }
 
   async getCourseByUserId(organizationId: string, user_id: string) {
-    const store = cls.getStore();
-    organizationId = store?.organizationId || organizationId;
     return sequelize.query(
       `
     SELECT 
@@ -102,14 +68,13 @@ export class AssiginCourseRepositorie {
       AND :user_id = ANY(ac.user_id)
     `,
       {
-        replacements: { organization_id: organizationId, user_id },
+        replacements: { organizationId, user_id },
         type: QueryTypes.SELECT,
       }
     );
   }
+
   async getCourseById(organizationId: string, course_id: string) {
-    const store = cls.getStore();
-    organizationId = store?.organizationId || organizationId;
     const sql = `
     SELECT 
       jsonb_build_object(
@@ -152,7 +117,7 @@ export class AssiginCourseRepositorie {
   `;
 
     return await sequelize?.query(sql, {
-      replacements: { organization_id: organizationId, course_id },
+      replacements: { organizationId, course_id },
       type: QueryTypes?.SELECT,
     });
   }

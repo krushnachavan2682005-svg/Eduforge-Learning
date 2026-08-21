@@ -1,0 +1,1762 @@
+{
+  "modules": {
+    "actionItems": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "actionItems.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 148
+        },
+        {
+          "name": "actionItems.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 22
+        },
+        {
+          "name": "actionItems.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 61
+        },
+        {
+          "name": "actionItems.repository.ts",
+          "type": "repository",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": true,
+          "usesFastifyReply": false,
+          "rawSqlCount": 1,
+          "transactionCount": 0,
+          "lines": 177
+        },
+        {
+          "name": "actionItems.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 45
+        },
+        {
+          "name": "actionItems.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 24
+        }
+      ]
+    },
+    "ai-documents": {
+      "hasController": false,
+      "hasService": false,
+      "hasRepo": false,
+      "files": []
+    },
+    "assignActionItems": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "assignActionItems.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 787
+        },
+        {
+          "name": "assignActionItems.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 12
+        },
+        {
+          "name": "assignActionItems.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 85
+        },
+        {
+          "name": "assignActionItems.repository.ts",
+          "type": "repository",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": true,
+          "usesFastifyReply": false,
+          "rawSqlCount": 7,
+          "transactionCount": 0,
+          "lines": 334
+        },
+        {
+          "name": "assignActionItems.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 83
+        },
+        {
+          "name": "assignActionItems.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 168
+        },
+        {
+          "name": "assignedActionItemsTimeline.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 60
+        }
+      ]
+    },
+    "assignCourse": {
+      "hasController": true,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "assignCourse.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 63
+        },
+        {
+          "name": "assignCourse.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 9
+        },
+        {
+          "name": "assignCourse.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 36
+        },
+        {
+          "name": "assignCourse.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 1,
+          "transactionCount": 0,
+          "lines": 107
+        },
+        {
+          "name": "assignCourse.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 32
+        },
+        {
+          "name": "assignCourse.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 21
+        },
+        {
+          "name": "assignCourse.service.ts",
+          "type": "service",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 122
+        }
+      ]
+    },
+    "auth": {
+      "hasController": true,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "auth.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 140
+        },
+        {
+          "name": "auth.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 1,
+          "lines": 120
+        },
+        {
+          "name": "auth.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 25
+        },
+        {
+          "name": "auth.schemas.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 27
+        },
+        {
+          "name": "auth.service.ts",
+          "type": "service",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 196
+        }
+      ]
+    },
+    "completedAssignCourse": {
+      "hasController": true,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "completedAssignCourse.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 49
+        },
+        {
+          "name": "completedAssignCourse.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 9
+        },
+        {
+          "name": "completedAssignCourse.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 44
+        },
+        {
+          "name": "completedAssignCourse.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 1,
+          "transactionCount": 0,
+          "lines": 110
+        },
+        {
+          "name": "completedAssignCourse.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 23
+        },
+        {
+          "name": "completedAssignCourse.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 14
+        },
+        {
+          "name": "completedAssignCourse.service.ts",
+          "type": "service",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 27
+        }
+      ]
+    },
+    "course": {
+      "hasController": true,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "course.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 84
+        },
+        {
+          "name": "course.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 17
+        },
+        {
+          "name": "course.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 79
+        },
+        {
+          "name": "course.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 155
+        },
+        {
+          "name": "course.routes.ts",
+          "type": "other",
+          "importsRepo": true,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 80
+        },
+        {
+          "name": "course.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 45
+        },
+        {
+          "name": "course.service.ts",
+          "type": "service",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": true,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 94
+        }
+      ]
+    },
+    "dashboard": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "dashboard.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 127
+        },
+        {
+          "name": "dashboard.repository.ts",
+          "type": "repository",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": true,
+          "usesFastifyReply": false,
+          "rawSqlCount": 12,
+          "transactionCount": 0,
+          "lines": 387
+        },
+        {
+          "name": "dashboard.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 31
+        },
+        {
+          "name": "dashboard.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 20
+        }
+      ]
+    },
+    "enrollment": {
+      "hasController": true,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "enrollment.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 76
+        },
+        {
+          "name": "enrollment.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 6
+        },
+        {
+          "name": "enrollment.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 52
+        },
+        {
+          "name": "enrollment.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 44
+        },
+        {
+          "name": "enrollment.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 29
+        },
+        {
+          "name": "enrollment.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 14
+        },
+        {
+          "name": "enrollment.service.ts",
+          "type": "service",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 47
+        }
+      ]
+    },
+    "exam": {
+      "hasController": true,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "exam.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 789
+        },
+        {
+          "name": "exam.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 383
+        },
+        {
+          "name": "exam.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 858
+        },
+        {
+          "name": "exam.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": true,
+          "usesFastifyReply": false,
+          "rawSqlCount": 2,
+          "transactionCount": 6,
+          "lines": 855
+        },
+        {
+          "name": "exam.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 134
+        },
+        {
+          "name": "exam.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 481
+        },
+        {
+          "name": "exam.service.ts",
+          "type": "service",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 902
+        },
+        {
+          "name": "publicExam.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 31
+        }
+      ]
+    },
+    "lesson": {
+      "hasController": true,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "lesson.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 64
+        },
+        {
+          "name": "lesson.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 16
+        },
+        {
+          "name": "lesson.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 84
+        },
+        {
+          "name": "lesson.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 78
+        },
+        {
+          "name": "lesson.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 30
+        },
+        {
+          "name": "lesson.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 11
+        },
+        {
+          "name": "lesson.service.ts",
+          "type": "service",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": true,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 89
+        }
+      ]
+    },
+    "level": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "level.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 133
+        },
+        {
+          "name": "level.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 60
+        },
+        {
+          "name": "level.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 1,
+          "transactionCount": 0,
+          "lines": 90
+        },
+        {
+          "name": "level.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 39
+        },
+        {
+          "name": "level.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 12
+        }
+      ]
+    },
+    "members": {
+      "hasController": true,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "member.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 183
+        },
+        {
+          "name": "member.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 2,
+          "lines": 423
+        },
+        {
+          "name": "member.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 79
+        },
+        {
+          "name": "member.schemas.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 57
+        },
+        {
+          "name": "member.service.ts",
+          "type": "service",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 127
+        }
+      ]
+    },
+    "organizations": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": false,
+      "files": [
+        {
+          "name": "organization.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 49
+        },
+        {
+          "name": "organization.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 75
+        },
+        {
+          "name": "organization.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 12
+        }
+      ]
+    },
+    "quizze": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "quizze.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 98
+        },
+        {
+          "name": "quizze.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 7
+        },
+        {
+          "name": "quizze.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 56
+        },
+        {
+          "name": "quizze.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 45
+        },
+        {
+          "name": "quizze.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 30
+        },
+        {
+          "name": "quizze.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 17
+        }
+      ]
+    },
+    "rbac": {
+      "hasController": false,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "permission.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 72
+        },
+        {
+          "name": "permission.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 25
+        },
+        {
+          "name": "rbac.seed.ts",
+          "type": "other",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 148
+        },
+        {
+          "name": "rbac.service.ts",
+          "type": "service",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 86
+        },
+        {
+          "name": "role-permission.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 84
+        },
+        {
+          "name": "role.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 93
+        },
+        {
+          "name": "role.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 93
+        },
+        {
+          "name": "user-role.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 95
+        }
+      ]
+    },
+    "resumes": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "resumes.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 83
+        },
+        {
+          "name": "resumes.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 26
+        },
+        {
+          "name": "resumes.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 77
+        },
+        {
+          "name": "resumes.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 1,
+          "transactionCount": 0,
+          "lines": 70
+        },
+        {
+          "name": "resumes.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 28
+        },
+        {
+          "name": "resumes.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 95
+        }
+      ]
+    },
+    "reviews": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "reviews.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 92
+        },
+        {
+          "name": "reviews.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 10
+        },
+        {
+          "name": "reviews.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 72
+        },
+        {
+          "name": "reviews.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 49
+        },
+        {
+          "name": "reviews.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 28
+        },
+        {
+          "name": "reviews.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 25
+        }
+      ]
+    },
+    "roles": {
+      "hasController": false,
+      "hasService": false,
+      "hasRepo": false,
+      "files": [
+        {
+          "name": "role.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 101
+        }
+      ]
+    },
+    "section": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "section.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 109
+        },
+        {
+          "name": "section.interface.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 7
+        },
+        {
+          "name": "section.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 101
+        },
+        {
+          "name": "section.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": true,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 107
+        },
+        {
+          "name": "section.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 30
+        },
+        {
+          "name": "section.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 47
+        }
+      ]
+    },
+    "sessions": {
+      "hasController": false,
+      "hasService": false,
+      "hasRepo": false,
+      "files": [
+        {
+          "name": "session.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 86
+        }
+      ]
+    },
+    "studentResults": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "studentResults.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 86
+        },
+        {
+          "name": "studentResults.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 85
+        },
+        {
+          "name": "studentResults.repository.ts",
+          "type": "repository",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": true,
+          "usesFastifyReply": false,
+          "rawSqlCount": 2,
+          "transactionCount": 0,
+          "lines": 183
+        },
+        {
+          "name": "studentResults.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 57
+        }
+      ]
+    },
+    "students": {
+      "hasController": true,
+      "hasService": true,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "class-student.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 78
+        },
+        {
+          "name": "class.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 74
+        },
+        {
+          "name": "enrollment.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 107
+        },
+        {
+          "name": "student.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 106
+        },
+        {
+          "name": "student.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 97
+        },
+        {
+          "name": "student.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 373
+        },
+        {
+          "name": "student.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 65
+        },
+        {
+          "name": "student.service.ts",
+          "type": "service",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 162
+        }
+      ]
+    },
+    "upload": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "upload.controller.ts",
+          "type": "controller",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 51
+        },
+        {
+          "name": "upload.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 54
+        },
+        {
+          "name": "upload.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 14
+        },
+        {
+          "name": "upload.schema.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 15
+        }
+      ]
+    },
+    "users": {
+      "hasController": true,
+      "hasService": false,
+      "hasRepo": true,
+      "files": [
+        {
+          "name": "user.controller.ts",
+          "type": "controller",
+          "importsRepo": true,
+          "instantiatesRepo": true,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": true,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 56
+        },
+        {
+          "name": "user.model.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 96
+        },
+        {
+          "name": "user.repository.ts",
+          "type": "repository",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 17
+        },
+        {
+          "name": "user.routes.ts",
+          "type": "other",
+          "importsRepo": false,
+          "instantiatesRepo": false,
+          "importsModel": false,
+          "usesALS": false,
+          "usesFastifyReply": false,
+          "rawSqlCount": 0,
+          "transactionCount": 0,
+          "lines": 12
+        }
+      ]
+    }
+  }
+}

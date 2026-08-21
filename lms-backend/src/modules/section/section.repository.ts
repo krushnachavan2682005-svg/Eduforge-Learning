@@ -1,13 +1,10 @@
 import { Sequelize } from "sequelize";
 import { Section } from "./section.model";
 import { paginate } from "../../utils/pagination";
-import { asyncLocalStorage as cls } from "../../constants/request-context";
 
 export class sectionRepository {
-  async getSection(page: number, limit: number, filters: Record<string, any>) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    const finalFilters = { ...filters, organization_id: organizationId };
+  async getSection(organizationId: string, page: number, limit: number) {
+    const finalFilters = { organization_id: organizationId };
     
     const data = await paginate(Section, {
       page: Number(page),
@@ -48,9 +45,6 @@ export class sectionRepository {
   }
 
   async getSectionById(organizationId: string, id: string) {
-    const store = cls.getStore();
-    organizationId = store?.organizationId || organizationId;
-    
     return Section.findOne({
       where: { organization_id: organizationId, id },
       attributes: [
@@ -79,25 +73,18 @@ export class sectionRepository {
     });
   }
 
-  async createSection(data: Partial<Section>) {
-    const store = cls.getStore();
-    if (store?.organizationId) {
-      data.organization_id = store.organizationId;
-    }
+  async createSection(organizationId: string, data: Partial<Section>) {
+    data.organization_id = organizationId;
     return Section.create(data as any);
   }
 
-  async updateSection(id: string, data: Partial<Section>) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
+  async updateSection(organizationId: string, id: string, data: Partial<Section>) {
     const lesson = await Section.findOne({ where: { id, organization_id: organizationId } });
     if (!lesson) return null;
     return lesson.update(data);
   }
 
-  async delete(id: string) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
+  async delete(organizationId: string, id: string) {
     const lesson = await Section.findOne({ where: { id, organization_id: organizationId } });
     if (!lesson) return null;
     await lesson?.destroy();

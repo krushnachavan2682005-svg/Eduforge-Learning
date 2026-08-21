@@ -1,15 +1,16 @@
 import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { ReviewsRepository } from "./reviews.repository";
+import { ReviewsService } from "./reviews.service";
 import { ReviewsInterface } from "./reviews.interface";
 import { Reviews } from "./reviews.model";
-const reviewRepo = new ReviewsRepository();
+
+const reviewsService = new ReviewsService();
 
 export class ReviewsController {
   async getReview(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = req.params as { id: string };
-      const review = await reviewRepo.getReviewById(id);
+      const review = await reviewsService.getReviewById(id);
       return reply
         .code(200)
         .send({ data: review, message: "Review fetched successfully" });
@@ -21,9 +22,9 @@ export class ReviewsController {
 
   async createReview(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const body = req.body as ReviewsInterface;
-      const data = { ...body, organization_id: req.user?.organization_id as string };
-      const review = await reviewRepo.createReview(data);
+      const body = req.body as ReviewsInterface;
+      const organization_id = req.user?.organization_id as string;
+      const review = await reviewsService.createReview(body, organization_id);
       return reply.code(201).send({
         data: { id: review?.id },
         message: "Review created successfully",
@@ -39,7 +40,7 @@ export class ReviewsController {
       const { id } = req.params as { id: string };
       const body = req.body as Partial<ReviewsInterface>;
 
-      const updated = await reviewRepo.updateReview(id, body);
+      const updated = await reviewsService.updateReview(id, body);
 
       if (!updated) {
         return reply.code(200).send({ message: "Review not found" });
@@ -58,7 +59,7 @@ export class ReviewsController {
   async deleteReview(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { id } = req.params as { id: string };
-      const deleted = await reviewRepo.deleteReview(id);
+      const deleted = await reviewsService.deleteReview(id);
 
       if (!deleted) {
         throw new NotFoundError("Review not found");
@@ -67,19 +68,20 @@ export class ReviewsController {
       return reply.send({ message: "Review deleted" });
     } catch (error) {
       req.log.error(error);
+      if (error instanceof NotFoundError) throw error;
       throw new InternalServerError("Failed to delete review");
     }
   }
 
-
   async getAllReviews(req: FastifyRequest, reply: FastifyReply) {
-    try {
+    try {
       const { page, limit } = req.query as { page?: string; limit?: string };
+      const organization_id = req.user?.organization_id as string;
 
-      const reviews = await reviewRepo.getAllReviews(
+      const reviews = await reviewsService.getAllReviews(
         Number(page),
         Number(limit),
-        { organization_id: req.user?.organization_id as string }
+        organization_id
       );
 
       return reply.status(200).send(reviews);

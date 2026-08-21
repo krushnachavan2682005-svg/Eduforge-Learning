@@ -28,16 +28,16 @@ export class EnrollmentRepsitory {
     return Enrollment.create(data as any);
   }
 
-  async updateEnrollment(id: string, data: Partial<Enrollment>) {
-    const result = await Enrollment.findByPk(id);
-    if (!result) return null;
-    return result.update(data);
+  async findById(organizationId: string, id: string) {
+    return Enrollment.findOne({ where: { id, organization_id: organizationId } });
   }
 
-  async deleteEnrollment(id: string) {
-    const data = await Enrollment.findByPk(id);
-    if (!data) return null;
-    await data.destroy();
-    return data;
+  async updateEnrollment(enrollment: any, data: Partial<Enrollment>) {
+    return enrollment.update(data);
+  }
+
+  async deleteEnrollment(enrollment: any) {
+    await enrollment.destroy();
+    return enrollment;
   }
 }

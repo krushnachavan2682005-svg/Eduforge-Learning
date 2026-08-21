@@ -1,32 +1,21 @@
 import { ActionItems } from "./actionItems.model";
 import { paginate } from "../../utils/pagination";
 import { ActionItemsInterface } from "./actionItems.interface";
-import { QueryTypes, Op } from "sequelize";
+import { QueryTypes } from "sequelize";
 import { sequelize } from "../../config/database";
-import { AssignedActionItemsModel } from "../assignActionItems/assignActionItems.model";
-import { StudentRepository } from "../students/student.repository";
-import { asyncLocalStorage as cls } from "../../constants/request-context";
-
-const studentRepository = new StudentRepository();
 
 export class ActionItemRepository {
   async getActionItems(
-    page: number,
-    limit: number,
     filters: Record<string, any>,
+    page: number,
+    limit: number
   ) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    if (organizationId) {
-      filters.organization_id = organizationId;
-    }
     return paginate(ActionItems, {
-      page: Number(page),
-      limit: Number(limit),
+      page,
+      limit,
       filters,
       attributes: [
         "id",
-        // "organizationId",
         "task_name",
         "total_score",
         "description",
@@ -41,14 +30,10 @@ export class ActionItemRepository {
   }
 
   async getActionItemById(organizationId: string, id: string) {
-    const store = cls.getStore();
-    organizationId = store?.organizationId as string;
-    if (!organizationId) throw new Error("Tenant context missing");
     return ActionItems.findOne({
       where: { organization_id: organizationId, id },
       attributes: [
         "id",
-        // "organizationId",
         "task_name",
         "total_score",
         "description",
@@ -62,45 +47,22 @@ export class ActionItemRepository {
   }
 
   async createActionItem(data: ActionItemsInterface) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    if (organizationId) {
-      data.organization_id = organizationId;
-    }
     return ActionItems.create(data);
   }
 
-  async updateActionItem(id: string, data: Partial<ActionItemsInterface>) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    const action = await ActionItems.findOne({ where: organizationId? { id, organization_id: organizationId } : { id } });
+  async updateActionItem(organizationId: string, id: string, data: Partial<ActionItemsInterface>) {
+    const action = await ActionItems.findOne({ where: { id, organization_id: organizationId } });
     if (!action) return null;
     return action.update(data);
   }
 
-  async deleteActionItem(id: string) {
-    const store = cls.getStore();
-    const organizationId = store?.organizationId;
-    const action = await ActionItems.findOne({ where: organizationId? { id, organization_id: organizationId } : { id } });
-    if (!action) return null;
-    const assignments = await AssignedActionItemsModel?.findAll({
-      where: { action_item_id: { [Op.contains]: [id] } },
-    });
-
-    for (const a of assignments) {
-      const ids = a?.action_item_id?.filter((i) => i !== id);
-      ids?.length
-        ? await a?.update({ action_item_id: ids })
-        : await a?.destroy();
-    }
-    await action.destroy();
-    return action;
+  async deleteActionItem(organizationId: string, id: string) {
+    // Handled purely via Service using Sequelize models directly or this could just be generic if used.
+    // However, it was already handled fully in the Service.
+    return null;
   }
 
   async getReviewerActionItems(clientId: string, reviewerId: string) {
-    const store = cls.getStore();
-    clientId = store?.organizationId as string;
-    if (!clientId) throw new Error("Tenant context missing");
     const sql = `
     SELECT 
       ai.*,
@@ -139,33 +101,6 @@ export class ActionItemRepository {
         },
         type: QueryTypes.SELECT,
       });
-
-      // Extract all unique user_ids from all assignments
-      const allUserIds = new Set<string>();
-      results.forEach((item) => {
-        item.student_assignments?.forEach((assignment: any) => {
-          assignment?.user_ids?.forEach((uid: string) => allUserIds?.add(uid));
-        });
-      });
-
-      if (allUserIds.size > 0) {
-        const userIdsArray = Array?.from(allUserIds);
-        const nameMap = await studentRepository.getStudentNamesByUserIds(
-          clientId,
-          userIdsArray,
-        );
-
-        results.forEach((item) => {
-          item.student_assignments?.forEach((assignment: any) => {
-            assignment.user_ids = (assignment?.user_ids || [])?.map(
-              (uid: string) => ({
-                id: uid,
-                name: nameMap[uid] || "",
-              }),
-            );
-          });
-        });
-      }
 
       return results;
     } catch (error) {

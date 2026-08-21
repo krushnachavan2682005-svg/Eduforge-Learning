@@ -2,12 +2,6 @@ import { Reviews } from "./reviews.model";
 import { paginate } from "../../utils/pagination";
 
 export class ReviewsRepository {
-  findAll() {
-      throw new Error("Method not implemented.");
-  }
-  findById(arg0: string) {
-      throw new Error("Method not implemented.");
-  }
   async getAllReviews(
     page: number,
     limit: number,
@@ -21,6 +15,7 @@ export class ReviewsRepository {
       order: [["created_at", "DESC"]],
     });
   }
+  
   async getReviewById(id: string) {
     return Reviews.findOne({
       where: { id },
@@ -28,20 +23,19 @@ export class ReviewsRepository {
     });
   }
 
+  async findById(id: string) {
+    return Reviews.findByPk(id);
+  }
+
   async createReview(data: Partial<Reviews>) {
     return Reviews.create(data as any);
   }
 
-
-  async updateReview(id: string, data: Partial<Reviews>) {
-    const review = await Reviews.findByPk(id);
-    if (!review) return null;
+  async updateReview(review: any, data: Partial<Reviews>) {
     return review.update(data);
   }
 
-  async deleteReview(id: string) {
-    const review = await Reviews.findByPk(id);
-    if (!review) return null;
+  async deleteReview(review: any) {
     await review.destroy();
     return review;
   }

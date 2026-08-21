@@ -3,9 +3,6 @@ import { ClassStudent } from "./class-student.model";
 import { StudentClass } from "./class.model";
 import { LocalEnrollment, LocalEnrollmentStatus } from "./enrollment.model";
 import { Student } from "./student.model";
-import { OrganizationUser } from "../roles/role.model";
-import { User } from "../users/user.model";
-import { Course } from "../course/course.model";
 
 type EnrollmentListFilters = {
   organizationId: string;
@@ -27,18 +24,6 @@ export class StudentRepository {
     status?: "active" | "inactive";
   }) {
     return Student.create(data);
-  }
-
-  async userBelongsToOrganization(organizationId: string, userId: string) {
-    const membership = await OrganizationUser.findOne({
-      where: {
-        organization_id: organizationId,
-        user_id: userId,
-        is_active: true,
-      },
-    });
-
-    return Boolean(membership);
   }
 
   async listStudents(organizationId: string) {
@@ -75,10 +60,11 @@ export class StudentRepository {
   }
 
   async getClassDetail(organizationId: string, classId: string) {
-    const studentClass = await this.getClassById(organizationId, classId);
-    if (!studentClass) return null;
-
-    const studentCount = await ClassStudent.count({
+    return this.getClassById(organizationId, classId);
+  }
+  
+  async getStudentCountByClassId(organizationId: string, classId: string) {
+    return ClassStudent.count({
       where: { class_id: classId },
       include: [
         {
@@ -90,11 +76,6 @@ export class StudentRepository {
         },
       ],
     });
-
-    return {
-      ...studentClass.toJSON(),
-      student_count: studentCount,
-    };
   }
 
   async addStudentToClass(classId: string, studentId: string) {
@@ -106,10 +87,7 @@ export class StudentRepository {
   }
 
   async getStudentsByClassId(organizationId: string, classId: string) {
-    const studentClass = await this.getClassById(organizationId, classId);
-    if (!studentClass) return null;
-
-    const mappings = await ClassStudent.findAll({
+    return ClassStudent.findAll({
       where: { class_id: classId },
       include: [
         {
@@ -121,38 +99,6 @@ export class StudentRepository {
       ],
       order: [["created_at", "DESC"]],
     });
-
-    return mappings
-      .map((mapping: any) => mapping.student)
-      .filter(Boolean)
-      .map((student: Student) => ({
-        id: student.id,
-        user_id: student.user_id,
-        first_name: student.first_name,
-        last_name: student.last_name,
-        email: student.email,
-        phone: student.phone,
-        status: student.status,
-      }));
-  }
-
-  async removeStudentFromClass(
-    organizationId: string,
-    classId: string,
-    studentId: string,
-  ) {
-    const [studentClass, student] = await Promise.all([
-      this.getClassById(organizationId, classId),
-      this.getStudentById(organizationId, studentId),
-    ]);
-
-    if (!studentClass || !student) return null;
-
-    const deleted = await ClassStudent.destroy({
-      where: { class_id: classId, student_id: studentId },
-    });
-
-    return { deleted };
   }
 
   async getUserIdsByClassId(organizationId: string, classId: string) {
@@ -173,10 +119,47 @@ export class StudentRepository {
       .filter(Boolean);
   }
 
+  async removeStudentFromClass(classId: string, studentId: string) {
+    const deleted = await ClassStudent.destroy({
+      where: { class_id: classId, student_id: studentId },
+    });
+
+    return { deleted };
+  }
+
   async findStudentByUserId(organizationId: string, userId: string) {
     return Student.findOne({
       where: { organization_id: organizationId, user_id: userId },
     });
+  }
+
+  async getStudentDisplayName(organizationId: string, userId: string) {
+    const student = await Student.findOne({
+      where: { organization_id: organizationId, user_id: userId },
+    });
+
+    if (student) {
+      return [student.first_name, student.last_name].filter(Boolean).join(" ");
+    }
+    return "";
+  }
+
+  async getStudentNamesByUserIds(organizationId: string, userIds: string[]) {
+    if (!userIds.length) return {};
+
+    const students = await Student.findAll({
+      where: { organization_id: organizationId, user_id: { [Op.in]: userIds } },
+    });
+
+    const names: Record<string, string> = {};
+
+    students.forEach((student) => {
+      names[student.user_id] = [student.first_name, student.last_name]
+        .filter(Boolean)
+        .join(" ");
+    });
+
+    return names;
   }
 
   async createEnrollment(data: {
@@ -203,12 +186,11 @@ export class StudentRepository {
   }
 
   async getEnrollmentsByStudent(organizationId: string, studentId: string) {
-    const enrollments = await LocalEnrollment.findAll({
+    return LocalEnrollment.findAll({
       where: { organization_id: organizationId, student_id: studentId },
       order: [["enrolled_at", "DESC"]],
       include: [{ model: Student, as: "student" }],
     });
-    return this.attachCourseSummaries(organizationId, enrollments);
   }
 
   async listEnrollments(filters: EnrollmentListFilters) {
@@ -251,38 +233,23 @@ export class StudentRepository {
       distinct: true,
     });
 
-    const data = await this.attachCourseSummaries(filters.organizationId, rows);
-
     return {
-      data,
-      meta: {
-        page: filters.page,
-        limit: filters.limit,
-        total: count,
-        total_pages: Math.ceil(count / filters.limit),
-      },
+      data: rows,
+      count,
     };
   }
 
   async getEnrollmentById(organizationId: string, enrollmentId: string) {
-    const enrollment = await LocalEnrollment.findOne({
+    return LocalEnrollment.findOne({
       where: { id: enrollmentId, organization_id: organizationId },
       include: [{ model: Student, as: "student" }],
     });
-
-    if (!enrollment) return null;
-
-    const [serialized] = await this.attachCourseSummaries(organizationId, [
-      enrollment,
-    ]);
-
-    return serialized || null;
   }
 
-  async updateEnrollmentStatus(
+  async updateEnrollment(
     organizationId: string,
     enrollmentId: string,
-    status: LocalEnrollmentStatus,
+    data: any,
   ) {
     const enrollment = await LocalEnrollment.findOne({
       where: { id: enrollmentId, organization_id: organizationId },
@@ -290,11 +257,8 @@ export class StudentRepository {
 
     if (!enrollment) return null;
 
-    enrollment.status = status;
-    enrollment.completed_at = status === "completed" ? new Date() : null;
-    await enrollment.save();
-
-    return this.getEnrollmentById(organizationId, enrollmentId);
+    await enrollment.update(data);
+    return enrollment;
   }
 
   async getDashboardCounts(organizationId: string) {
@@ -312,74 +276,5 @@ export class StudentRepository {
       completed_courses: completedCourses,
       pending_courses: Math.max(assignedCourses - completedCourses, 0),
     };
-  }
-
-  async getStudentDisplayName(organizationId: string, userId: string) {
-    const student = await Student.findOne({
-      where: { organization_id: organizationId, user_id: userId },
-    });
-
-    if (student) {
-      return [student.first_name, student.last_name].filter(Boolean).join(" ");
-    }
-
-    const user = await User.findOne({ where: { id: userId, organization_id: organizationId } });
-    if (!user) return "";
-
-    return [user.first_name, user.last_name].filter(Boolean).join(" ");
-  }
-
-  async getStudentNamesByUserIds(organizationId: string, userIds: string[]) {
-    if (!userIds.length) return {};
-
-    const [students, users] = await Promise.all([
-      Student.findAll({
-        where: { organization_id: organizationId, user_id: { [Op.in]: userIds } },
-      }),
-      User.findAll({ where: { id: { [Op.in]: userIds }, organization_id: organizationId } }),
-    ]);
-
-    const names: Record<string, string> = {};
-
-    users.forEach((user) => {
-      names[user.id] = [user.first_name, user.last_name].filter(Boolean).join(" ");
-    });
-
-    students.forEach((student) => {
-      names[student.user_id] = [student.first_name, student.last_name]
-        .filter(Boolean)
-        .join(" ");
-    });
-
-    return names;
-  }
-
-  private async attachCourseSummaries(
-    organizationId: string,
-    enrollments: LocalEnrollment[],
-  ) {
-    const serialized = enrollments.map((enrollment: any) => enrollment.toJSON());
-    const courseIds = Array.from(
-      new Set(serialized.map((enrollment) => enrollment.course_id).filter(Boolean)),
-    );
-
-    if (!courseIds.length) return serialized;
-
-    const courses = await Course.findAll({
-      where: {
-        id: { [Op.in]: courseIds },
-        organization_id: organizationId,
-      },
-      attributes: ["id", "title", "description", "level", "is_published"],
-    });
-
-    const courseById = new Map(
-      courses.map((course: any) => [course.id, course.toJSON()]),
-    );
-
-    return serialized.map((enrollment) => ({
-      ...enrollment,
-      course: courseById.get(enrollment.course_id) || null,
-    }));
   }
 }

@@ -1,85 +1,33 @@
 
 import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
-import { DashboardRepository } from "./dashboard.repository";
-
+import { DashboardService } from "./dashboard.service";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { AuthRepository } from "../auth/auth.repository";
-import { StudentRepository } from "../students/student.repository";
 
-const authRepository = new AuthRepository();
-const studentRepository = new StudentRepository();
+const dashboardService = new DashboardService();
 
 export class LocalDashboardController {
   async me(req: FastifyRequest, reply: FastifyReply) {
     try {
-      if (!req.user) {
-        return reply.code(401).send({
-          success: false,
-          message: "Authentication required",
-        });
+      if (!req.user || !req.user.organization_id) {
+        throw new UnauthorizedError("Tenant context missing");
       }
 
-      const membership = await authRepository.findUserContext(
+      const data = await dashboardService.getMeDashboard(
         req.user.sub,
-        req.user.organization_id,
-      );
-
-      if (!membership) {
-        return reply.code(404).send({
-          success: false,
-          message: "Dashboard context was not found",
-        });
-      }
-
-      const user = (membership as any).user;
-      const organization = (membership as any).organization;
-      const name = [user.first_name, user.last_name].filter(Boolean).join(" ");
-      const counts = await studentRepository.getDashboardCounts(
-        req.user.organization_id,
+        req.user.organization_id
       );
 
       return reply.code(200).send({
         success: true,
-        data: {
-          profile: {
-            id: user.id,
-            name,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            email: user.email,
-            role: membership.role,
-            organization: {
-              id: organization.id,
-              name: organization.name,
-              slug: organization.slug,
-            },
-            profileViews: 0,
-          },
-          stats: {
-            courses_created: 0,
-            courses_assigned: counts.assigned_courses,
-            assigned_courses: counts.assigned_courses,
-            total_students: counts.total_students,
-            completed_students: counts.completed_courses,
-            completed_courses: counts.completed_courses,
-            pending_students: counts.pending_courses,
-            pending_courses: counts.pending_courses,
-          },
-          timeline: [],
-        },
+        data,
       });
     } catch (error) {
       req.log.error(error);
-      return reply.code(500).send({
-        success: false,
-        message: "Failed to fetch dashboard",
-      });
+      if (error instanceof NotFoundError || error instanceof UnauthorizedError) throw error;
+      throw new InternalServerError("Failed to fetch dashboard");
     }
   }
 }
-
-
-const dashboardRepo = new DashboardRepository();
 
 export class DashboardController {
   async getDashboard(req: FastifyRequest, reply: FastifyReply) {
@@ -92,8 +40,10 @@ export class DashboardController {
         throw new ValidationError("user_id required");
       }
 
-      // client_id is safely extracted from context inside the repo
-      const data = await dashboardRepo.getUserDashboard("", user_id);
+      const organizationId = req.user?.organization_id;
+      if (!organizationId) throw new UnauthorizedError("Tenant context missing");
+
+      const data = await dashboardService.getUserDashboard(organizationId, user_id);
       return reply.code(200).send({
         success: true,
         message: "Dashboard data fetched successfully",
@@ -101,6 +51,7 @@ export class DashboardController {
       });
     } catch (error) {
       req.log.error(error);
+      if (error instanceof ValidationError || error instanceof UnauthorizedError) throw error;
       throw new InternalServerError("Failed to fetch dashboard data");
     }
   }
@@ -111,8 +62,10 @@ export class DashboardController {
         user_id: string; 
       };
 
-      // client_id is safely extracted from context inside the repo
-      const data = await dashboardRepo.getTutorCounts("", user_id);
+      const organizationId = req.user?.organization_id;
+      if (!organizationId) throw new UnauthorizedError("Tenant context missing");
+
+      const data = await dashboardService.getTutorDashboard(organizationId, user_id);
       return reply.code(200).send({
         success: true,
         message: "Tutor dashboard data fetched successfully",
@@ -120,6 +73,7 @@ export class DashboardController {
       });
     } catch (error) {
       req.log.error(error);
+      if (error instanceof UnauthorizedError) throw error;
       throw new InternalServerError("Failed to fetch tutor dashboard data");
     }
   }

@@ -1,6 +1,6 @@
 import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
-import UploadService from "./upload.repository";
+import UploadService from "./upload.service";
 
 class UploadController {
   async uploadFile(request: FastifyRequest, reply: FastifyReply) {
