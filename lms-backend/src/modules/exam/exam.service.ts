@@ -659,33 +659,48 @@ export class ExamService {
 
   async assignExam(organizationId: string, examIds: string[], userIds: string[], classIds: string[]) {
     const validExamIds: string[] = [];
-    for (const examId of examIds) {
-      const exam = await this.repository.getExamById(organizationId, examId);
-      if (!exam) throw new NotFoundError(`Exam with ID '${examId}' not found.`);
-      if ((exam as any).organization_id && (exam as any).organization_id !== organizationId) {
-         throw new ForbiddenError(`Exam with ID '${examId}' does not belong to this organization.`);
-      }
-      validExamIds.push(examId);
+
+    // 1. Bulk validate exams
+    const exams = await this.repository.getExamsByIds(organizationId, examIds);
+    if (exams.length !== examIds.length) {
+      throw new NotFoundError(`One or more exams not found.`);
     }
+
+    for (const exam of exams) {
+      if ((exam as any).organization_id && (exam as any).organization_id !== organizationId) {
+         throw new ForbiddenError(`Exam with ID '${(exam as any).id}' does not belong to this organization.`);
+      }
+      validExamIds.push((exam as any).id);
+    }
+
     let finalUserIds: string[] = [];
     let classInfo: { id: string; name: string } | undefined;
+    
     if (userIds && userIds.length) {
        finalUserIds.push(...userIds);
     }
-    for (const classId of classIds) {
-       const classUserIds = await this.studentRepository.getUserIdsByClassId(organizationId, classId);
-       const classDetails = await this.studentRepository.getClassById(organizationId, classId);
-       finalUserIds.push(...classUserIds);
-       if (classDetails && !classInfo) {
-         classInfo = { id: classDetails.id, name: classDetails.name };
-       }
+
+    // 2. Bulk fetch classes/users
+    if (classIds && classIds.length > 0) {
+      const classMappings = await this.studentRepository.getUserIdsByClassIds(organizationId, classIds);
+      classMappings.forEach((m: any) => finalUserIds.push(m.user_id));
+      
+      // Get first class details for classInfo if not already set
+      if (!classInfo && classIds.length > 0) {
+        const classDetails = await this.studentRepository.getClassById(organizationId, classIds[0]);
+        if (classDetails) {
+          classInfo = { id: classDetails.id, name: classDetails.name };
+        }
+      }
     }
+
     finalUserIds = [...new Set(finalUserIds)];
     if (!finalUserIds.length) throw new ValidationError('No users found to assign.');
     const validMembersCount = await this.repository.countValidOrganizationUsers(organizationId, finalUserIds);
     if (validMembersCount !== finalUserIds.length) {
        throw new ValidationError('One or more users do not belong to this organization or are inactive.');
     }
+    
     const assignmentsToCreate = [];
     for (const examId of validExamIds) {
       for (const userId of finalUserIds) {
@@ -698,19 +713,27 @@ export class ExamService {
       }
     }
     const assignments = await this.repository.bulkCreateExamAssignments(assignmentsToCreate);
+    
+    // 3. Bulk create publish timeline
+    const publishPayloads: { assigned_id: string; assignment_id: string; user_id: string; publish: boolean }[] = [];
     for (const assignment of assignments) {
        if (!(assignment as any).id) continue;
-       try {
-         await this.repository.logExamPublishEvent({
-           assigned_id: (assignment as any).id,
-           assignment_id: (assignment as any).exam_id,
-           user_id: (assignment as any).user_id,
-           publish: false,
-         });
-       } catch (err) {
-         console.warn('Failed to log publish event for single assignment', err);
-       }
+       publishPayloads.push({
+         assigned_id: (assignment as any).id,
+         assignment_id: (assignment as any).exam_id,
+         user_id: (assignment as any).user_id,
+         publish: false,
+       });
     }
+
+    if (publishPayloads.length > 0) {
+      try {
+        await this.repository.bulkLogExamPublishEvent(publishPayloads);
+      } catch (err) {
+        console.warn('Failed to bulk log publish events', err);
+      }
+    }
+
     return assignments;
   }
 

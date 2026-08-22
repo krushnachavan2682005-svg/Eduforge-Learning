@@ -1,0 +1,177 @@
+[
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\actionItems\\actionItems.service.ts",
+    "line": 64,
+    "block": "    for (const a of assignments) {\r\n      const ids = a.action_item_id?.filter((i) => i !== id);\r\n      ids?.length\r\n        ? await a.update({ action_item_id: ids })\r\n        : await a.destroy();\r\n    }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 71,
+    "block": "      const uniqueUserIds = [...new Set(rawTimeline.map((item: any) => item.user_id))];\r\n      studentNameMap = await this.studentRepository.getStudentNamesByUserIds(\r\n        organizationId,\r\n        uniqueUserIds\r\n      );\r\n    }\r\n\r\n    return rawTimeline.map((item: any) => {\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 160,
+    "block": "    const userIds = [...new Set((rawItems as any[]).map((i) => i.user_id))];\r\n    const studentMap = new Map(\r\n      Object.entries(await this.studentRepository.getStudentNamesByUserIds(organizationId, userIds))\r\n    );\r\n\r\n    const mappedItems = rawItems.map((item) => ({\r\n      ...item,\r\n      student_name: studentMap.get(item.user_id) ?? \"\",\r\n    }));\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 259,
+    "block": "      for (const user of user_id) {\r\n        for (const itemId of action_item_id) {\r\n          const count = await ActionItems.count({ where: { id: itemId, organization_id: resolvedClientId } });\r\n          if (count !== 1) {\r\n            throw new Error(\"One or more action items do not belong to the current organization\");\r\n          }\r\n\r\n          const exists = await AssignedActionItemsModel.findOne({\r\n            where: {\r\n              organization_id: resolvedClientId,\r\n              user_id: { [Op.contains]: [user] },\r\n              action_item_id: { [Op.contains]: [itemId] },\r\n            },\r\n          });\r\n          if (!exists) {\r\n            await this.repository.createAssignCourse({\r\n              action_item_id: [itemId],\r\n              user_id: [user],\r\n              organization_id: resolvedClientId,\r\n              status: \"ASSIGNED\",\r\n            });\r\n            newAssignments++;\r\n          }\r\n        }\r\n      }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 260,
+    "block": "        for (const itemId of action_item_id) {\r\n          const count = await ActionItems.count({ where: { id: itemId, organization_id: resolvedClientId } });\r\n          if (count !== 1) {\r\n            throw new Error(\"One or more action items do not belong to the current organization\");\r\n          }\r\n\r\n          const exists = await AssignedActionItemsModel.findOne({\r\n            where: {\r\n              organization_id: resolvedClientId,\r\n              user_id: { [Op.contains]: [user] },\r\n              action_item_id: { [Op.contains]: [itemId] },\r\n            },\r\n          });\r\n          if (!exists) {\r\n            await this.repository.createAssignCourse({\r\n              action_item_id: [itemId],\r\n              user_id: [user],\r\n              organization_id: resolvedClientId,\r\n              status: \"ASSIGNED\",\r\n            });\r\n            newAssignments++;\r\n          }\r\n        }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 288,
+    "block": "      for (const cid of classIds) {\r\n        let classClientId = resolvedClientId;\r\n        if (!classClientId) {\r\n          const localClass = await StudentClass.findByPk(cid);\r\n          classClientId = localClass?.organization_id || null;\r\n        }\r\n\r\n        if (!classClientId) {\r\n          throw new ValidationError(`Invalid or unknown class_id: ${cid}`);\r\n        }\r\n        resolvedClientId = classClientId;\r\n\r\n        const classUsers = await this.studentRepository.getUserIdsByClassId(\r\n          classClientId,\r\n          cid\r\n        );\r\n        if (!classUsers.length) {\r\n          throw new ValidationError(`No students found for class_id: ${cid}`);\r\n        }\r\n\r\n        for (const user of classUsers) {\r\n          for (const itemId of action_item_id) {\r\n            const count = await ActionItems.count({ where: { id: itemId, organization_id: classClientId } });\r\n            if (count !== 1) {\r\n              throw new Error(\"One or more action items do not belong to the current organization\");\r\n            }\r\n\r\n            const exists = await AssignedActionItemsModel.findOne({\r\n              where: {\r\n                organization_id: classClientId,\r\n                class_id: cid,\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 308,
+    "block": "        for (const user of classUsers) {\r\n          for (const itemId of action_item_id) {\r\n            const count = await ActionItems.count({ where: { id: itemId, organization_id: classClientId } });\r\n            if (count !== 1) {\r\n              throw new Error(\"One or more action items do not belong to the current organization\");\r\n            }\r\n\r\n            const exists = await AssignedActionItemsModel.findOne({\r\n              where: {\r\n                organization_id: classClientId,\r\n                class_id: cid,\r\n                user_id: { [Op.contains]: [user] },\r\n                action_item_id: { [Op.contains]: [itemId] },\r\n              },\r\n            });\r\n            if (!exists) {\r\n              await this.repository.createAssignCourse({\r\n                action_item_id: [itemId],\r\n                user_id: [user],\r\n                class_id: cid,\r\n                organization_id: classClientId,\r\n                status: \"ASSIGNED\",\r\n              });\r\n              newAssignments++;\r\n            }\r\n          }\r\n        }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 309,
+    "block": "          for (const itemId of action_item_id) {\r\n            const count = await ActionItems.count({ where: { id: itemId, organization_id: classClientId } });\r\n            if (count !== 1) {\r\n              throw new Error(\"One or more action items do not belong to the current organization\");\r\n            }\r\n\r\n            const exists = await AssignedActionItemsModel.findOne({\r\n              where: {\r\n                organization_id: classClientId,\r\n                class_id: cid,\r\n                user_id: { [Op.contains]: [user] },\r\n                action_item_id: { [Op.contains]: [itemId] },\r\n              },\r\n            });\r\n            if (!exists) {\r\n              await this.repository.createAssignCourse({\r\n                action_item_id: [itemId],\r\n                user_id: [user],\r\n                class_id: cid,\r\n                organization_id: classClientId,\r\n                status: \"ASSIGNED\",\r\n              });\r\n              newAssignments++;\r\n            }\r\n          }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 344,
+    "block": "      const clientUsers = localStudents.map((s) => s.user_id).filter(Boolean);\r\n\r\n      for (const user of clientUsers) {\r\n        for (const itemId of action_item_id) {\r\n          const count = await ActionItems.count({ where: { id: itemId, organization_id: client } });\r\n          if (count !== 1) {\r\n            throw new Error(\"One or more action items do not belong to the current organization\");\r\n          }\r\n\r\n          const exists = await AssignedActionItemsModel.findOne({\r\n            where: {\r\n              organization_id: client,\r\n              user_id: { [Op.contains]: [user] },\r\n              action_item_id: { [Op.contains]: [itemId] },\r\n            },\r\n          });\r\n          if (!exists) {\r\n            await this.repository.createAssignCourse({\r\n              action_item_id: [itemId],\r\n              user_id: [user],\r\n              organization_id: client,\r\n              status: \"ASSIGNED\",\r\n            });\r\n            newAssignments++;\r\n          }\r\n        }\r\n      }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 346,
+    "block": "      for (const user of clientUsers) {\r\n        for (const itemId of action_item_id) {\r\n          const count = await ActionItems.count({ where: { id: itemId, organization_id: client } });\r\n          if (count !== 1) {\r\n            throw new Error(\"One or more action items do not belong to the current organization\");\r\n          }\r\n\r\n          const exists = await AssignedActionItemsModel.findOne({\r\n            where: {\r\n              organization_id: client,\r\n              user_id: { [Op.contains]: [user] },\r\n              action_item_id: { [Op.contains]: [itemId] },\r\n            },\r\n          });\r\n          if (!exists) {\r\n            await this.repository.createAssignCourse({\r\n              action_item_id: [itemId],\r\n              user_id: [user],\r\n              organization_id: client,\r\n              status: \"ASSIGNED\",\r\n            });\r\n            newAssignments++;\r\n          }\r\n        }\r\n      }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignActionItems\\assignActionItems.service.ts",
+    "line": 347,
+    "block": "        for (const itemId of action_item_id) {\r\n          const count = await ActionItems.count({ where: { id: itemId, organization_id: client } });\r\n          if (count !== 1) {\r\n            throw new Error(\"One or more action items do not belong to the current organization\");\r\n          }\r\n\r\n          const exists = await AssignedActionItemsModel.findOne({\r\n            where: {\r\n              organization_id: client,\r\n              user_id: { [Op.contains]: [user] },\r\n              action_item_id: { [Op.contains]: [itemId] },\r\n            },\r\n          });\r\n          if (!exists) {\r\n            await this.repository.createAssignCourse({\r\n              action_item_id: [itemId],\r\n              user_id: [user],\r\n              organization_id: client,\r\n              status: \"ASSIGNED\",\r\n            });\r\n            newAssignments++;\r\n          }\r\n        }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignCourse\\assignCourse.service.ts",
+    "line": 27,
+    "block": "    for (const selectedClassId of classIds) {\r\n      const classUserIds = await this.studentRepository.getUserIdsByClassId(\r\n        organizationId,\r\n        selectedClassId\r\n      );\r\n      finalUserIds.push(...classUserIds);\r\n      classUserIds.forEach((user) => {\r\n        if (!userClassMap.has(user)) userClassMap.set(user, selectedClassId);\r\n      });\r\n    }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\assignCourse\\assignCourse.service.ts",
+    "line": 74,
+    "block": "    for (const user of usersToAssign) {\r\n      await this.repository.createAssignCourse({\r\n        course_id: courseIds,\r\n        user_id: [user],\r\n        class_id: userClassMap.get(user),\r\n        organization_id: organizationId,\r\n      });\r\n\r\n      const student = await this.studentRepository.findStudentByUserId(\r\n        organizationId,\r\n        user\r\n      );\r\n\r\n      if (student) {\r\n        await Promise.all(\r\n          courseIds.map((courseId) =>\r\n            this.studentRepository.createEnrollment({\r\n              organization_id: organizationId,\r\n              student_id: student.id,\r\n              course_id: courseId,\r\n              status: \"assigned\",\r\n            })\r\n          )\r\n        );\r\n      }\r\n    }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\dashboard\\dashboard.service.ts",
+    "line": 73,
+    "block": "    const [courses, testsResult, actionItems] = await Promise.all([\r\n      this.courseRepo.getCourseByUserId(organizationId, userId),\r\n      this.resultsRepo.getResultsByUserId(organizationId, userId),\r\n      this.actionRepo.getApprovedActionItemsByUserId(organizationId, userId),\r\n    ]);\r\n\r\n    const tests = testsResult?.data || [];\r\n    const studentNameStr = await this.studentRepository.getStudentDisplayName(organizationId, userId);\r\n\r\n    const profile = {\r\n      name: studentNameStr || \"\",\r\n      role: \"\",\r\n      location: \"\",\r\n      profileViews: (tests?.length || 0) + (actionItems?.length || 0),\r\n    };\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\dashboard\\dashboard.service.ts",
+    "line": 204,
+    "block": "      const assignedExamSet = new Set(assignRows.map((r: any) => r.exam_id));\r\n      testStats.assigned = assignedExamSet.size;\r\n      testStats.totalStudentsAssigned = assignRows.length;\r\n\r\n      const submissionRows = await this.repository.getExamSubmissionsByExamIds(examIds);\r\n\r\n      if (submissionRows.length) {\r\n        if (submissionRows[0].hasOwnProperty(\"submitted_at\")) {\r\n          testStats.submittedByStudents = submissionRows.filter(\r\n            (r: any) => r.submitted_at != null,\r\n          ).length;\r\n          testStats.pendingSubmission =\r\n            testStats.totalStudentsAssigned - testStats.submittedByStudents;\r\n        }\r\n        testStats.reviewedByTutor = submissionRows.filter(\r\n          (r: any) => r.review_status === \"completed\",\r\n        ).length;\r\n        testStats.pendingReview =\r\n          testStats.submittedByStudents - testStats.reviewedByTutor;\r\n      }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\dashboard\\dashboard.service.ts",
+    "line": 278,
+    "block": "      courseIds.forEach((cid: string) => assignedCourses.add(cid));\r\n      const studentCount = (r.user_id || []).length;\r\n      totalCourseStudents += studentCount;\r\n    });\r\n\r\n    let sectionRows = await this.repository.getSectionUserMappings(organizationId);\r\n    if (tutorCourseIds.length > 0) {\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.repository.ts",
+    "line": 304,
+    "block": "          data.questions.map((q) => q.id).filter(Boolean),\r\n        );\r\n        const existingQuestions = await Question.findAll({\r\n          where: { exam_id: examId },\r\n          attributes: [\"id\"],\r\n          transaction,\r\n        });\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.repository.ts",
+    "line": 311,
+    "block": "        const existingQuestionIds = new Set(existingQuestions.map((q) => q.id));\r\n\r\n        // Determine which questions to delete\r\n        const questionsToDelete = [...existingQuestionIds].filter(\r\n          (id) => !incomingQuestionIds.has(id),\r\n        );\r\n\r\n        if (questionsToDelete.length > 0) {\r\n          await Question.destroy({\r\n            where: { id: questionsToDelete },\r\n            transaction,\r\n          });\r\n        }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.repository.ts",
+    "line": 325,
+    "block": "        for (const questionData of data.questions) {\r\n          if (questionData.id) {\r\n            await Question.update(\r\n              {\r\n                type: questionData.type,\r\n                text: questionData.text,\r\n                marks: questionData.marks,\r\n                is_mandatory: questionData.is_mandatory,\r\n                correct_answer: questionData.correct_answer,\r\n                options: questionData.options, organization_id: organizationId || data.organization_id,\r\n                updated_on: new Date(),\r\n              },\r\n              {\r\n                where: { id: questionData.id, exam_id: examId },\r\n                transaction,\r\n              },\r\n            );\r\n          } else {\r\n            await Question.create(\r\n              {\r\n                exam_id: examId,\r\n                type: questionData.type!,\r\n                text: questionData.text!,\r\n                marks: questionData.marks!,\r\n                is_mandatory: questionData.is_mandatory!,\r\n                correct_answer: questionData.correct_answer,\r\n                options: questionData.options, organization_id: organizationId || data.organization_id,\r\n                created_on: new Date(),\r\n                updated_on: new Date(),\r\n              },\r\n              { transaction },\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.service.ts",
+    "line": 662,
+    "block": "    for (const examId of examIds) {\r\n      const exam = await this.repository.getExamById(organizationId, examId);\r\n      if (!exam) throw new NotFoundError(`Exam with ID '${examId}' not found.`);\r\n      if ((exam as any).organization_id && (exam as any).organization_id !== organizationId) {\r\n         throw new ForbiddenError(`Exam with ID '${examId}' does not belong to this organization.`);\r\n      }\r\n      validExamIds.push(examId);\r\n    }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.service.ts",
+    "line": 675,
+    "block": "    for (const classId of classIds) {\r\n       const classUserIds = await this.studentRepository.getUserIdsByClassId(organizationId, classId);\r\n       const classDetails = await this.studentRepository.getClassById(organizationId, classId);\r\n       finalUserIds.push(...classUserIds);\r\n       if (classDetails && !classInfo) {\r\n         classInfo = { id: classDetails.id, name: classDetails.name };\r\n       }\r\n    }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.service.ts",
+    "line": 728,
+    "block": "    const assignmentIds = assignments.map((a: any) => a.id);\r\n    const timelineRecords = await this.repository.getPublishTimelinesForAssignments(assignmentIds);\r\n    const publishMap = new Map<string, boolean>();\r\n    timelineRecords.forEach((r: any) => {\r\n      const aid = r.assigned_id;\r\n      if (!publishMap.has(aid)) publishMap.set(aid, !!r.publish);\r\n    });\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.service.ts",
+    "line": 771,
+    "block": "      const uniqueUserIds = [...new Set(raw.map((r: any) => r.user_id))];\r\n      const orgId = organizationId || (raw[0] as any)?.organization_id || '';\r\n      studentNameMap = await this.studentRepository.getStudentNamesByUserIds(orgId, uniqueUserIds);\r\n    }\r\n    return raw.map((item: any) => ({\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.service.ts",
+    "line": 791,
+    "block": "    const orgIds = [...new Set(results.map((r: any) => r?.organization_id).filter(Boolean))];\r\n    for (const organizationId of orgIds) {\r\n      const userIds = [...new Set(results.filter((r: any) => r?.organization_id === organizationId).map((r: any) => r?.user_id).filter(Boolean))];\r\n      namesByOrg.set(organizationId as string, await this.studentRepository.getStudentNamesByUserIds(organizationId as string, userIds as string[]));\r\n    }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.service.ts",
+    "line": 792,
+    "block": "    for (const organizationId of orgIds) {\r\n      const userIds = [...new Set(results.filter((r: any) => r?.organization_id === organizationId).map((r: any) => r?.user_id).filter(Boolean))];\r\n      namesByOrg.set(organizationId as string, await this.studentRepository.getStudentNamesByUserIds(organizationId as string, userIds as string[]));\r\n    }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\exam\\exam.service.ts",
+    "line": 793,
+    "block": "      const userIds = [...new Set(results.filter((r: any) => r?.organization_id === organizationId).map((r: any) => r?.user_id).filter(Boolean))];\r\n      namesByOrg.set(organizationId as string, await this.studentRepository.getStudentNamesByUserIds(organizationId as string, userIds as string[]));\r\n    }\r\n    return results.map((r: any) => ({ ...r, student_name: namesByOrg.get(r?.organization_id as string)?.[r?.user_id as string] || '' }));\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\members\\member.repository.ts",
+    "line": 163,
+    "block": "    const userIds = memberships.rows.map((membership) => membership.user_id);\r\n    const rolesByUser = await this.getRolesByUserIds(input.organization_id, userIds);\r\n\r\n    let items = memberships.rows.map((membership: any) =>\r\n      this.serializeMember(membership, rolesByUser[membership.user_id] || []),\r\n    );\r\n\r\n    if (input.role) {\r\n      items = items.filter((item) =>\r\n        item.roles.some((role: any) => role.code === input.role),\r\n      );\r\n    }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\rbac\\rbac.seed.ts",
+    "line": 94,
+    "block": "  for (const [code, name] of permissions) {\r\n    const permission = await permissionRepository.findOrCreate({ code, name });\r\n    permissionByCode.set(permission.code, permission.id);\r\n  }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\rbac\\rbac.seed.ts",
+    "line": 99,
+    "block": "  for (const [roleCode, permissionCodes] of Object.entries(rolePermissions)) {\r\n    const role = await roleRepository.findOrCreateRole({\r\n      code: roleCode,\r\n      name: roleNames[roleCode] || roleCode,\r\n      is_system_role: true,\r\n    });\r\n\r\n    for (const permissionCode of permissionCodes) {\r\n      const permissionId = permissionByCode.get(permissionCode);\r\n      if (permissionId) {\r\n        await roleRepository.assignPermission(role.id, permissionId);\r\n      }\r\n    }\r\n  }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\rbac\\rbac.seed.ts",
+    "line": 106,
+    "block": "    for (const permissionCode of permissionCodes) {\r\n      const permissionId = permissionByCode.get(permissionCode);\r\n      if (permissionId) {\r\n        await roleRepository.assignPermission(role.id, permissionId);\r\n      }\r\n    }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\rbac\\rbac.seed.ts",
+    "line": 120,
+    "block": "  for (const membership of memberships) {\r\n    const roleCode =\r\n      membership.role === \"student\"\r\n        ? \"student\"\r\n        : membership.role === \"tutor\"\r\n          ? \"teacher\"\r\n          : \"organization_admin\";\r\n    const role = await roleRepository.findRoleByCode(\r\n      roleCode,\r\n      membership.organization_id,\r\n    );\r\n\r\n    if (!role) continue;\r\n\r\n    await UserRole.findOrCreate({\r\n      where: {\r\n        user_id: membership.user_id,\r\n        organization_id: membership.organization_id,\r\n        role_id: role.id,\r\n      },\r\n      defaults: {\r\n        user_id: membership.user_id,\r\n        organization_id: membership.organization_id,\r\n        role_id: role.id,\r\n      },\r\n    });\r\n  }\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\studentResults\\studentResults.repository.ts",
+    "line": 129,
+    "block": "    const [results, countResult] = await Promise.all([\r\n      sequelize.query(query, {\r\n        replacements,\r\n        type: QueryTypes.SELECT,\r\n      }),\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\studentResults\\studentResults.service.ts",
+    "line": 54,
+    "block": "      ...new Set(result.data.map((r: any) => r.user_id).filter(Boolean)),\r\n    ];\r\n\r\n    const nameMap = userIds.length > 0 \r\n      ? await this.studentRepository.getStudentNamesByUserIds(organizationId, userIds as string[])\r\n      : {};\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\students\\student.service.ts",
+    "line": 134,
+    "block": "    const serialized = enrollments.map((enrollment: any) => enrollment.toJSON());\r\n    const courseIds = Array.from(\r\n      new Set(serialized.map((enrollment: any) => enrollment.course_id).filter(Boolean)),\r\n    );\r\n\r\n    if (!courseIds.length) return serialized;\r\n\r\n    const courses = await Course.findAll({\r\n      where: {\r\n        id: { [Op.in]: courseIds as string[] },\r\n        organization_id: organizationId,\r\n      },\r\n      attributes: [\"id\", \"title\", \"description\", \"level\", \"is_published\"],\r\n    });\r\n"
+  },
+  {
+    "file": "D:\\Personal Projects\\Eduforge Learning\\lms-backend\\src\\modules\\students\\student.service.ts",
+    "line": 136,
+    "block": "      new Set(serialized.map((enrollment: any) => enrollment.course_id).filter(Boolean)),\r\n    );\r\n\r\n    if (!courseIds.length) return serialized;\r\n\r\n    const courses = await Course.findAll({\r\n      where: {\r\n        id: { [Op.in]: courseIds as string[] },\r\n        organization_id: organizationId,\r\n      },\r\n      attributes: [\"id\", \"title\", \"description\", \"level\", \"is_published\"],\r\n    });\r\n"
+  }
+]

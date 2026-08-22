@@ -236,6 +236,66 @@ export class AssignActionItemsService {
     const { OrganizationUser } = await import("../roles/role.model");
     const { Op } = await import("sequelize");
 
+    const bulkProcessAssignments = async (
+      targetUsers: string[],
+      targetItems: string[],
+      targetOrg: string,
+      targetClassId?: string
+    ) => {
+      if (!targetUsers.length || !targetItems.length) return 0;
+      
+      const itemsCount = await ActionItems.count({
+        where: { id: { [Op.in]: targetItems }, organization_id: targetOrg }
+      });
+      if (itemsCount !== targetItems.length) {
+        throw new Error("One or more action items do not belong to the current organization");
+      }
+
+      const whereClause: any = {
+        organization_id: targetOrg,
+        user_id: { [Op.overlap]: targetUsers },
+        action_item_id: { [Op.overlap]: targetItems },
+      };
+      if (targetClassId) {
+        whereClause.class_id = targetClassId;
+      }
+
+      const existingAssignments = await AssignedActionItemsModel.findAll({
+        where: whereClause,
+        attributes: ['user_id', 'action_item_id']
+      });
+
+      const existsInMem = (uid: string, aid: string) => {
+        return existingAssignments.some((ea: any) => 
+          ea.user_id?.includes(uid) && ea.action_item_id?.includes(aid)
+        );
+      };
+
+      const payloadsToCreate: any[] = [];
+      for (const user of targetUsers) {
+        for (const itemId of targetItems) {
+          if (!existsInMem(user, itemId)) {
+            const payload: any = {
+              action_item_id: [itemId],
+              user_id: [user],
+              organization_id: targetOrg,
+              status: "ASSIGNED",
+            };
+            if (targetClassId) {
+              payload.class_id = targetClassId;
+            }
+            payloadsToCreate.push(payload);
+          }
+        }
+      }
+
+      if (payloadsToCreate.length > 0) {
+        await this.repository.bulkCreateAssignCourse(payloadsToCreate);
+        return payloadsToCreate.length;
+      }
+      return 0;
+    };
+
     // Assign to specific users
     if (user_id?.length) {
       if (!resolvedClientId) {
@@ -256,31 +316,7 @@ export class AssignActionItemsService {
         throw new ValidationError("One or more users do not belong to this organization or are inactive.");
       }
 
-      for (const user of user_id) {
-        for (const itemId of action_item_id) {
-          const count = await ActionItems.count({ where: { id: itemId, organization_id: resolvedClientId } });
-          if (count !== 1) {
-            throw new Error("One or more action items do not belong to the current organization");
-          }
-
-          const exists = await AssignedActionItemsModel.findOne({
-            where: {
-              organization_id: resolvedClientId,
-              user_id: { [Op.contains]: [user] },
-              action_item_id: { [Op.contains]: [itemId] },
-            },
-          });
-          if (!exists) {
-            await this.repository.createAssignCourse({
-              action_item_id: [itemId],
-              user_id: [user],
-              organization_id: resolvedClientId,
-              status: "ASSIGNED",
-            });
-            newAssignments++;
-          }
-        }
-      }
+      newAssignments += await bulkProcessAssignments(user_id, action_item_id, resolvedClientId);
     }
 
     // Assign to users by class
@@ -305,33 +341,7 @@ export class AssignActionItemsService {
           throw new ValidationError(`No students found for class_id: ${cid}`);
         }
 
-        for (const user of classUsers) {
-          for (const itemId of action_item_id) {
-            const count = await ActionItems.count({ where: { id: itemId, organization_id: classClientId } });
-            if (count !== 1) {
-              throw new Error("One or more action items do not belong to the current organization");
-            }
-
-            const exists = await AssignedActionItemsModel.findOne({
-              where: {
-                organization_id: classClientId,
-                class_id: cid,
-                user_id: { [Op.contains]: [user] },
-                action_item_id: { [Op.contains]: [itemId] },
-              },
-            });
-            if (!exists) {
-              await this.repository.createAssignCourse({
-                action_item_id: [itemId],
-                user_id: [user],
-                class_id: cid,
-                organization_id: classClientId,
-                status: "ASSIGNED",
-              });
-              newAssignments++;
-            }
-          }
-        }
+        newAssignments += await bulkProcessAssignments(classUsers, action_item_id, classClientId, cid);
       }
     }
 
@@ -343,31 +353,7 @@ export class AssignActionItemsService {
       const localStudents = await this.studentRepository.listStudents(client);
       const clientUsers = localStudents.map((s) => s.user_id).filter(Boolean);
 
-      for (const user of clientUsers) {
-        for (const itemId of action_item_id) {
-          const count = await ActionItems.count({ where: { id: itemId, organization_id: client } });
-          if (count !== 1) {
-            throw new Error("One or more action items do not belong to the current organization");
-          }
-
-          const exists = await AssignedActionItemsModel.findOne({
-            where: {
-              organization_id: client,
-              user_id: { [Op.contains]: [user] },
-              action_item_id: { [Op.contains]: [itemId] },
-            },
-          });
-          if (!exists) {
-            await this.repository.createAssignCourse({
-              action_item_id: [itemId],
-              user_id: [user],
-              organization_id: client,
-              status: "ASSIGNED",
-            });
-            newAssignments++;
-          }
-        }
-      }
+      newAssignments += await bulkProcessAssignments(clientUsers, action_item_id, client);
     }
 
     return newAssignments;

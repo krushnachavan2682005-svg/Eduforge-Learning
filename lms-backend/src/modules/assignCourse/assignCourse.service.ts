@@ -24,14 +24,14 @@ export class AssignCourseService {
 
     if (userIds?.length) finalUserIds.push(...userIds);
 
-    for (const selectedClassId of classIds) {
-      const classUserIds = await this.studentRepository.getUserIdsByClassId(
+    if (classIds.length > 0) {
+      const classMappings = await this.studentRepository.getUserIdsByClassIds(
         organizationId,
-        selectedClassId
+        classIds
       );
-      finalUserIds.push(...classUserIds);
-      classUserIds.forEach((user) => {
-        if (!userClassMap.has(user)) userClassMap.set(user, selectedClassId);
+      classMappings.forEach((m: any) => {
+        finalUserIds.push(m.user_id);
+        if (!userClassMap.has(m.user_id)) userClassMap.set(m.user_id, m.class_id);
       });
     }
 
@@ -71,30 +71,53 @@ export class AssignCourseService {
       throw new ValidationError("All users already have this course.");
     }
 
-    for (const user of usersToAssign) {
-      await this.repository.createAssignCourse({
-        course_id: courseIds,
-        user_id: [user],
-        class_id: userClassMap.get(user),
-        organization_id: organizationId,
-      });
+    // 1. Bulk find students
+    const students = await this.studentRepository.findStudentsByUserIds(
+      organizationId,
+      usersToAssign
+    );
 
-      const student = await this.studentRepository.findStudentByUserId(
+    // 2. Prepare and bulk create assigned courses
+    const assignedCoursesPayload = usersToAssign.map((user) => ({
+      course_id: courseIds,
+      user_id: [user],
+      class_id: userClassMap.get(user),
+      organization_id: organizationId,
+    }));
+
+    if (assignedCoursesPayload.length > 0) {
+      await this.repository.bulkCreateAssignCourse(assignedCoursesPayload);
+    }
+
+    // 3. Prepare and bulk create enrollments
+    const validStudentIds = students.map((s: any) => s.id);
+    if (validStudentIds.length > 0 && courseIds.length > 0) {
+      const existingEnrollments = await this.studentRepository.getEnrollmentsByStudentsAndCourses(
         organizationId,
-        user
+        validStudentIds,
+        courseIds
       );
 
-      if (student) {
-        await Promise.all(
-          courseIds.map((courseId) =>
-            this.studentRepository.createEnrollment({
+      const existingEnrollmentSet = new Set(
+        existingEnrollments.map((e: any) => `${e.student_id}_${e.course_id}`)
+      );
+
+      const enrollmentsPayload: any[] = [];
+      for (const student of students) {
+        for (const courseId of courseIds) {
+          if (!existingEnrollmentSet.has(`${student.id}_${courseId}`)) {
+            enrollmentsPayload.push({
               organization_id: organizationId,
               student_id: student.id,
               course_id: courseId,
               status: "assigned",
-            })
-          )
-        );
+            });
+          }
+        }
+      }
+
+      if (enrollmentsPayload.length > 0) {
+        await this.studentRepository.bulkCreateEnrollment(enrollmentsPayload);
       }
     }
 
