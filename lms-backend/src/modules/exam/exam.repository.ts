@@ -206,12 +206,20 @@ export class ExamRepository {
     return exam;
   }
 
+  async getExamsByIds(organizationId: string, examIds: string[]) {
+    const { Op } = require("sequelize");
+    const exams = await Exam.findAll({
+      where: organizationId ? { id: { [Op.in]: examIds }, organization_id: organizationId } : { id: { [Op.in]: examIds } },
+    });
+    return exams;
+  }
+
   async getAllExams(organizationId: string, limit: number, skip: number) {
-    const includeOptions = [{ model: Question, as: "questions", separate: true }];
+    // const includeOptions = [{ model: Question, as: "questions", separate: true }];
 
     const { count, rows } = await Exam.findAndCountAll({
       where: organizationId ? { organization_id: organizationId } : undefined,
-      include: includeOptions,
+      // include: includeOptions,
       limit,
       offset: skip,
       order: [["created_on", "DESC"]],
@@ -322,39 +330,57 @@ export class ExamRepository {
           });
         }
 
+        const questionsToCreate: any[] = [];
+        const questionsToUpdate: any[] = [];
+
         for (const questionData of data.questions) {
           if (questionData.id) {
-            await Question.update(
-              {
-                type: questionData.type,
-                text: questionData.text,
-                marks: questionData.marks,
-                is_mandatory: questionData.is_mandatory,
-                correct_answer: questionData.correct_answer,
-                options: questionData.options, organization_id: organizationId || data.organization_id,
-                updated_on: new Date(),
-              },
-              {
-                where: { id: questionData.id, exam_id: examId },
-                transaction,
-              },
-            );
+            questionsToUpdate.push({
+              id: questionData.id,
+              exam_id: examId,
+              type: questionData.type,
+              text: questionData.text,
+              marks: questionData.marks,
+              is_mandatory: questionData.is_mandatory,
+              correct_answer: questionData.correct_answer,
+              options: questionData.options,
+              organization_id: organizationId || data.organization_id,
+              updated_on: new Date(),
+            });
           } else {
-            await Question.create(
-              {
-                exam_id: examId,
-                type: questionData.type!,
-                text: questionData.text!,
-                marks: questionData.marks!,
-                is_mandatory: questionData.is_mandatory!,
-                correct_answer: questionData.correct_answer,
-                options: questionData.options, organization_id: organizationId || data.organization_id,
-                created_on: new Date(),
-                updated_on: new Date(),
-              },
-              { transaction },
-            );
+            questionsToCreate.push({
+              exam_id: examId,
+              type: questionData.type!,
+              text: questionData.text!,
+              marks: questionData.marks!,
+              is_mandatory: questionData.is_mandatory!,
+              correct_answer: questionData.correct_answer,
+              options: questionData.options,
+              organization_id: organizationId || data.organization_id,
+              created_on: new Date(),
+              updated_on: new Date(),
+            });
           }
+        }
+
+        if (questionsToCreate.length > 0) {
+          await Question.bulkCreate(questionsToCreate, { transaction });
+        }
+
+        if (questionsToUpdate.length > 0) {
+          await Question.bulkCreate(questionsToUpdate, {
+            transaction,
+            updateOnDuplicate: [
+              "type",
+              "text",
+              "marks",
+              "is_mandatory",
+              "correct_answer",
+              "options",
+              "organization_id",
+              "updated_on"
+            ]
+          });
         }
       }
 
@@ -793,6 +819,25 @@ async resumePublicExamSession(session_id:string){
     }
 
     return record;
+  }
+
+  async bulkLogExamPublishEvent(dataArray: {
+    assigned_id: string;
+    assignment_id: string;
+    user_id: string;
+    publish: boolean;
+  }[]) {
+    const payloads = dataArray.map(data => ({
+      assigned_id: data.assigned_id,
+      assignment_id: data.assignment_id,
+      user_id: data.user_id,
+      publish: data.publish,
+      created_at: new Date()
+    }));
+
+    return AssignedActionItemsTimelineModel.bulkCreate(payloads, {
+      ignoreDuplicates: true,
+    });
   }
 
   async getExamPublishTimelineByUser(

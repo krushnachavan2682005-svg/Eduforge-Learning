@@ -119,6 +119,27 @@ export class StudentRepository {
       .filter(Boolean);
   }
 
+  async getUserIdsByClassIds(organizationId: string, classIds: string[]) {
+    const mappings = await ClassStudent.findAll({
+      where: { class_id: { [Op.in]: classIds } },
+      include: [
+        {
+          model: Student,
+          as: "student",
+          where: { organization_id: organizationId, status: "active" },
+          attributes: ["id", "user_id"],
+        },
+      ],
+    });
+
+    return mappings
+      .map((mapping: any) => ({
+        class_id: mapping.class_id,
+        user_id: mapping.student?.user_id
+      }))
+      .filter((m: any) => Boolean(m.user_id));
+  }
+
   async removeStudentFromClass(classId: string, studentId: string) {
     const deleted = await ClassStudent.destroy({
       where: { class_id: classId, student_id: studentId },
@@ -130,6 +151,12 @@ export class StudentRepository {
   async findStudentByUserId(organizationId: string, userId: string) {
     return Student.findOne({
       where: { organization_id: organizationId, user_id: userId },
+    });
+  }
+
+  async findStudentsByUserIds(organizationId: string, userIds: string[]) {
+    return Student.findAll({
+      where: { organization_id: organizationId, user_id: { [Op.in]: userIds } },
     });
   }
 
@@ -183,6 +210,25 @@ export class StudentRepository {
     });
 
     return enrollment;
+  }
+
+  async bulkCreateEnrollment(data: {
+    organization_id: string;
+    student_id: string;
+    course_id: string;
+    status?: LocalEnrollmentStatus;
+  }[]) {
+    return LocalEnrollment.bulkCreate(data, { ignoreDuplicates: true });
+  }
+
+  async getEnrollmentsByStudentsAndCourses(organizationId: string, studentIds: string[], courseIds: string[]) {
+    return LocalEnrollment.findAll({
+      where: { 
+        organization_id: organizationId,
+        student_id: { [Op.in]: studentIds },
+        course_id: { [Op.in]: courseIds }
+      }
+    });
   }
 
   async getEnrollmentsByStudent(organizationId: string, studentId: string) {

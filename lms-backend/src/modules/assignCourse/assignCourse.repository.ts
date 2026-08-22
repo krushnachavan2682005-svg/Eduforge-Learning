@@ -8,6 +8,10 @@ export class AssiginCourseRepositorie {
     return AssignedCourseModel.create(data as any);
   }
 
+  async bulkCreateAssignCourse(data: Partial<AssignedCourseModel>[]) {
+    return AssignedCourseModel.bulkCreate(data as any[]);
+  }
+
   async findAllAssignedCourses(organizationId: string, userIds: string[]) {
     return AssignedCourseModel.findAll({
       where: { user_id: { [Op.overlap]: userIds }, organization_id: organizationId },

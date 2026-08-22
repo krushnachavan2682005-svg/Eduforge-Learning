@@ -51,6 +51,10 @@ export class AssiginActionItemsrepositorie {
     return AssignedActionItemsModel.create(data as any);
   }
 
+  async bulkCreateAssignCourse(data: Partial<AssignedActionItemsModel>[]) {
+    return AssignedActionItemsModel.bulkCreate(data as any[]);
+  }
+
   async getActionItemsByUserId(
     organizationId: string,
     user_id: string,
