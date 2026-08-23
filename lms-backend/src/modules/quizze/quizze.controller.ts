@@ -11,7 +11,10 @@ export class QuizController {
     try {
       if (!req.user) return reply.code(401).send({ success: false });
       const { id } = req.params as { id: string };
-      const quiz = await quizzeService.getQuizById(req.user.organization_id, id);
+      const quiz = await quizzeService.getQuizById(
+        req.user.organization_id,
+        id,
+      );
 
       return reply
         .code(200)
@@ -29,8 +32,11 @@ export class QuizController {
     try {
       if (!req.user) return reply.code(401).send({ success: false });
       const body = req.body as QuizzeInterface;
-      const quiz = await quizzeService.createQuiz(req.user.organization_id, body);
-      
+      const quiz = await quizzeService.createQuiz(
+        req.user.organization_id,
+        body,
+      );
+
       return reply.code(201).send({
         data: {
           id: quiz?.id,
@@ -49,7 +55,11 @@ export class QuizController {
       const { id } = req.params as { id: string };
       const body = req.body as Partial<Quiz>;
 
-      const updated = await quizzeService.updateQuiz(req.user.organization_id, id, body);
+      const updated = await quizzeService.updateQuiz(
+        req.user.organization_id,
+        id,
+        body,
+      );
 
       return reply.send({
         data: updated?.id,
@@ -68,7 +78,7 @@ export class QuizController {
     try {
       if (!req.user) return reply.code(401).send({ success: false });
       const { id } = req.params as { id: string };
-      
+
       await quizzeService.deleteQuiz(req.user.organization_id, id);
 
       return reply.send({ message: "Quiz deleted" });
@@ -90,7 +100,7 @@ export class QuizController {
       const quiz = await quizzeService.getQuiz(
         req.user.organization_id,
         Number(page),
-        Number(limit)
+        Number(limit),
       );
 
       return reply.status(200).send(quiz);

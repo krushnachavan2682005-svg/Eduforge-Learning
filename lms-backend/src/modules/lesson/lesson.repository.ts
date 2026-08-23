@@ -3,9 +3,14 @@ import { lesson } from "./lesson.model";
 import { paginate } from "../../utils/pagination";
 
 export class lessonRepsitory {
-  async getLesson(organizationId: string, page: number, limit: number, filters: Record<string, any>) {
+  async getLesson(
+    organizationId: string,
+    page: number,
+    limit: number,
+    filters: Record<string, any>,
+  ) {
     const finalFilters = { ...filters, organization_id: organizationId };
-    
+
     const data = await paginate(lesson, {
       page: Number(page),
       limit: Number(limit),

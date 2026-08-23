@@ -115,7 +115,9 @@ export async function seedRbac() {
 }
 
 async function backfillUserRoles(roleRepository: RoleRepository) {
-  const memberships = await OrganizationUser.findAll({ where: { is_active: true } });
+  const memberships = await OrganizationUser.findAll({
+    where: { is_active: true },
+  });
 
   for (const membership of memberships) {
     const roleCode =

@@ -5,21 +5,35 @@ export class ReviewsRepository {
   async getAllReviews(
     page: number,
     limit: number,
-    filters?: Record<string, any>
+    filters?: Record<string, any>,
   ) {
     return paginate(Reviews, {
       page: Number(page),
       limit: Number(limit),
       filters,
-      attributes: ["id", "user_id", "course_id", "rating", "comment", "created_at"],
+      attributes: [
+        "id",
+        "user_id",
+        "course_id",
+        "rating",
+        "comment",
+        "created_at",
+      ],
       order: [["created_at", "DESC"]],
     });
   }
-  
+
   async getReviewById(id: string) {
     return Reviews.findOne({
       where: { id },
-      attributes: ["id", "user_id", "course_id", "rating", "comment", "created_at"],
+      attributes: [
+        "id",
+        "user_id",
+        "course_id",
+        "rating",
+        "comment",
+        "created_at",
+      ],
     });
   }
 

@@ -63,7 +63,13 @@ export class ExamRepository {
     return {
       ...snapshot,
       questions: (snapshot.questions || []).map((question: any) => {
-        const { correct_answer, correct_option, expected_answer, rubric, ...safeQuestion } = question;
+        const {
+          correct_answer,
+          correct_option,
+          expected_answer,
+          rubric,
+          ...safeQuestion
+        } = question;
         return safeQuestion;
       }),
     };
@@ -71,10 +77,15 @@ export class ExamRepository {
 
   public buildExamSnapshot(examInstance: any) {
     const exam = examInstance?.toJSON ? examInstance.toJSON() : examInstance;
-    const startTime = exam?.exam_start_time ? new Date(exam.exam_start_time) : null;
+    const startTime = exam?.exam_start_time
+      ? new Date(exam.exam_start_time)
+      : null;
     const endTime =
       startTime && !isNaN(startTime.getTime())
-        ? new Date(startTime.getTime() + (Number(exam?.duration_minutes) || 0) * 60 * 1000)
+        ? new Date(
+            startTime.getTime() +
+              (Number(exam?.duration_minutes) || 0) * 60 * 1000,
+          )
         : null;
 
     return {
@@ -89,7 +100,8 @@ export class ExamRepository {
       total_marks: Number(exam?.total_marks) || 0,
       passing_marks: Number(exam?.passing_marks) || 0,
       reviewer_type: "teacher",
-      reviewers: exam?.reviewers || [], organization_id: exam?.organization_id,
+      reviewers: exam?.reviewers || [],
+      organization_id: exam?.organization_id,
       questions: (exam?.questions || []).map((question: any) => {
         const q = question?.toJSON ? question.toJSON() : question;
         return {
@@ -113,23 +125,48 @@ export class ExamRepository {
 
   async findAssignment(organizationId: string, userId: string, examId: string) {
     return ExamAssignment.findOne({
-      where: { exam_id: examId, user_id: userId, organization_id: organizationId },
+      where: {
+        exam_id: examId,
+        user_id: userId,
+        organization_id: organizationId,
+      },
     });
   }
 
-  async findCompletedMapping(organizationId: string, userId: string, examId: string) {
+  async findCompletedMapping(
+    organizationId: string,
+    userId: string,
+    examId: string,
+  ) {
     return ExamUserMapping.findOne({
-      where: { exam_id: examId, user_id: userId, organization_id: organizationId, is_completed: true },
+      where: {
+        exam_id: examId,
+        user_id: userId,
+        organization_id: organizationId,
+        is_completed: true,
+      },
     });
   }
 
-  async findActiveSession(organizationId: string, userId: string, examId: string) {
+  async findActiveSession(
+    organizationId: string,
+    userId: string,
+    examId: string,
+  ) {
     return ExamSession.findOne({
-      where: { exam_id: examId, user_id: userId, organization_id: organizationId, is_completed: false },
+      where: {
+        exam_id: examId,
+        user_id: userId,
+        organization_id: organizationId,
+        is_completed: false,
+      },
     });
   }
 
-  async createFullExam(organizationId: string, data: IExam & { questions: IQuestion[] }) {
+  async createFullExam(
+    organizationId: string,
+    data: IExam & { questions: IQuestion[] },
+  ) {
     const transaction = await sequelize.transaction();
     let isTransactionCommitted = false;
 
@@ -143,7 +180,7 @@ export class ExamRepository {
           passing_marks: data.passing_marks,
           duration_minutes: data.duration_minutes,
           exam_date: data.exam_date ? new Date(data.exam_date) : new Date(), // Keep existing logic for exam_date
-          exam_start_time: new Date(data.exam_start_time!), 
+          exam_start_time: new Date(data.exam_start_time!),
           organization_id: organizationId || data.organization_id,
           created_by: data.created_by!,
           updated_by: data.updated_by!,
@@ -164,7 +201,7 @@ export class ExamRepository {
             marks: q.marks,
             is_mandatory: q.is_mandatory,
             correct_answer: q.correct_answer,
-            options: q.options, 
+            options: q.options,
             organization_id: organizationId || data.organization_id,
             created_on: new Date(),
             updated_on: new Date(),
@@ -195,7 +232,9 @@ export class ExamRepository {
 
   async getExamById(organizationId: string, examId: string) {
     const exam = await Exam.findOne({
-      where: organizationId ? { id: examId, organization_id: organizationId } : { id: examId },
+      where: organizationId
+        ? { id: examId, organization_id: organizationId }
+        : { id: examId },
       include: [
         {
           model: Question,
@@ -209,7 +248,9 @@ export class ExamRepository {
   async getExamsByIds(organizationId: string, examIds: string[]) {
     const { Op } = require("sequelize");
     const exams = await Exam.findAll({
-      where: organizationId ? { id: { [Op.in]: examIds }, organization_id: organizationId } : { id: { [Op.in]: examIds } },
+      where: organizationId
+        ? { id: { [Op.in]: examIds }, organization_id: organizationId }
+        : { id: { [Op.in]: examIds } },
     });
     return exams;
   }
@@ -219,7 +260,23 @@ export class ExamRepository {
 
     const { count, rows } = await Exam.findAndCountAll({
       where: organizationId ? { organization_id: organizationId } : undefined,
-      // include: includeOptions,
+      include: [
+        {
+          model: Question,
+          as: "questions",
+          attributes: [
+            "id",
+            "exam_id",
+            "type",
+            "text",
+            "marks",
+            "is_mandatory",
+            "organization_id",
+            "options",
+          ],
+          separate: true,
+        },
+      ],
       limit,
       offset: skip,
       order: [["created_on", "DESC"]],
@@ -227,11 +284,20 @@ export class ExamRepository {
     return { exams: rows, total: count };
   }
 
-  async getAssignedExamsForUserFilter(organizationId: string, limit: number, skip: number, userId: string) {
-    const includeOptions = [{ model: Question, as: "questions", separate: true }];
+  async getAssignedExamsForUserFilter(
+    organizationId: string,
+    limit: number,
+    skip: number,
+    userId: string,
+  ) {
+    const includeOptions = [
+      { model: Question, as: "questions", separate: true },
+    ];
 
     const assignments = await ExamAssignment.findAll({
-      where: organizationId ? { user_id: userId, organization_id: organizationId } : { user_id: userId },
+      where: organizationId
+        ? { user_id: userId, organization_id: organizationId }
+        : { user_id: userId },
       attributes: ["exam_id"],
     });
 
@@ -242,7 +308,9 @@ export class ExamRepository {
     const examIds = assignments.map((a) => a.exam_id);
 
     const { count, rows } = await Exam.findAndCountAll({
-      where: organizationId ? { id: examIds, organization_id: organizationId } : { id: examIds },
+      where: organizationId
+        ? { id: examIds, organization_id: organizationId }
+        : { id: examIds },
       include: includeOptions,
       limit,
       offset: skip,
@@ -251,9 +319,16 @@ export class ExamRepository {
     return { exams: rows, total: count };
   }
 
-  async getExamsByCreator(organizationId: string, userId: string, limit: number, skip: number) {
+  async getExamsByCreator(
+    organizationId: string,
+    userId: string,
+    limit: number,
+    skip: number,
+  ) {
     const { count, rows } = await Exam.findAndCountAll({
-      where: organizationId ? { created_by: userId, organization_id: organizationId } : { created_by: userId },
+      where: organizationId
+        ? { created_by: userId, organization_id: organizationId }
+        : { created_by: userId },
       include: [
         {
           model: Question,
@@ -270,7 +345,12 @@ export class ExamRepository {
   async updateExam(organizationId: string, examId: string, data: IExamUpdate) {
     const transaction = await sequelize.transaction();
     try {
-      const exam = await Exam.findOne({ where: organizationId ? { id: examId, organization_id: organizationId } : { id: examId }, transaction });
+      const exam = await Exam.findOne({
+        where: organizationId
+          ? { id: examId, organization_id: organizationId }
+          : { id: examId },
+        transaction,
+      });
       if (!exam) {
         return null;
       }
@@ -378,8 +458,8 @@ export class ExamRepository {
               "correct_answer",
               "options",
               "organization_id",
-              "updated_on"
-            ]
+              "updated_on",
+            ],
           });
         }
       }
@@ -395,7 +475,12 @@ export class ExamRepository {
   async deleteExam(organizationId: string, examId: string) {
     const transaction = await sequelize.transaction();
     try {
-      const exam = await Exam.findOne({ where: organizationId ? { id: examId, organization_id: organizationId } : { id: examId }, transaction });
+      const exam = await Exam.findOne({
+        where: organizationId
+          ? { id: examId, organization_id: organizationId }
+          : { id: examId },
+        transaction,
+      });
       if (!exam) {
         return false;
       }
@@ -423,12 +508,32 @@ export class ExamRepository {
       page,
       limit,
       filters: { id: examIds },
-      include: [{ model: Question, as: "questions" }],
+      include: [
+        {
+          model: Question,
+          as: "questions",
+          attributes: [
+            "id",
+            "exam_id",
+            "type",
+            "text",
+            "marks",
+            "is_mandatory",
+            "organization_id",
+            "options",
+          ],
+          separate: true,
+        },
+      ],
       order: [["created_on", "DESC"]],
     });
   }
 
-  async getExamUserMappingsForExams(userId: string, examIds: string[], isCompleted: boolean) {
+  async getExamUserMappingsForExams(
+    userId: string,
+    examIds: string[],
+    isCompleted: boolean,
+  ) {
     return ExamUserMapping.findAll({
       where: { user_id: userId, exam_id: examIds, is_completed: isCompleted },
       attributes: ["exam_id", "is_completed", "review_status", "submitted_at"],
@@ -448,8 +553,8 @@ export class ExamRepository {
       where: {
         organization_id: organizationId,
         user_id: userIds,
-        is_active: true
-      }
+        is_active: true,
+      },
     });
   }
 
@@ -480,9 +585,11 @@ export class ExamRepository {
 
       const store = cls.getStore();
       const organizationId = store?.organizationId;
-      
+
       const exam = await Exam.findOne({
-        where: organizationId? { id: data.exam_id, organization_id: organizationId } : { id: data.exam_id },
+        where: organizationId
+          ? { id: data.exam_id, organization_id: organizationId }
+          : { id: data.exam_id },
         include: [{ model: Question, as: "questions" }],
         transaction,
       });
@@ -493,7 +600,8 @@ export class ExamRepository {
         {
           exam_id: data?.exam_id,
           user_id: data?.user_id,
-          current_question_index: data?.current_question_index || 0, organization_id: data?.organization_id,
+          current_question_index: data?.current_question_index || 0,
+          organization_id: data?.organization_id,
           answers_data: {
             answers: data?.answers_data || [],
             exam_snapshot: snapshot,
@@ -513,27 +621,29 @@ export class ExamRepository {
       throw error;
     }
   }
-async createPublicExamSession(data: {
-  exam_id: string;
-  session_id:string;
-  started_at: Date;
-  is_completed: boolean;
-  name:string|null;
-  email:string
-}) {
-  return await ExamUserMappingPublic.create(data);
-}
-async resumePublicExamSession(session_id:string){
-  const session=await ExamUserMappingPublic.findOne({where:{session_id}})
-  return ({
+  async createPublicExamSession(data: {
+    exam_id: string;
+    session_id: string;
+    started_at: Date;
+    is_completed: boolean;
+    name: string | null;
+    email: string;
+  }) {
+    return await ExamUserMappingPublic.create(data);
+  }
+  async resumePublicExamSession(session_id: string) {
+    const session = await ExamUserMappingPublic.findOne({
+      where: { session_id },
+    });
+    return {
       success: true,
       data: {
         session_id,
-        exam:session?.exam_id,
-        answers: session?.final_answers || [], 
+        exam: session?.exam_id,
+        answers: session?.final_answers || [],
         is_completed: session?.is_completed,
       },
-    });
+    };
   }
   async getPublicExamSessionBySessionId(session_id: string) {
     return await ExamUserMappingPublic.findOne({
@@ -549,11 +659,13 @@ async resumePublicExamSession(session_id:string){
     const result = paginate(ExamUserMappingPublic, {
       page: page,
       limit: limit,
-      attributes:["name","exam_id","submitted_at"],
-      
-       order: [ ["submitted_at", "DESC"],["id", "DESC"]],
+      attributes: ["name", "exam_id", "submitted_at"],
+
+      order: [
+        ["submitted_at", "DESC"],
+        ["id", "DESC"],
+      ],
     });
-    
 
     return result;
   }
@@ -562,25 +674,31 @@ async resumePublicExamSession(session_id:string){
     questionId: string,
     userAnswer: string,
     questionIndex: number,
-    snapshot: any
+    snapshot: any,
   ): Promise<any> {
     const transaction = await sequelize.transaction();
     try {
-      const session = await ExamSession.findByPk(sessionId, { transaction, lock: true });
+      const session = await ExamSession.findByPk(sessionId, {
+        transaction,
+        lock: true,
+      });
       if (!session) throw new Error("Session not found");
-      if (session.is_completed) throw new Error("Exam session already completed");
+      if (session.is_completed)
+        throw new Error("Exam session already completed");
 
       const container = this.getSessionContainer(session.answers_data);
       const answersData = container.answers;
-      const filteredAnswers = answersData.filter((answer: any) => answer.question_id !== questionId);
-      
+      const filteredAnswers = answersData.filter(
+        (answer: any) => answer.question_id !== questionId,
+      );
+
       const newAnswer = {
         question_id: questionId,
         user_answer: userAnswer,
         answered_at: new Date(),
         question_index: questionIndex,
       };
-      
+
       const updateData: any = {
         answers_data: {
           answers: [...filteredAnswers, newAnswer],
@@ -627,13 +745,23 @@ async resumePublicExamSession(session_id:string){
   }
 
   async findCompletedMappingBySession(sessionId: string, userId: string) {
-    return ExamUserMapping.findOne({ where: { session_id: sessionId, user_id: userId } });
+    return ExamUserMapping.findOne({
+      where: { session_id: sessionId, user_id: userId },
+    });
   }
 
-  async updateSessionStatus(sessionId: string, isCompleted: boolean, transaction: any) {
+  async updateSessionStatus(
+    sessionId: string,
+    isCompleted: boolean,
+    transaction: any,
+  ) {
     return ExamSession.update(
-      { is_completed: isCompleted, completed_at: new Date(), updated_on: new Date() },
-      { where: { id: sessionId }, transaction }
+      {
+        is_completed: isCompleted,
+        completed_at: new Date(),
+        updated_on: new Date(),
+      },
+      { where: { id: sessionId }, transaction },
     );
   }
 
@@ -683,7 +811,10 @@ async resumePublicExamSession(session_id:string){
   }
 
   async updateMapping(mappingId: string, data: any, transaction: any) {
-    return ExamUserMapping.update(data, { where: { id: mappingId }, transaction });
+    return ExamUserMapping.update(data, {
+      where: { id: mappingId },
+      transaction,
+    });
   }
 
   async getExamResults(sessionId: string, userId: string) {
@@ -698,7 +829,8 @@ async resumePublicExamSession(session_id:string){
         },
       ],
     });
-    if (!mapping) throw new Error(`Exam results not found for session ${sessionId}`);
+    if (!mapping)
+      throw new Error(`Exam results not found for session ${sessionId}`);
 
     return {
       mapping: mapping.toJSON(),
@@ -775,9 +907,17 @@ async resumePublicExamSession(session_id:string){
     return { mapping, exam };
   }
 
-  async getExamUserMappingByExamId(examId: string, userId: string, organizationId: string) {
+  async getExamUserMappingByExamId(
+    examId: string,
+    userId: string,
+    organizationId: string,
+  ) {
     const mapping = await ExamUserMapping.findOne({
-      where: { exam_id: examId, user_id: userId, organization_id: organizationId },
+      where: {
+        exam_id: examId,
+        user_id: userId,
+        organization_id: organizationId,
+      },
     });
     if (!mapping) return null;
     const exam = await Exam.findByPk(mapping.exam_id, {
@@ -821,18 +961,20 @@ async resumePublicExamSession(session_id:string){
     return record;
   }
 
-  async bulkLogExamPublishEvent(dataArray: {
-    assigned_id: string;
-    assignment_id: string;
-    user_id: string;
-    publish: boolean;
-  }[]) {
-    const payloads = dataArray.map(data => ({
+  async bulkLogExamPublishEvent(
+    dataArray: {
+      assigned_id: string;
+      assignment_id: string;
+      user_id: string;
+      publish: boolean;
+    }[],
+  ) {
+    const payloads = dataArray.map((data) => ({
       assigned_id: data.assigned_id,
       assignment_id: data.assignment_id,
       user_id: data.user_id,
       publish: data.publish,
-      created_at: new Date()
+      created_at: new Date(),
     }));
 
     return AssignedActionItemsTimelineModel.bulkCreate(payloads, {

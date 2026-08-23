@@ -43,7 +43,11 @@ export class MemberService {
     const page = Math.max(Number(query.page || 1), 1);
     const limit = Math.min(Math.max(Number(query.limit || 10), 1), 100);
     const active =
-      query.active === "true" ? true : query.active === "false" ? false : undefined;
+      query.active === "true"
+        ? true
+        : query.active === "false"
+          ? false
+          : undefined;
 
     return this.repository.listMembers({
       organization_id: organizationId,
@@ -83,7 +87,11 @@ export class MemberService {
     input: { password: string; confirm_password?: string },
   ) {
     this.validatePassword(input.password, input.confirm_password);
-    return this.repository.updatePassword(organizationId, userId, input.password);
+    return this.repository.updatePassword(
+      organizationId,
+      userId,
+      input.password,
+    );
   }
 
   assignRole(organizationId: string, userId: string, roleCode: string) {
@@ -115,7 +123,11 @@ export class MemberService {
       throw error;
     }
 
-    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+    if (
+      password.length < 8 ||
+      !/[A-Za-z]/.test(password) ||
+      !/[0-9]/.test(password)
+    ) {
       const error = new Error(
         "Password must be at least 8 characters and include at least one letter and one number",
       );

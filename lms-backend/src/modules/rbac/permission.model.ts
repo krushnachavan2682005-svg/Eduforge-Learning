@@ -10,8 +10,10 @@ export interface PermissionAttributes {
   updated_at?: Date;
 }
 
-export interface PermissionCreationAttributes
-  extends Optional<PermissionAttributes, "id" | "description" | "created_at" | "updated_at"> {}
+export interface PermissionCreationAttributes extends Optional<
+  PermissionAttributes,
+  "id" | "description" | "created_at" | "updated_at"
+> {}
 
 export class Permission
   extends Model<PermissionAttributes, PermissionCreationAttributes>
@@ -61,7 +63,8 @@ Permission.init(
     indexes: [{ unique: true, fields: ["code"] }],
     hooks: {
       beforeValidate: (permission) => {
-        if (permission.code) permission.code = permission.code.trim().toUpperCase();
+        if (permission.code)
+          permission.code = permission.code.trim().toUpperCase();
       },
       beforeUpdate: (permission) => {
         permission.updated_at = new Date();

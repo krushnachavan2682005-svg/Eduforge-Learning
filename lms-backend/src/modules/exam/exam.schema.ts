@@ -436,8 +436,10 @@ export const publicExamSubmitSchema = {
           required: ["question_id", "user_answer"],
           properties: {
             question_id: { type: "string", format: "uuid" },
-            user_answer: { type: ["string", "number", "boolean"],
-              maxLength: 1000 },
+            user_answer: {
+              type: ["string", "number", "boolean"],
+              maxLength: 1000,
+            },
           },
           additionalProperties: false,
         },

@@ -65,7 +65,9 @@ export function getBearerToken(req: FastifyRequest, reply: FastifyReply) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    reply.code(401).send({ success: false, message: "Authorization token is missing" });
+    reply
+      .code(401)
+      .send({ success: false, message: "Authorization token is missing" });
     return null;
   }
 

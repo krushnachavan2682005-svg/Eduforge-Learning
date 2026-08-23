@@ -24,7 +24,7 @@ export async function verifyToken(req: FastifyRequest, reply: FastifyReply) {
     // Inject organization ID into the tenant context
     const { asyncLocalStorage } = require("../constants/request-context");
     const store = asyncLocalStorage.getStore();
-    
+
     if (store && req.user.organization_id) {
       store.organizationId = req.user.organization_id;
     }

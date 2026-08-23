@@ -1,14 +1,14 @@
 export const uploadFileSchema = {
-  consumes: ['multipart/form-data'],
+  consumes: ["multipart/form-data"],
   body: {
-    type: 'object',
-    required: ['form-data'],
+    type: "object",
+    required: ["form-data"],
     properties: {
-      'form-data': {
-        type: 'string',
-        format: 'binary',
-        description: 'File to upload'
-      }
-    }
+      "form-data": {
+        type: "string",
+        format: "binary",
+        description: "File to upload",
+      },
+    },
   },
 };

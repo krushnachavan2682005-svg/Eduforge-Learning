@@ -1,4 +1,12 @@
-import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
+import {
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+  ConflictError,
+  InternalServerError,
+  ServiceUnavailableError,
+} from "../../utils/globalErrorHandlingFile";
 import { FastifyRequest, FastifyReply } from "fastify";
 import { LevelService } from "./level.service";
 const levelService = new LevelService();
@@ -48,7 +56,11 @@ export class LevelController {
       };
 
       const organization_id = req.user?.organization_id as string;
-      const items = await levelService.getLevels(Number(page), Number(limit), organization_id);
+      const items = await levelService.getLevels(
+        Number(page),
+        Number(limit),
+        organization_id,
+      );
 
       return reply.code(200).send({
         data: items,
@@ -62,8 +74,11 @@ export class LevelController {
 
   async getLevelById(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { id } = req.params as { id: string; };
-      const item = await levelService.getLevelById(req.user?.organization_id as string, id);
+      const { id } = req.params as { id: string };
+      const item = await levelService.getLevelById(
+        req.user?.organization_id as string,
+        id,
+      );
 
       if (!item) throw new NotFoundError("Level not found");
 
@@ -94,7 +109,8 @@ export class LevelController {
       });
     } catch (error: any) {
       req.log.error(error);
-      if (error instanceof ForbiddenError || error instanceof NotFoundError) throw error;
+      if (error instanceof ForbiddenError || error instanceof NotFoundError)
+        throw error;
       throw new InternalServerError("Failed to update level");
     }
   }
@@ -103,7 +119,7 @@ export class LevelController {
     try {
       const { id } = req.params as { id: string };
       const organization_id = req.user?.organization_id as string;
-      
+
       const deleted = await levelService.deleteLevel(id, organization_id);
 
       if (!deleted) throw new NotFoundError("Level not found");
@@ -113,7 +129,8 @@ export class LevelController {
       });
     } catch (error: any) {
       req.log.error(error);
-      if (error instanceof ForbiddenError || error instanceof NotFoundError) throw error;
+      if (error instanceof ForbiddenError || error instanceof NotFoundError)
+        throw error;
       throw new InternalServerError("Failed to delete level");
     }
   }

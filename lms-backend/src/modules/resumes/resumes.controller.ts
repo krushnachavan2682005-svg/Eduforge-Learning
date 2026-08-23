@@ -1,4 +1,12 @@
-import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
+import {
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+  ConflictError,
+  InternalServerError,
+  ServiceUnavailableError,
+} from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ResumeService } from "./resumes.service";
 import { ResumeInterface } from "./resumes.interface";
@@ -27,7 +35,7 @@ export class ResumeController {
       const { userId } = req.params as { userId: string };
       const body = req.body as ResumeInterface;
 
-      const record = await resumeService.updateResume(userId , body);
+      const record = await resumeService.updateResume(userId, body);
 
       return reply.code(200).send({
         data: record,
@@ -40,13 +48,12 @@ export class ResumeController {
     }
   }
 
-
   // Get Resume by User ID
   async getResumeByUserId(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { userId } = req.params as { userId: string };
       const resume = await resumeService.getResumeByUserId(userId);
-      
+
       return reply.code(200).send({
         data: resume,
         message: "Resume fetched successfully",
@@ -74,4 +81,3 @@ export class ResumeController {
     }
   }
 }
-

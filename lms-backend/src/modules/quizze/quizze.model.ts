@@ -34,8 +34,7 @@ Quiz.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    organization_id: { type: DataTypes.UUID, allowNull: false,
-    },
+    organization_id: { type: DataTypes.UUID, allowNull: false },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
@@ -51,5 +50,5 @@ Quiz.init(
         beforeSave(instance);
       },
     },
-  }
+  },
 );

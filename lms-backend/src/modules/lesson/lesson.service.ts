@@ -1,14 +1,28 @@
 import { lesson } from "./lesson.model";
 import { lessonRepsitory } from "./lesson.repository";
 import { CourseRepository } from "../course/course.repository";
-import { ConflictError, InternalServerError, NotFoundError } from "../../utils/globalErrorHandlingFile";
+import {
+  ConflictError,
+  InternalServerError,
+  NotFoundError,
+} from "../../utils/globalErrorHandlingFile";
 
 export class LessonService {
   private lessonRepo = new lessonRepsitory();
   private courseRepo = new CourseRepository();
 
-  async getAllLessons(organizationId: string, page: number, limit: number, filters: Record<string, any>) {
-    return await this.lessonRepo.getLesson(organizationId, page, limit, filters);
+  async getAllLessons(
+    organizationId: string,
+    page: number,
+    limit: number,
+    filters: Record<string, any>,
+  ) {
+    return await this.lessonRepo.getLesson(
+      organizationId,
+      page,
+      limit,
+      filters,
+    );
   }
 
   async getLessonById(organizationId: string, id: string) {
@@ -19,7 +33,10 @@ export class LessonService {
 
   async createLesson(organizationId: string, data: Partial<lesson>) {
     if (data.course_id) {
-      const course = await this.courseRepo.getCourseById(organizationId, data.course_id);
+      const course = await this.courseRepo.getCourseById(
+        organizationId,
+        data.course_id,
+      );
       if (!course || (Array.isArray(course) && course.length === 0)) {
         throw new NotFoundError("Course not found or access denied");
       }
@@ -35,9 +52,16 @@ export class LessonService {
     }
   }
 
-  async updateLesson(organizationId: string, id: string, data: Partial<lesson>) {
+  async updateLesson(
+    organizationId: string,
+    id: string,
+    data: Partial<lesson>,
+  ) {
     if (data.course_id) {
-      const course = await this.courseRepo.getCourseById(organizationId, data.course_id);
+      const course = await this.courseRepo.getCourseById(
+        organizationId,
+        data.course_id,
+      );
       if (!course || (Array.isArray(course) && course.length === 0)) {
         throw new NotFoundError("Course not found or access denied");
       }

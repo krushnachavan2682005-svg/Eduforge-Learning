@@ -1,5 +1,9 @@
 import { LevelRepository } from "./level.repository";
-import { ConflictError, ForbiddenError, NotFoundError } from "../../utils/globalErrorHandlingFile";
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from "../../utils/globalErrorHandlingFile";
 
 export class LevelService {
   private repository: LevelRepository;
@@ -8,8 +12,16 @@ export class LevelService {
     this.repository = new LevelRepository();
   }
 
-  async createLevel(data: { organization_id: string; level_name: string; start_date?: string; end_date?: string }) {
-    const existing = await this.repository.findLevelByName(data.organization_id, data.level_name);
+  async createLevel(data: {
+    organization_id: string;
+    level_name: string;
+    start_date?: string;
+    end_date?: string;
+  }) {
+    const existing = await this.repository.findLevelByName(
+      data.organization_id,
+      data.level_name,
+    );
     if (existing) {
       throw new ConflictError("This level name already exists for this client");
     }
@@ -17,7 +29,9 @@ export class LevelService {
   }
 
   async getLevels(page: number, limit: number, organizationId: string) {
-    return await this.repository.getLevels(page, limit, { organization_id: organizationId });
+    return await this.repository.getLevels(page, limit, {
+      organization_id: organizationId,
+    });
   }
 
   async getLevelById(organizationId: string, id: string) {
@@ -28,9 +42,14 @@ export class LevelService {
     const item = await this.repository.getLevelById(organizationId, id);
     if (!item) return null;
 
-    const isAssigned = await this.repository.isLevelAssignedToUsers(item.level_name, organizationId);
+    const isAssigned = await this.repository.isLevelAssignedToUsers(
+      item.level_name,
+      organizationId,
+    );
     if (isAssigned) {
-      throw new ForbiddenError("Level cannot be updated because it is assigned to a user.");
+      throw new ForbiddenError(
+        "Level cannot be updated because it is assigned to a user.",
+      );
     }
 
     return await this.repository.updateLevel(item, data);
@@ -40,9 +59,14 @@ export class LevelService {
     const item = await this.repository.getLevelById(organizationId, id);
     if (!item) return null;
 
-    const isAssigned = await this.repository.isLevelAssignedToUsers(item.level_name, organizationId);
+    const isAssigned = await this.repository.isLevelAssignedToUsers(
+      item.level_name,
+      organizationId,
+    );
     if (isAssigned) {
-      throw new ForbiddenError("Level cannot be deleted because it is assigned to a user.");
+      throw new ForbiddenError(
+        "Level cannot be deleted because it is assigned to a user.",
+      );
     }
 
     return await this.repository.deleteLevel(item);

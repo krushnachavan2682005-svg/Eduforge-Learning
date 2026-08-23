@@ -14,9 +14,14 @@ export class lessonController {
       course_id?: string;
     };
 
-    const lessons = await lessonService.getAllLessons(req.user.organization_id, Number(page), Number(limit), {
-      course_id,
-    });
+    const lessons = await lessonService.getAllLessons(
+      req.user.organization_id,
+      Number(page),
+      Number(limit),
+      {
+        course_id,
+      },
+    );
 
     return reply.status(200).send(lessons);
   }
@@ -24,7 +29,10 @@ export class lessonController {
   async getLessonById(req: FastifyRequest, reply: FastifyReply) {
     if (!req.user) return reply.code(401).send({ success: false });
     const { id } = req.params as { id: string };
-    const lesson = await lessonService.getLessonById(req.user.organization_id, id);
+    const lesson = await lessonService.getLessonById(
+      req.user.organization_id,
+      id,
+    );
 
     return reply
       .code(200)
@@ -35,8 +43,11 @@ export class lessonController {
     if (!req.user) return reply.code(401).send({ success: false });
     const body = req.body as lessonInterface;
     const data = { ...body };
-    const lesson = await lessonService.createLesson(req.user.organization_id, data);
-    
+    const lesson = await lessonService.createLesson(
+      req.user.organization_id,
+      data,
+    );
+
     return reply.code(201).send({
       data: {
         id: lesson?.id,
@@ -51,7 +62,11 @@ export class lessonController {
     const body = req.body as Partial<lesson>;
 
     const updateData = { ...body };
-    const updated = await lessonService.updateLesson(req.user.organization_id, id, updateData);
+    const updated = await lessonService.updateLesson(
+      req.user.organization_id,
+      id,
+      updateData,
+    );
 
     return reply.send({
       data: updated?.id,
@@ -66,4 +81,4 @@ export class lessonController {
 
     return reply.send({ message: "Lesson deleted" });
   }
-}
+}

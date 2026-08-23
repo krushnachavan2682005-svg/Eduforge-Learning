@@ -23,8 +23,7 @@ export interface ExamAttributes {
   updated_by: string;
 }
 
-interface ExamCreationAttributes
-  extends Optional<
+interface ExamCreationAttributes extends Optional<
   ExamAttributes,
   "id" | "created_on" | "updated_on" | "is_completed"
 > {}
@@ -43,8 +42,10 @@ export interface QuestionAttributes {
   updated_on: Date;
 }
 
-export interface QuestionCreationAttributes
-  extends Optional<QuestionAttributes, "id" | "created_on" | "updated_on"> {}
+export interface QuestionCreationAttributes extends Optional<
+  QuestionAttributes,
+  "id" | "created_on" | "updated_on"
+> {}
 
 export interface ExamSessionAttributes {
   id: string;
@@ -90,9 +91,9 @@ export interface ExamUserMappingPublicAttributes {
   session_id: string;
   started_at: Date;
   is_completed: boolean;
-  
-  name?:string|null;
-  email?: string|null;
+
+  name?: string | null;
+  email?: string | null;
   total_marks_obtained?: number;
   total_possible_marks?: number;
   percentage?: number;
@@ -106,12 +107,20 @@ export interface ExamUserMappingPublicAttributes {
   created_on: Date;
 }
 
-
 export type ExamUserMappingPublicCreationAttributes = Optional<
   ExamUserMappingPublicAttributes,
-  "id" | "created_on" | "name" | "email"  | "total_marks_obtained" |
-  "total_possible_marks" | "percentage" | "passed" |
-  "submitted_at" | "time_taken_minutes" | "final_answers" | "organization_id"
+  | "id"
+  | "created_on"
+  | "name"
+  | "email"
+  | "total_marks_obtained"
+  | "total_possible_marks"
+  | "percentage"
+  | "passed"
+  | "submitted_at"
+  | "time_taken_minutes"
+  | "final_answers"
+  | "organization_id"
 >;
 export interface ExamReviewAttributes {
   id: string;
@@ -226,7 +235,7 @@ Exam.init(
         exam.updated_on = new Date();
       },
     },
-  }
+  },
 );
 
 // ---------------- Question model ----------------
@@ -306,7 +315,7 @@ Question.init(
         question.updated_on = new Date();
       },
     },
-  }
+  },
 );
 
 // ---------------- ExamSession model ----------------
@@ -396,7 +405,7 @@ ExamSession.init(
         session.updated_on = new Date();
       },
     },
-  }
+  },
 );
 
 // ---------------- ExamUserMapping model ----------------
@@ -520,7 +529,7 @@ ExamUserMapping.init(
     tableName: "exam_user_mappings",
     modelName: "ExamUserMapping",
     timestamps: false,
-  }
+  },
 );
 
 //------------------Exam-User-Mapping for Public Users--------
@@ -533,16 +542,12 @@ class ExamUserMappingPublic
 {
   public id!: string;
 
- 
   public exam_id!: string;
   public session_id!: string;
   public started_at!: Date;
   public is_completed!: boolean;
   public email?: string;
-  public name?:string;
-
- 
-
+  public name?: string;
 
   public total_marks_obtained?: number;
   public total_possible_marks?: number;
@@ -577,16 +582,15 @@ ExamUserMappingPublic.init(
       allowNull: false,
       unique: true,
     },
-    name:{
-      type:DataTypes.STRING,
-      allowNull:true
+    name: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: true, 
+      allowNull: true,
     },
 
-  
     total_marks_obtained: {
       type: DataTypes.FLOAT,
       allowNull: true,
@@ -614,7 +618,7 @@ ExamUserMappingPublic.init(
 
     submitted_at: {
       type: DataTypes.DATE,
-      allowNull: true, 
+      allowNull: true,
     },
 
     time_taken_minutes: {
@@ -624,13 +628,13 @@ ExamUserMappingPublic.init(
 
     final_answers: {
       type: DataTypes.JSONB,
-      allowNull: true, 
+      allowNull: true,
     },
 
     is_completed: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false, 
+      defaultValue: false,
     },
 
     organization_id: {
@@ -645,10 +649,10 @@ ExamUserMappingPublic.init(
   },
   {
     sequelize,
-    tableName: "exam_user_mappings_public", 
+    tableName: "exam_user_mappings_public",
     modelName: "ExamUserMappingPublic",
     timestamps: false,
-  }
+  },
 );
 // ---------------- ExamReview model ----------------
 class ExamReview
@@ -723,7 +727,7 @@ ExamReview.init(
     tableName: "exam_reviews",
     modelName: "ExamReview",
     timestamps: false,
-  }
+  },
 );
 
 // ---------------- ExamAssignment model ----------------
@@ -780,7 +784,7 @@ ExamAssignment.init(
         assignment.updated_on = new Date();
       },
     },
-  }
+  },
 );
 
 // ==================== Associations ====================

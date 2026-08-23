@@ -15,8 +15,10 @@ export interface OrganizationUserAttributes {
   updated_at?: Date;
 }
 
-export interface OrganizationUserCreationAttributes
-  extends Optional<OrganizationUserAttributes, "id" | "is_active" | "created_at" | "updated_at"> {}
+export interface OrganizationUserCreationAttributes extends Optional<
+  OrganizationUserAttributes,
+  "id" | "is_active" | "created_at" | "updated_at"
+> {}
 
 export class OrganizationUser
   extends Model<OrganizationUserAttributes, OrganizationUserCreationAttributes>
@@ -96,5 +98,8 @@ OrganizationUser.belongsTo(Organization, {
   as: "organization",
 });
 
-User.belongsTo(Organization, { foreignKey: "organization_id", as: "organization" });
+User.belongsTo(Organization, {
+  foreignKey: "organization_id",
+  as: "organization",
+});
 Organization.hasMany(User, { foreignKey: "organization_id", as: "users" });

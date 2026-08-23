@@ -9,11 +9,10 @@ export class ResumeRepository {
     return resume.toJSON(); // return plain object instead of Sequelize instance
   }
 
-
   async getResumeByUserId(userId: string) {
     return await ResumeModel.findOne({
       where: { user_id: userId }, // use actual column name
-      raw: true
+      raw: true,
     });
   }
 
@@ -24,7 +23,6 @@ export class ResumeRepository {
 
     return count;
   }
-
 
   //  Delete resume
   async deleteResume(id: string) {
@@ -61,7 +59,7 @@ export class ResumeRepository {
       {
         replacements: { id },
         type: QueryTypes.SELECT,
-      }
+      },
     );
 
     return results[0] || null;

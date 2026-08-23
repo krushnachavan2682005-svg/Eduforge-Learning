@@ -10,8 +10,10 @@ export interface OrganizationAttributes {
   updated_at?: Date;
 }
 
-export interface OrganizationCreationAttributes
-  extends Optional<OrganizationAttributes, "id" | "is_active" | "created_at" | "updated_at"> {}
+export interface OrganizationCreationAttributes extends Optional<
+  OrganizationAttributes,
+  "id" | "is_active" | "created_at" | "updated_at"
+> {}
 
 export class Organization
   extends Model<OrganizationAttributes, OrganizationCreationAttributes>

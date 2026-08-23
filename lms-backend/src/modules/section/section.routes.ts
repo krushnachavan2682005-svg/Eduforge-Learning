@@ -4,27 +4,31 @@ import { Section } from "./section.model";
 import { sectionSchema } from "./section.schema";
 import { verifyToken } from "../../utils/auth";
 
-const controller= new sectionController()
+const controller = new sectionController();
 type CreateSectionBody = Partial<Section>;
 
 export default async function sectionRoutes(fastify: FastifyInstance) {
-  fastify.post("/section", { schema: sectionSchema ,preHandler: verifyToken }, (req, reply) =>
-    controller.createSection(req, reply)
+  fastify.post(
+    "/section",
+    { schema: sectionSchema, preHandler: verifyToken },
+    (req, reply) => controller.createSection(req, reply),
   );
 
-  fastify.get("/all-section",{ preHandler: verifyToken }, (req, reply) =>
-    controller.getAllSection(req, reply)
+  fastify.get("/all-section", { preHandler: verifyToken }, (req, reply) =>
+    controller.getAllSection(req, reply),
   );
 
-  fastify.get("/section/:id",{ preHandler: verifyToken }, (req, reply) =>
-    controller.getSectionById(req, reply)
+  fastify.get("/section/:id", { preHandler: verifyToken }, (req, reply) =>
+    controller.getSectionById(req, reply),
   );
 
-  fastify.put("/section/:id", { schema: sectionSchema ,preHandler: verifyToken}, (req, reply) =>
-    controller.updateSection(req, reply)
+  fastify.put(
+    "/section/:id",
+    { schema: sectionSchema, preHandler: verifyToken },
+    (req, reply) => controller.updateSection(req, reply),
   );
 
-  fastify.delete("/section/:id",{ preHandler: verifyToken }, (req, reply) =>
-    controller.deleteSection(req, reply)
+  fastify.delete("/section/:id", { preHandler: verifyToken }, (req, reply) =>
+    controller.deleteSection(req, reply),
   );
 }

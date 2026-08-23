@@ -1,6 +1,10 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { OrganizationService } from "./organization.service";
-import { InternalServerError, NotFoundError, UnauthorizedError } from "../../utils/globalErrorHandlingFile";
+import {
+  InternalServerError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../../utils/globalErrorHandlingFile";
 
 const organizationService = new OrganizationService();
 
@@ -22,9 +26,9 @@ export class OrganizationController {
       });
     } catch (error) {
       req.log.error(error);
-      if (error instanceof NotFoundError || error instanceof UnauthorizedError) throw error;
+      if (error instanceof NotFoundError || error instanceof UnauthorizedError)
+        throw error;
       throw new InternalServerError("Failed to fetch current organization");
     }
   }
 }
-

@@ -1,5 +1,11 @@
 import { StudentRepository } from "./student.repository";
-import { ForbiddenError, NotFoundError, ConflictError, InternalServerError, ValidationError } from "../../utils/globalErrorHandlingFile";
+import {
+  ForbiddenError,
+  NotFoundError,
+  ConflictError,
+  InternalServerError,
+  ValidationError,
+} from "../../utils/globalErrorHandlingFile";
 import { LocalEnrollmentStatus } from "./enrollment.model";
 import { OrganizationUser } from "../roles/role.model";
 import { User } from "../users/user.model";
@@ -19,7 +25,9 @@ export class StudentService {
     });
 
     if (!Boolean(membership)) {
-      throw new ForbiddenError("Student user does not belong to current organization");
+      throw new ForbiddenError(
+        "Student user does not belong to current organization",
+      );
     }
 
     const studentData = {
@@ -62,7 +70,10 @@ export class StudentService {
     const studentClass = await this.repository.getClassDetail(orgId, id);
     if (!studentClass) throw new NotFoundError("Class not found");
 
-    const studentCount = await this.repository.getStudentCountByClassId(orgId, id);
+    const studentCount = await this.repository.getStudentCountByClassId(
+      orgId,
+      id,
+    );
 
     return {
       ...studentClass.toJSON(),
@@ -97,27 +108,38 @@ export class StudentService {
     ]);
 
     if (!studentClass || !student) {
-      throw new NotFoundError("Class or student not found in current organization");
+      throw new NotFoundError(
+        "Class or student not found in current organization",
+      );
     }
 
     return this.repository.addStudentToClass(classId, studentId);
   }
 
-  async removeStudentFromClass(orgId: string, classId: string, studentId: string) {
+  async removeStudentFromClass(
+    orgId: string,
+    classId: string,
+    studentId: string,
+  ) {
     const [studentClass, student] = await Promise.all([
       this.repository.getClassById(orgId, classId),
       this.repository.getStudentById(orgId, studentId),
     ]);
 
     if (!studentClass || !student) {
-      throw new NotFoundError("Class or student not found in current organization");
+      throw new NotFoundError(
+        "Class or student not found in current organization",
+      );
     }
 
     return this.repository.removeStudentFromClass(classId, studentId);
   }
 
   async createEnrollment(orgId: string, data: any) {
-    const student = await this.repository.getStudentById(orgId, data.student_id);
+    const student = await this.repository.getStudentById(
+      orgId,
+      data.student_id,
+    );
     if (!student) {
       throw new NotFoundError("Student not found");
     }
@@ -130,10 +152,19 @@ export class StudentService {
     });
   }
 
-  private async attachCourseSummaries(organizationId: string, enrollments: any[]) {
-    const serialized = enrollments.map((enrollment: any) => enrollment.toJSON());
+  private async attachCourseSummaries(
+    organizationId: string,
+    enrollments: any[],
+  ) {
+    const serialized = enrollments.map((enrollment: any) =>
+      enrollment.toJSON(),
+    );
     const courseIds = Array.from(
-      new Set(serialized.map((enrollment: any) => enrollment.course_id).filter(Boolean)),
+      new Set(
+        serialized
+          .map((enrollment: any) => enrollment.course_id)
+          .filter(Boolean),
+      ),
     );
 
     if (!courseIds.length) return serialized;
@@ -165,7 +196,9 @@ export class StudentService {
       "completed",
       "cancelled",
     ];
-    const status = allowedStatuses.includes(query.status as LocalEnrollmentStatus)
+    const status = allowedStatuses.includes(
+      query.status as LocalEnrollmentStatus,
+    )
       ? query.status
       : undefined;
 
@@ -218,7 +251,11 @@ export class StudentService {
       dataToUpdate.completed_at = null;
     }
 
-    const updated = await this.repository.updateEnrollment(orgId, id, dataToUpdate);
+    const updated = await this.repository.updateEnrollment(
+      orgId,
+      id,
+      dataToUpdate,
+    );
     if (!updated) throw new NotFoundError("Enrollment not found");
 
     return this.getEnrollment(orgId, id);
@@ -228,8 +265,10 @@ export class StudentService {
     const student = await this.repository.getStudentById(orgId, studentId);
     if (!student) throw new NotFoundError("Student not found");
 
-    const enrollments = await this.repository.getEnrollmentsByStudent(orgId, studentId);
+    const enrollments = await this.repository.getEnrollmentsByStudent(
+      orgId,
+      studentId,
+    );
     return this.attachCourseSummaries(orgId, enrollments as any[]);
   }
 }
-

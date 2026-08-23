@@ -67,5 +67,5 @@ Reviews.init(
         beforeSave(instance);
       },
     },
-  }
+  },
 );
