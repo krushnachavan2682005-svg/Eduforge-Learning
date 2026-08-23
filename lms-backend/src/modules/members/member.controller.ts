@@ -7,7 +7,10 @@ export class MemberController {
   async create(req: FastifyRequest, reply: FastifyReply) {
     try {
       if (!req.user) return reply.code(401).send({ success: false });
-      const member = await service.createMember(req.user.organization_id, req.body as any);
+      const member = await service.createMember(
+        req.user.organization_id,
+        req.body as any,
+      );
       return reply.code(201).send({
         success: true,
         data: member,
@@ -32,7 +35,9 @@ export class MemberController {
       return reply.code(200).send({ success: true, data: members });
     } catch (error: any) {
       req.log.error(error);
-      return reply.code(500).send({ success: false, message: "Failed to fetch members" });
+      return reply
+        .code(500)
+        .send({ success: false, message: "Failed to fetch members" });
     }
   }
 
@@ -42,12 +47,16 @@ export class MemberController {
       const { id } = req.params as { id: string };
       const member = await service.getMember(req.user.organization_id, id);
       if (!member) {
-        return reply.code(404).send({ success: false, message: "Member not found" });
+        return reply
+          .code(404)
+          .send({ success: false, message: "Member not found" });
       }
       return reply.code(200).send({ success: true, data: member });
     } catch (error: any) {
       req.log.error(error);
-      return reply.code(500).send({ success: false, message: "Failed to fetch member" });
+      return reply
+        .code(500)
+        .send({ success: false, message: "Failed to fetch member" });
     }
   }
 
@@ -61,7 +70,9 @@ export class MemberController {
         req.body as any,
       );
       if (!member) {
-        return reply.code(404).send({ success: false, message: "Member not found" });
+        return reply
+          .code(404)
+          .send({ success: false, message: "Member not found" });
       }
       return reply.code(200).send({
         success: true,
@@ -86,13 +97,19 @@ export class MemberController {
         confirm_password?: string;
       };
 
-      const updated = await service.resetPassword(req.user.organization_id, id, {
-        password,
-        confirm_password,
-      });
+      const updated = await service.resetPassword(
+        req.user.organization_id,
+        id,
+        {
+          password,
+          confirm_password,
+        },
+      );
 
       if (!updated) {
-        return reply.code(404).send({ success: false, message: "Member not found" });
+        return reply
+          .code(404)
+          .send({ success: false, message: "Member not found" });
       }
 
       return reply.code(200).send({
@@ -112,9 +129,14 @@ export class MemberController {
     try {
       if (!req.user) return reply.code(401).send({ success: false });
       const { id } = req.params as { id: string };
-      const member = await service.deactivateMember(req.user.organization_id, id);
+      const member = await service.deactivateMember(
+        req.user.organization_id,
+        id,
+      );
       if (!member) {
-        return reply.code(404).send({ success: false, message: "Member not found" });
+        return reply
+          .code(404)
+          .send({ success: false, message: "Member not found" });
       }
       return reply.code(200).send({
         success: true,
@@ -123,7 +145,9 @@ export class MemberController {
       });
     } catch (error: any) {
       req.log.error(error);
-      return reply.code(500).send({ success: false, message: "Failed to deactivate member" });
+      return reply
+        .code(500)
+        .send({ success: false, message: "Failed to deactivate member" });
     }
   }
 
@@ -132,9 +156,15 @@ export class MemberController {
       if (!req.user) return reply.code(401).send({ success: false });
       const { id } = req.params as { id: string };
       const { role_code } = req.body as { role_code: string };
-      const member = await service.assignRole(req.user.organization_id, id, role_code);
+      const member = await service.assignRole(
+        req.user.organization_id,
+        id,
+        role_code,
+      );
       if (!member) {
-        return reply.code(404).send({ success: false, message: "Member not found" });
+        return reply
+          .code(404)
+          .send({ success: false, message: "Member not found" });
       }
       return reply.code(200).send({
         success: true,
@@ -154,9 +184,15 @@ export class MemberController {
     try {
       if (!req.user) return reply.code(401).send({ success: false });
       const { id, role_id } = req.params as { id: string; role_id: string };
-      const result = await service.removeRole(req.user.organization_id, id, role_id);
+      const result = await service.removeRole(
+        req.user.organization_id,
+        id,
+        role_id,
+      );
       if (!result) {
-        return reply.code(404).send({ success: false, message: "Member not found" });
+        return reply
+          .code(404)
+          .send({ success: false, message: "Member not found" });
       }
       return reply.code(200).send({
         success: true,
@@ -165,7 +201,9 @@ export class MemberController {
       });
     } catch (error: any) {
       req.log.error(error);
-      return reply.code(500).send({ success: false, message: "Failed to remove role" });
+      return reply
+        .code(500)
+        .send({ success: false, message: "Failed to remove role" });
     }
   }
 

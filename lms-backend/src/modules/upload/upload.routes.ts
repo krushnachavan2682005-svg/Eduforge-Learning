@@ -5,9 +5,9 @@ import { uploadFileSchema } from "./upload.schema";
 
 export default async function uploadRoutes(fastify: FastifyInstance) {
   fastify.post("/upload", { preHandler: verifyToken }, (req, reply) =>
-    uploadController.uploadFile(req, reply)
+    uploadController.uploadFile(req, reply),
   );
   fastify.post("/presigned-url", { preHandler: verifyToken }, (req, reply) =>
-    uploadController.generatePresignedUrl(req, reply)
+    uploadController.generatePresignedUrl(req, reply),
   );
 }

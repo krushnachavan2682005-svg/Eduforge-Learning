@@ -10,7 +10,11 @@ export class SectionService {
   }
 
   async getAllSection(organizationId: string, page: string, limit: string) {
-    return this.repository.getSection(organizationId, Number(page), Number(limit));
+    return this.repository.getSection(
+      organizationId,
+      Number(page),
+      Number(limit),
+    );
   }
 
   async getSectionById(organizationId: string, id: string) {
@@ -32,11 +36,15 @@ export class SectionService {
   async updateSection(
     organizationId: string,
     id: string,
-    body: Partial<SectionInterface>
+    body: Partial<SectionInterface>,
   ) {
     try {
       const updateData = { ...body };
-      return await this.repository.updateSection(organizationId, id, updateData);
+      return await this.repository.updateSection(
+        organizationId,
+        id,
+        updateData,
+      );
     } catch (error) {
       if (error instanceof Error && error.message.includes("already exists")) {
         throw new ConflictError("Failed to update section: already exists");

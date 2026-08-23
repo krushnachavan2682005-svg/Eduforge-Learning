@@ -11,8 +11,10 @@ export interface RolePermissionAttributes {
   updated_at?: Date;
 }
 
-export interface RolePermissionCreationAttributes
-  extends Optional<RolePermissionAttributes, "id" | "created_at" | "updated_at"> {}
+export interface RolePermissionCreationAttributes extends Optional<
+  RolePermissionAttributes,
+  "id" | "created_at" | "updated_at"
+> {}
 
 export class RolePermission
   extends Model<RolePermissionAttributes, RolePermissionCreationAttributes>
@@ -80,4 +82,7 @@ Permission.belongsToMany(Role, {
   as: "roles",
 });
 RolePermission.belongsTo(Role, { foreignKey: "role_id", as: "role" });
-RolePermission.belongsTo(Permission, { foreignKey: "permission_id", as: "permission" });
+RolePermission.belongsTo(Permission, {
+  foreignKey: "permission_id",
+  as: "permission",
+});

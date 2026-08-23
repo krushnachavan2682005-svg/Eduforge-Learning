@@ -1,4 +1,12 @@
-import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
+import {
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+  ConflictError,
+  InternalServerError,
+  ServiceUnavailableError,
+} from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import UploadService from "./upload.service";
 
@@ -16,7 +24,7 @@ class UploadController {
       const result = await UploadService.uploadFile(
         request.server,
         file,
-        folder
+        folder,
       );
 
       reply.code(201).send(result);
@@ -33,7 +41,7 @@ class UploadController {
 
       const result = await UploadService.generatePresignedUrl(
         request.server,
-        key
+        key,
       );
 
       reply.code(200).send({

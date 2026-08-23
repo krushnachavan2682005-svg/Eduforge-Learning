@@ -37,17 +37,17 @@ declare module "fastify" {
   interface FastifyInstance {
     s3Upload: (
       file: any,
-      folder: string
+      folder: string,
     ) => Promise<{ key: string; url: string }>;
     s3UploadBuffer: (
       buffer: Buffer,
       path: string,
-      options?: any
+      options?: any,
     ) => Promise<{ key: string; url: string }>;
     s3Presign: (
       key: string,
       expiresIn?: number,
-      download?: boolean
+      download?: boolean,
     ) => Promise<string>;
     s3Delete: (key: string) => Promise<void>;
     s3DeleteMany: (keys: string[]) => Promise<void>;
@@ -82,7 +82,7 @@ export default fp<S3PluginOptions>(async (fastify, opts) => {
         Body: file.file,
         ContentType: file.mimetype || guessMime(filename),
         ACL: ObjectCannedACL.public_read,
-      })
+      }),
     );
 
     const url = `https://${bucketName}.s3.${region}.amazonaws.com/${key}`;
@@ -103,12 +103,12 @@ export default fp<S3PluginOptions>(async (fastify, opts) => {
           Key: path,
           Body: buffer,
           ContentType: contentType,
-        })
+        }),
       );
 
       const url = `https://${bucketName}.s3.${region}.amazonaws.com/${path}`;
       return { key: path, url };
-    }
+    },
   );
 
   fastify.decorate("s3Url", (key: string) => {
@@ -131,7 +131,7 @@ export default fp<S3PluginOptions>(async (fastify, opts) => {
 
       const signedUrl = await getSignedUrl(s3, command, { expiresIn });
       return signedUrl;
-    }
+    },
   );
 
   fastify.decorate("s3Delete", async (key: string) => {
@@ -143,7 +143,7 @@ export default fp<S3PluginOptions>(async (fastify, opts) => {
       new DeleteObjectsCommand({
         Bucket: bucketName,
         Delete: { Objects: keys.map((Key) => ({ Key })) },
-      })
+      }),
     );
   });
 });

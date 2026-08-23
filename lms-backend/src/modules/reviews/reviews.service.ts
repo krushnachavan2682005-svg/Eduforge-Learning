@@ -28,12 +28,14 @@ export class ReviewsService {
   async deleteReview(id: string) {
     const review = await this.repository.findById(id);
     if (!review) return null; // We'll map this to NotFoundError in controller, or throw it here. Let's throw here since delete naturally throws 404 in controller.
-    
+
     await this.repository.deleteReview(review);
     return true;
   }
 
   async getAllReviews(page: number, limit: number, organizationId: string) {
-    return await this.repository.getAllReviews(page, limit, { organization_id: organizationId });
+    return await this.repository.getAllReviews(page, limit, {
+      organization_id: organizationId,
+    });
   }
 }

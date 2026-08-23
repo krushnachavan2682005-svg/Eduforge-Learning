@@ -20,14 +20,15 @@ const Controller = new ExamController();
 export default async function examRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/exams",
-    { schema: createFullExamSchema, preHandler: requirePermission("EXAM_CREATE") },
+    {
+      schema: createFullExamSchema,
+      preHandler: requirePermission("EXAM_CREATE"),
+    },
     (req, reply) => Controller.createExam(req, reply),
   );
 
-  fastify.get(
-    "/all-exams",
-    { preHandler: verifyToken },
-    (req, reply) => Controller.getExams(req, reply),
+  fastify.get("/all-exams", { preHandler: verifyToken }, (req, reply) =>
+    Controller.getExams(req, reply),
   );
 
   fastify.get("/exam/:id", { preHandler: verifyToken }, (req, reply) =>
@@ -43,12 +44,17 @@ export default async function examRoutes(fastify: FastifyInstance) {
 
   fastify.put(
     "/exam/:id",
-    { schema: updateFullExamSchema, preHandler: requirePermission("EXAM_UPDATE") },
+    {
+      schema: updateFullExamSchema,
+      preHandler: requirePermission("EXAM_UPDATE"),
+    },
     (req, reply) => Controller.updateExam(req, reply),
   );
 
-  fastify.delete("/exam/:id", { preHandler: requirePermission("EXAM_DELETE") }, (req, reply) =>
-    Controller.deleteExam(req, reply),
+  fastify.delete(
+    "/exam/:id",
+    { preHandler: requirePermission("EXAM_DELETE") },
+    (req, reply) => Controller.deleteExam(req, reply),
   );
 
   // Start a new exam session for an assigned user
@@ -82,10 +88,10 @@ export default async function examRoutes(fastify: FastifyInstance) {
   // Get student's exam review by exam_id
   fastify.get(
     "/exam/:exam_id/review_student_id/:user_id",
-    { 
-      preHandler: verifyToken
+    {
+      preHandler: verifyToken,
     },
-    (req, reply) => Controller.getStudentExamReview(req, reply)
+    (req, reply) => Controller.getStudentExamReview(req, reply),
   );
 
   // Get exam results
@@ -129,5 +135,4 @@ export default async function examRoutes(fastify: FastifyInstance) {
     { schema: getSubmissionForReviewSchema, preHandler: verifyToken },
     (req, reply) => Controller.getSubmissionForReview(req, reply),
   );
-
 }

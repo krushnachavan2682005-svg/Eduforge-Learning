@@ -16,7 +16,7 @@ export class ResumeService {
 
   async updateResume(userId: string, data: ResumeInterface) {
     const count = await this.repository.updateResume(userId, data);
-    
+
     if (count === 0) {
       throw new NotFoundError("Resume not found");
     }
@@ -27,7 +27,7 @@ export class ResumeService {
 
   async getResumeByUserId(userId: string) {
     const resume = await this.repository.getResumeByUserId(userId);
-    
+
     if (!resume) {
       throw new NotFoundError("Resume not found for this user");
     }
@@ -37,7 +37,7 @@ export class ResumeService {
 
   async deleteResume(id: string) {
     const deleted = await this.repository.deleteResume(id);
-    
+
     if (!deleted) {
       throw new NotFoundError("Resume not found");
     }

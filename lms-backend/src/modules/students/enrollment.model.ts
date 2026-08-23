@@ -21,8 +21,10 @@ export interface LocalEnrollmentAttributes {
   updated_at?: Date;
 }
 
-export interface LocalEnrollmentCreationAttributes
-  extends Optional<LocalEnrollmentAttributes, "id" | "status" | "enrolled_at" | "completed_at" | "created_at" | "updated_at"> {}
+export interface LocalEnrollmentCreationAttributes extends Optional<
+  LocalEnrollmentAttributes,
+  "id" | "status" | "enrolled_at" | "completed_at" | "created_at" | "updated_at"
+> {}
 
 export class LocalEnrollment
   extends Model<LocalEnrollmentAttributes, LocalEnrollmentCreationAttributes>
@@ -102,5 +104,8 @@ LocalEnrollment.belongsTo(Organization, {
   foreignKey: "organization_id",
   as: "organization",
 });
-Student.hasMany(LocalEnrollment, { foreignKey: "student_id", as: "enrollments" });
+Student.hasMany(LocalEnrollment, {
+  foreignKey: "student_id",
+  as: "enrollments",
+});
 LocalEnrollment.belongsTo(Student, { foreignKey: "student_id", as: "student" });

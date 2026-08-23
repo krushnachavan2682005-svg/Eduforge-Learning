@@ -5,7 +5,7 @@ import { paginate } from "../../utils/pagination";
 export class sectionRepository {
   async getSection(organizationId: string, page: number, limit: number) {
     const finalFilters = { organization_id: organizationId };
-    
+
     const data = await paginate(Section, {
       page: Number(page),
       limit: Number(limit),
@@ -78,14 +78,22 @@ export class sectionRepository {
     return Section.create(data as any);
   }
 
-  async updateSection(organizationId: string, id: string, data: Partial<Section>) {
-    const lesson = await Section.findOne({ where: { id, organization_id: organizationId } });
+  async updateSection(
+    organizationId: string,
+    id: string,
+    data: Partial<Section>,
+  ) {
+    const lesson = await Section.findOne({
+      where: { id, organization_id: organizationId },
+    });
     if (!lesson) return null;
     return lesson.update(data);
   }
 
   async delete(organizationId: string, id: string) {
-    const lesson = await Section.findOne({ where: { id, organization_id: organizationId } });
+    const lesson = await Section.findOne({
+      where: { id, organization_id: organizationId },
+    });
     if (!lesson) return null;
     await lesson?.destroy();
     return lesson;

@@ -13,8 +13,10 @@ export interface StudentClassAttributes {
   updated_at?: Date;
 }
 
-export interface StudentClassCreationAttributes
-  extends Optional<StudentClassAttributes, "id" | "description" | "created_at" | "updated_at"> {}
+export interface StudentClassCreationAttributes extends Optional<
+  StudentClassAttributes,
+  "id" | "description" | "created_at" | "updated_at"
+> {}
 
 export class StudentClass
   extends Model<StudentClassAttributes, StudentClassCreationAttributes>
@@ -67,7 +69,13 @@ StudentClass.init(
   },
 );
 
-Organization.hasMany(StudentClass, { foreignKey: "organization_id", as: "classes" });
-StudentClass.belongsTo(Organization, { foreignKey: "organization_id", as: "organization" });
+Organization.hasMany(StudentClass, {
+  foreignKey: "organization_id",
+  as: "classes",
+});
+StudentClass.belongsTo(Organization, {
+  foreignKey: "organization_id",
+  as: "organization",
+});
 User.hasMany(StudentClass, { foreignKey: "created_by", as: "created_classes" });
 StudentClass.belongsTo(User, { foreignKey: "created_by", as: "creator" });

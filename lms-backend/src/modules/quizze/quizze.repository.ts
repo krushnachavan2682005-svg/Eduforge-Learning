@@ -1,18 +1,13 @@
 import { Quiz } from "./quizze.model";
 import { paginate } from "../../utils/pagination";
 
-
 export class QuizRepsitory {
-  async getQuiz(
-    organizationId: string,
-    page: number,
-    limit: number
-  ) {
+  async getQuiz(organizationId: string, page: number, limit: number) {
     const data = await paginate(Quiz, {
       page: Number(page),
       limit: Number(limit),
       filters: { organization_id: organizationId },
-      attributes: ["id",  "lesson_id", "question","options", "created_at"],
+      attributes: ["id", "lesson_id", "question", "options", "created_at"],
       order: [["created_at", "DESC"]],
     });
     return data;
@@ -21,7 +16,7 @@ export class QuizRepsitory {
   async getQuizById(organizationId: string, id: string) {
     return Quiz.findOne({
       where: { id, organization_id: organizationId },
-      attributes: ["id",  "lesson_id", "question","options", "created_at"],
+      attributes: ["id", "lesson_id", "question", "options", "created_at"],
     });
   }
 

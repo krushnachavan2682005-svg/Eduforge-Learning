@@ -9,7 +9,11 @@ import { UserRole } from "../rbac/user-role.model";
 import { Student } from "../students/student.model";
 import { User } from "../users/user.model";
 
-export type MemberRoleCode = "teacher" | "student" | "organization_admin" | "reviewer";
+export type MemberRoleCode =
+  | "teacher"
+  | "student"
+  | "organization_admin"
+  | "reviewer";
 
 export interface CreateMemberInput {
   organization_id: string;
@@ -85,7 +89,11 @@ export class MemberRepository {
         { transaction },
       );
 
-      const role = await this.findRoleByCode(input.role, input.organization_id, transaction);
+      const role = await this.findRoleByCode(
+        input.role,
+        input.organization_id,
+        transaction,
+      );
       if (!role) {
         const error = new Error(`Role '${input.role}' was not found`);
         (error as any).statusCode = 404;
@@ -161,7 +169,10 @@ export class MemberRepository {
     });
 
     const userIds = memberships.rows.map((membership) => membership.user_id);
-    const rolesByUser = await this.getRolesByUserIds(input.organization_id, userIds);
+    const rolesByUser = await this.getRolesByUserIds(
+      input.organization_id,
+      userIds,
+    );
 
     let items = memberships.rows.map((membership: any) =>
       this.serializeMember(membership, rolesByUser[membership.user_id] || []),
@@ -179,7 +190,9 @@ export class MemberRepository {
         page: input.page,
         limit: input.limit,
         total: input.role ? items.length : memberships.count,
-        totalPages: Math.ceil((input.role ? items.length : memberships.count) / input.limit),
+        totalPages: Math.ceil(
+          (input.role ? items.length : memberships.count) / input.limit,
+        ),
       },
     };
   }
@@ -222,17 +235,27 @@ export class MemberRepository {
       const user = (membership as any).user as User;
       await user.update(
         {
-          ...(data.first_name !== undefined ? { first_name: data.first_name.trim() } : {}),
-          ...(data.last_name !== undefined ? { last_name: data.last_name.trim() } : {}),
-          ...(data.email !== undefined ? { email: data.email.trim().toLowerCase() } : {}),
-          ...(data.is_active !== undefined ? { is_active: data.is_active } : {}),
+          ...(data.first_name !== undefined
+            ? { first_name: data.first_name.trim() }
+            : {}),
+          ...(data.last_name !== undefined
+            ? { last_name: data.last_name.trim() }
+            : {}),
+          ...(data.email !== undefined
+            ? { email: data.email.trim().toLowerCase() }
+            : {}),
+          ...(data.is_active !== undefined
+            ? { is_active: data.is_active }
+            : {}),
         },
         { transaction },
       );
 
       await membership.update(
         {
-          ...(data.is_active !== undefined ? { is_active: data.is_active } : {}),
+          ...(data.is_active !== undefined
+            ? { is_active: data.is_active }
+            : {}),
         },
         { transaction },
       );
@@ -245,9 +268,15 @@ export class MemberRepository {
       if (student) {
         await student.update(
           {
-            ...(data.first_name !== undefined ? { first_name: data.first_name.trim() } : {}),
-            ...(data.last_name !== undefined ? { last_name: data.last_name.trim() } : {}),
-            ...(data.email !== undefined ? { email: data.email.trim().toLowerCase() } : {}),
+            ...(data.first_name !== undefined
+              ? { first_name: data.first_name.trim() }
+              : {}),
+            ...(data.last_name !== undefined
+              ? { last_name: data.last_name.trim() }
+              : {}),
+            ...(data.email !== undefined
+              ? { email: data.email.trim().toLowerCase() }
+              : {}),
             ...(data.phone !== undefined ? { phone: data.phone } : {}),
             ...(data.is_active !== undefined
               ? { status: data.is_active ? "active" : "inactive" }
@@ -265,7 +294,11 @@ export class MemberRepository {
     return this.updateMember(organizationId, userId, { is_active: false });
   }
 
-  async updatePassword(organizationId: string, userId: string, password: string) {
+  async updatePassword(
+    organizationId: string,
+    userId: string,
+    password: string,
+  ) {
     const membership = await OrganizationUser.findOne({
       where: { organization_id: organizationId, user_id: userId },
       include: [{ model: User, as: "user" }],
@@ -329,7 +362,10 @@ export class MemberRepository {
   async listRoles(organizationId: string) {
     return Role.findAll({
       where: {
-        [Op.or]: [{ organization_id: organizationId }, { organization_id: null }],
+        [Op.or]: [
+          { organization_id: organizationId },
+          { organization_id: null },
+        ],
       },
       order: [
         ["is_system_role", "DESC"],
@@ -350,7 +386,10 @@ export class MemberRepository {
     return Role.findOne({
       where: {
         code: code.trim().toLowerCase(),
-        [Op.or]: [{ organization_id: organizationId }, { organization_id: null }],
+        [Op.or]: [
+          { organization_id: organizationId },
+          { organization_id: null },
+        ],
       },
       order: [["organization_id", "DESC"]],
       transaction,

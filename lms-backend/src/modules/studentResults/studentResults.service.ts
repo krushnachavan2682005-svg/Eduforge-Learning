@@ -15,19 +15,19 @@ export class StudentResultsService {
     userId: string,
     page: number = 1,
     limit: number = 10,
-    reviewStatus?: string
+    reviewStatus?: string,
   ) {
     const studentName = await this.studentRepository.getStudentDisplayName(
       organizationId,
-      userId
+      userId,
     );
-    
+
     const result = await this.repository.getResultsByUserId(
       organizationId,
       userId,
       page,
       limit,
-      reviewStatus
+      reviewStatus,
     );
 
     return {
@@ -41,22 +41,26 @@ export class StudentResultsService {
     organizationId: string,
     page: number = 1,
     limit: number = 10,
-    reviewStatus?: string
+    reviewStatus?: string,
   ) {
     const result = await this.repository.getAllResults(
       organizationId,
       page,
       limit,
-      reviewStatus
+      reviewStatus,
     );
 
     const userIds = [
       ...new Set(result.data.map((r: any) => r.user_id).filter(Boolean)),
     ];
 
-    const nameMap = userIds.length > 0 
-      ? await this.studentRepository.getStudentNamesByUserIds(organizationId, userIds as string[])
-      : {};
+    const nameMap =
+      userIds.length > 0
+        ? await this.studentRepository.getStudentNamesByUserIds(
+            organizationId,
+            userIds as string[],
+          )
+        : {};
 
     const data = result.data.map((r: any) => ({
       ...r,

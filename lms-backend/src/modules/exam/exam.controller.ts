@@ -1,4 +1,12 @@
-import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
+import {
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+  ConflictError,
+  InternalServerError,
+  ServiceUnavailableError,
+} from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { v4 as uuid } from "uuid";
 import { QueryTypes, UUID } from "sequelize";
@@ -41,7 +49,11 @@ export class ExamController {
         });
       }
 
-      const createdExam = await examService.createExam(organizationId, userId, body);
+      const createdExam = await examService.createExam(
+        organizationId,
+        userId,
+        body,
+      );
 
       return reply.code(201).send({
         success: true,
@@ -66,7 +78,7 @@ export class ExamController {
         user_id?: string;
       };
       const organizationId = req.user?.organization_id as string;
-      
+
       const { exams, total } = await examService.getExams(
         organizationId,
         Number(page) || 1,
@@ -143,13 +155,18 @@ export class ExamController {
           message: "Cross-organization access is forbidden",
         });
       }
-      
+
       const body = req.body as IExamUpdate & {
         updated_by: string;
         exam_start_time?: string;
       };
 
-      const updated = await examService.updateExam(organizationId, id, userId, body);
+      const updated = await examService.updateExam(
+        organizationId,
+        id,
+        userId,
+        body,
+      );
 
       return reply.send({
         success: true,
@@ -181,22 +198,43 @@ export class ExamController {
 
   async startExam(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { user_id, exam_id } = req.params as { user_id: string; exam_id: string };
+      const { user_id, exam_id } = req.params as {
+        user_id: string;
+        exam_id: string;
+      };
       const organizationId = req.user?.organization_id as string;
       if (!req.user) {
-        return reply.code(401).send({ success: false, message: "Authentication required" });
+        return reply
+          .code(401)
+          .send({ success: false, message: "Authentication required" });
       }
       if (!organizationId) {
-        return reply.code(403).send({ success: false, message: "Cross-organization access is forbidden" });
+        return reply
+          .code(403)
+          .send({
+            success: false,
+            message: "Cross-organization access is forbidden",
+          });
       }
       if (req.user.sub !== user_id) {
-        return reply.code(403).send({ success: false, message: "Students can only start their own assigned tests." });
+        return reply
+          .code(403)
+          .send({
+            success: false,
+            message: "Students can only start their own assigned tests.",
+          });
       }
       if (!user_id || !exam_id) {
-        throw new ValidationError("User ID and Exam ID are required in route parameters");
+        throw new ValidationError(
+          "User ID and Exam ID are required in route parameters",
+        );
       }
 
-      const response = await examService.startExam(organizationId, user_id, exam_id);
+      const response = await examService.startExam(
+        organizationId,
+        user_id,
+        exam_id,
+      );
 
       return reply.send({
         success: true,
@@ -226,7 +264,11 @@ export class ExamController {
         throw new ValidationError("Exam ID is required");
       }
 
-      const data = await examService.startPublicExam(exam_id, { first_name, last_name, email });
+      const data = await examService.startPublicExam(exam_id, {
+        first_name,
+        last_name,
+        email,
+      });
 
       return reply.send({
         success: true,
@@ -244,8 +286,11 @@ export class ExamController {
 
   async savePublicExamAnswer(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { exam_id, session_id } = req.params as { exam_id: string; session_id: string };
-      
+      const { exam_id, session_id } = req.params as {
+        exam_id: string;
+        session_id: string;
+      };
+
       if (!exam_id || !session_id) {
         throw new ValidationError("Exam ID and Session ID are required");
       }
@@ -255,7 +300,11 @@ export class ExamController {
         throw new ValidationError("Answers array is required");
       }
 
-      const mergedAnswers = await examService.savePublicExamAnswer(exam_id, session_id, body.answers as any);
+      const mergedAnswers = await examService.savePublicExamAnswer(
+        exam_id,
+        session_id,
+        body.answers as any,
+      );
 
       return reply.code(200).send({
         success: true,
@@ -272,7 +321,7 @@ export class ExamController {
     try {
       const { session_id } = req.params as { session_id: string };
       const data = await examService.resumePublicExamSession(session_id);
-      
+
       return reply.status(200).send({
         success: true,
         data,
@@ -285,10 +334,15 @@ export class ExamController {
 
   async submitPublicExam(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { exam_id, session_id } = req.params as { exam_id: string; session_id: string };
+      const { exam_id, session_id } = req.params as {
+        exam_id: string;
+        session_id: string;
+      };
 
       if (!exam_id || !session_id) {
-        throw new ValidationError("Exam ID is required & Session Id Is Required");
+        throw new ValidationError(
+          "Exam ID is required & Session Id Is Required",
+        );
       }
 
       const body = req.body as IPublicExamSubmitRequest;
@@ -296,7 +350,11 @@ export class ExamController {
         throw new ValidationError("Answers array is required");
       }
 
-      const data = await examService.submitPublicExam(exam_id, session_id, body.answers as any);
+      const data = await examService.submitPublicExam(
+        exam_id,
+        session_id,
+        body.answers as any,
+      );
 
       return reply.send({
         success: true,
@@ -314,8 +372,14 @@ export class ExamController {
 
   async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { page = "1", limit = "10" } = req.query as { page?: string; limit?: string };
-      const data = await examService.getPublicExamResult(Number(page), Number(limit));
+      const { page = "1", limit = "10" } = req.query as {
+        page?: string;
+        limit?: string;
+      };
+      const data = await examService.getPublicExamResult(
+        Number(page),
+        Number(limit),
+      );
 
       return reply.send({
         success: true,
@@ -333,7 +397,10 @@ export class ExamController {
       const user_id = params.user_id;
 
       const organizationId = req.user?.organization_id as string;
-      if (!req.user) return reply.code(401).send({ success: false, message: "Authentication required" });
+      if (!req.user)
+        return reply
+          .code(401)
+          .send({ success: false, message: "Authentication required" });
       if (req.user.sub !== user_id) {
         return reply.code(403).send({
           success: false,
@@ -352,7 +419,9 @@ export class ExamController {
         body.current_question_index === undefined ||
         body.current_question_index < 0
       ) {
-        throw new ValidationError("Session ID, Question ID, user answer, and valid current question index are required");
+        throw new ValidationError(
+          "Session ID, Question ID, user answer, and valid current question index are required",
+        );
       }
 
       const response = await examService.saveAnswer(
@@ -361,7 +430,7 @@ export class ExamController {
         body.session_id,
         body.question_id,
         body.user_answer,
-        body.current_question_index
+        body.current_question_index,
       );
 
       const responseData = {
@@ -402,7 +471,10 @@ export class ExamController {
       const user_id = params.user_id;
 
       const organizationId = req.user?.organization_id as string;
-      if (!req.user) return reply.code(401).send({ success: false, message: "Authentication required" });
+      if (!req.user)
+        return reply
+          .code(401)
+          .send({ success: false, message: "Authentication required" });
       if (req.user.sub !== user_id) {
         return reply.code(403).send({
           success: false,
@@ -410,10 +482,13 @@ export class ExamController {
         });
       }
 
-      if (!body.session_id)
-        throw new ValidationError("Session ID is required");
+      if (!body.session_id) throw new ValidationError("Session ID is required");
 
-      const submissionResult = await examService.submitExam(organizationId, user_id, body.session_id);
+      const submissionResult = await examService.submitExam(
+        organizationId,
+        user_id,
+        body.session_id,
+      );
 
       if (submissionResult.alreadyCompleted) {
         return reply.code(200).send({
@@ -449,10 +524,13 @@ export class ExamController {
       const user_id = params.user_id;
       const organizationId = req.user?.organization_id as string;
 
-      if (!session_id)
-        throw new ValidationError("Session ID is required");
+      if (!session_id) throw new ValidationError("Session ID is required");
 
-      const results = await examService.getExamResults(organizationId, user_id, session_id);
+      const results = await examService.getExamResults(
+        organizationId,
+        user_id,
+        session_id,
+      );
       return reply.send({
         success: true,
         data: results,
@@ -471,7 +549,9 @@ export class ExamController {
       const organizationId = req.user?.organization_id as string;
 
       if (!session_id)
-        throw new ValidationError("Session ID is required in route parameters.");
+        throw new ValidationError(
+          "Session ID is required in route parameters.",
+        );
 
       const reviewData: IReviewExamRequest = {
         session_id,
@@ -481,7 +561,11 @@ export class ExamController {
           : {}),
       };
 
-      const reviewResult = await examService.reviewExam(organizationId, session_id, reviewData);
+      const reviewResult = await examService.reviewExam(
+        organizationId,
+        session_id,
+        reviewData,
+      );
       return reply.code(200).send({
         success: true,
         data: reviewResult,
@@ -525,7 +609,7 @@ export class ExamController {
         organizationId,
         exam_id,
         user_id || [],
-        classIds
+        classIds,
       );
 
       return reply.code(201).send({
@@ -547,7 +631,10 @@ export class ExamController {
         limit?: string;
       };
 
-      if (!req.user) return reply.code(401).send({ success: false, message: "Authentication required" });
+      if (!req.user)
+        return reply
+          .code(401)
+          .send({ success: false, message: "Authentication required" });
       if (req.user.sub !== user_id) {
         return reply.code(403).send({
           success: false,
@@ -559,7 +646,12 @@ export class ExamController {
       const limitNum = Number(limit) > 0 ? Number(limit) : 10;
       const organizationId = req.user?.organization_id as string;
 
-      const { items: exams, pagination } = await examService.getAssignedExams(organizationId, user_id, pageNum, limitNum);
+      const { items: exams, pagination } = await examService.getAssignedExams(
+        organizationId,
+        user_id,
+        pageNum,
+        limitNum,
+      );
 
       return reply.code(200).send({
         success: true,
@@ -583,10 +675,17 @@ export class ExamController {
       };
 
       if (!assigned_id || !assignment_id || !user_id) {
-        throw new ValidationError("assigned_id, assignment_id and user_id are required");
+        throw new ValidationError(
+          "assigned_id, assignment_id and user_id are required",
+        );
       }
 
-      await examService.publishAssignedExam(assigned_id, assignment_id, user_id, publish);
+      await examService.publishAssignedExam(
+        assigned_id,
+        assignment_id,
+        user_id,
+        publish,
+      );
 
       return reply.code(201).send({
         message: "Publish status recorded",
@@ -605,7 +704,10 @@ export class ExamController {
     try {
       const { user_id } = req.params as { user_id?: string };
       const organizationId = req.user?.organization_id as string;
-      const timeline = await examService.getAssignedExamPublishTimeline(organizationId, user_id);
+      const timeline = await examService.getAssignedExamPublishTimeline(
+        organizationId,
+        user_id,
+      );
 
       return reply.code(200).send({
         data: timeline,
@@ -661,12 +763,20 @@ export class ExamController {
 
   async getStudentExamReview(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { user_id, exam_id } = req.params as { user_id: string; exam_id: string; };
+      const { user_id, exam_id } = req.params as {
+        user_id: string;
+        exam_id: string;
+      };
 
       const organization_id = req.user?.organization_id as string;
       if (!user_id || !exam_id || !organization_id)
-        throw new ValidationError("User ID, Exam ID, and Client ID are required.");
-      if (!req.user) return reply.code(401).send({ success: false, message: "Authentication required" });
+        throw new ValidationError(
+          "User ID, Exam ID, and Client ID are required.",
+        );
+      if (!req.user)
+        return reply
+          .code(401)
+          .send({ success: false, message: "Authentication required" });
       if (req.user.sub !== user_id) {
         return reply.code(403).send({
           success: false,

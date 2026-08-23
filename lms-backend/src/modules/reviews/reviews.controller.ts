@@ -1,4 +1,12 @@
-import { ValidationError, NotFoundError, UnauthorizedError, ForbiddenError, ConflictError, InternalServerError, ServiceUnavailableError } from "../../utils/globalErrorHandlingFile";
+import {
+  ValidationError,
+  NotFoundError,
+  UnauthorizedError,
+  ForbiddenError,
+  ConflictError,
+  InternalServerError,
+  ServiceUnavailableError,
+} from "../../utils/globalErrorHandlingFile";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { ReviewsService } from "./reviews.service";
 import { ReviewsInterface } from "./reviews.interface";
@@ -81,7 +89,7 @@ export class ReviewsController {
       const reviews = await reviewsService.getAllReviews(
         Number(page),
         Number(limit),
-        organization_id
+        organization_id,
       );
 
       return reply.status(200).send(reviews);

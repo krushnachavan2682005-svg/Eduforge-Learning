@@ -15,7 +15,7 @@ export const ReviewSchema = {
           not: { required: ["id"] },
         },
         {
-          required: ["id"], 
+          required: ["id"],
         },
       ],
       additionalProperties: false,

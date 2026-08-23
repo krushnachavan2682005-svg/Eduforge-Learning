@@ -13,8 +13,9 @@ const controller = new MemberController();
 export default async function memberRoutes(fastify: FastifyInstance) {
   fastify.post(
     "/members",
-    { schema: createMemberSchema, 
-      preHandler: requirePermission("MEMBER_CREATE") 
+    {
+      schema: createMemberSchema,
+      preHandler: requirePermission("MEMBER_CREATE"),
     },
     (req, reply) => controller.create(req, reply),
   );
@@ -42,7 +43,10 @@ export default async function memberRoutes(fastify: FastifyInstance) {
 
   fastify.patch(
     "/members/:id",
-    { schema: updateMemberSchema, preHandler: requirePermission("MEMBER_UPDATE") },
+    {
+      schema: updateMemberSchema,
+      preHandler: requirePermission("MEMBER_UPDATE"),
+    },
     (req, reply) => controller.update(req, reply),
   );
 

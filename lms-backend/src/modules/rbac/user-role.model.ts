@@ -13,8 +13,10 @@ export interface UserRoleAttributes {
   updated_at?: Date;
 }
 
-export interface UserRoleCreationAttributes
-  extends Optional<UserRoleAttributes, "id" | "created_at" | "updated_at"> {}
+export interface UserRoleCreationAttributes extends Optional<
+  UserRoleAttributes,
+  "id" | "created_at" | "updated_at"
+> {}
 
 export class UserRole
   extends Model<UserRoleAttributes, UserRoleCreationAttributes>
@@ -88,7 +90,13 @@ Role.belongsToMany(User, {
   otherKey: "user_id",
   as: "users",
 });
-Organization.hasMany(UserRole, { foreignKey: "organization_id", as: "user_roles" });
-UserRole.belongsTo(Organization, { foreignKey: "organization_id", as: "organization" });
+Organization.hasMany(UserRole, {
+  foreignKey: "organization_id",
+  as: "user_roles",
+});
+UserRole.belongsTo(Organization, {
+  foreignKey: "organization_id",
+  as: "organization",
+});
 UserRole.belongsTo(User, { foreignKey: "user_id", as: "user" });
 UserRole.belongsTo(Role, { foreignKey: "role_id", as: "role" });
