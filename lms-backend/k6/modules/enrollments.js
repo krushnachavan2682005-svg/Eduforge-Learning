@@ -5,7 +5,8 @@ import { is200, hasData } from '../helpers/checks.js';
 import { metrics } from '../helpers/metrics.js';
 
 export function testEnrollments(limit = 10, page = 1) {
-  const url = `${ENV.BASE_URL}/enrollment?limit=${limit}&page=${page}`;
+  const baseUrl = ENV.BASE_URL.replace('/eduforge/api', '');
+  const url = `${baseUrl}/enrollments?limit=${limit}&page=${page}`;
   
   const res = http.get(url, { headers: getAuthHeaders() });
   

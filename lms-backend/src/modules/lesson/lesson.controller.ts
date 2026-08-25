@@ -14,13 +14,16 @@ export class lessonController {
       course_id?: string;
     };
 
+    const filters: any = {};
+    if (course_id) {
+      filters.course_id = course_id;
+    }
+
     const lessons = await lessonService.getAllLessons(
       req.user.organization_id,
       Number(page),
       Number(limit),
-      {
-        course_id,
-      },
+      filters,
     );
 
     return reply.status(200).send(lessons);

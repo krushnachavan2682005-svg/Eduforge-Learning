@@ -9,7 +9,7 @@ We use environment variables to prevent hardcoding secrets and IDs. You must set
 Create a copy of this for your local environment (DO NOT commit secrets):
 
 ```bash
-export BASE_URL=http://localhost:3000/api/v1
+export BASE_URL=http://localhost:3000/eduforge/api
 export AUTH_TOKEN=your_jwt_token_here
 export ORGANIZATION_ID=test_org_id
 export COURSE_ID=test_course_id

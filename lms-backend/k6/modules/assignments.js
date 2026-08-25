@@ -5,7 +5,7 @@ import { is201 } from '../helpers/checks.js';
 import { metrics } from '../helpers/metrics.js';
 
 export function testAssignCourse(payload) {
-  const url = `${ENV.BASE_URL}/assignCourse`;
+  const url = `${ENV.BASE_URL}/assign-course`;
   
   const res = http.post(url, JSON.stringify(payload), { headers: getAuthHeaders() });
   
@@ -19,7 +19,7 @@ export function testAssignCourse(payload) {
 }
 
 export function testAssignActionItems(payload) {
-  const url = `${ENV.BASE_URL}/assignActionItems`;
+  const url = `${ENV.BASE_URL}/assign-action-items`;
   
   const res = http.post(url, JSON.stringify(payload), { headers: getAuthHeaders() });
   

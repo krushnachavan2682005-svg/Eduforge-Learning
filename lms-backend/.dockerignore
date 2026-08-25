@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+dist
+.env
+.git
+.gitignore
+k6
+scratch
+postman_collection.json
+audit_results.json
+Dockerfile
+docker-compose.yml

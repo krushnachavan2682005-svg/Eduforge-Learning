@@ -5,7 +5,7 @@ import { is200, hasData } from '../helpers/checks.js';
 import { metrics } from '../helpers/metrics.js';
 
 export function testLessons(limit = 10, page = 1) {
-  const url = `${ENV.BASE_URL}/lessons?limit=${limit}&page=${page}`;
+  const url = `${ENV.BASE_URL}/all-lesson?limit=${limit}&page=${page}`;
   
   const res = http.get(url, { headers: getAuthHeaders() });
   
@@ -20,7 +20,7 @@ export function testLessons(limit = 10, page = 1) {
 
 export function testLessonById(lessonId = ENV.LESSON_ID) {
   if (!lessonId) return;
-  const url = `${ENV.BASE_URL}/lessons/${lessonId}`;
+  const url = `${ENV.BASE_URL}/lesson/${lessonId}`;
   
   const res = http.get(url, { headers: getAuthHeaders() });
   

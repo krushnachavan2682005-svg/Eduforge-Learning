@@ -19,20 +19,19 @@ export class sectionRepository {
         "quizzes",
         "created_at",
         "updated_at",
-        "lesson_id",
         [
           Sequelize.literal(`json_build_object(
           'id', "Section"."course_id",
           'title', (SELECT c.title FROM courses c WHERE c.id = "Section"."course_id"::uuid)
         )`),
-          "course_id",
+          "course",
         ] as any,
         [
           Sequelize.literal(`json_build_object(
           'id', "Section"."lesson_id",
           'title', (SELECT l.title FROM lessons l WHERE l.id = "Section"."lesson_id"::uuid)
         )`),
-          "lesson_id",
+          "lesson",
         ] as any,
       ],
       order: [
@@ -60,14 +59,14 @@ export class sectionRepository {
             'id', "Section"."course_id",
             'title', (SELECT c.title FROM courses c WHERE c.id = "Section"."course_id"::uuid)
           )`),
-          "course_id",
+          "course",
         ],
         [
           Sequelize.literal(`json_build_object(
             'id', "Section"."lesson_id",
             'title', (SELECT l.title FROM lessons l WHERE l.id = "Section"."lesson_id"::uuid)
           )`),
-          "lesson_id",
+          "lesson",
         ],
       ],
     });
