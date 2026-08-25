@@ -5,7 +5,7 @@ import { is200, hasData } from '../helpers/checks.js';
 import { metrics } from '../helpers/metrics.js';
 
 export function testSections(limit = 10, page = 1) {
-  const url = `${ENV.BASE_URL}/sections?limit=${limit}&page=${page}`;
+  const url = `${ENV.BASE_URL}/all-section?limit=${limit}&page=${page}`;
   
   const res = http.get(url, { headers: getAuthHeaders() });
   
@@ -20,7 +20,7 @@ export function testSections(limit = 10, page = 1) {
 
 export function testSectionById(sectionId = ENV.SECTION_ID) {
   if (!sectionId) return;
-  const url = `${ENV.BASE_URL}/sections/${sectionId}`;
+  const url = `${ENV.BASE_URL}/section/${sectionId}`;
   
   const res = http.get(url, { headers: getAuthHeaders() });
   

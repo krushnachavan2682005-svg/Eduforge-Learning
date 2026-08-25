@@ -1,5 +1,5 @@
 export const __ENV = Object.assign({
-  BASE_URL: 'http://localhost:3000/api/v1',
+  BASE_URL: 'http://localhost:3000/eduforge/api',
   AUTH_TOKEN: '',
   ORGANIZATION_ID: '', // Provide a test organization ID
   USER_ID: '',

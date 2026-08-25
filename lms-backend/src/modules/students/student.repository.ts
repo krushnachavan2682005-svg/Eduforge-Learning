@@ -62,7 +62,7 @@ export class StudentRepository {
   async getClassDetail(organizationId: string, classId: string) {
     return this.getClassById(organizationId, classId);
   }
-  
+
   async getStudentCountByClassId(organizationId: string, classId: string) {
     return ClassStudent.count({
       where: { class_id: classId },
@@ -135,7 +135,7 @@ export class StudentRepository {
     return mappings
       .map((mapping: any) => ({
         class_id: mapping.class_id,
-        user_id: mapping.student?.user_id
+        user_id: mapping.student?.user_id,
       }))
       .filter((m: any) => Boolean(m.user_id));
   }
@@ -212,22 +212,28 @@ export class StudentRepository {
     return enrollment;
   }
 
-  async bulkCreateEnrollment(data: {
-    organization_id: string;
-    student_id: string;
-    course_id: string;
-    status?: LocalEnrollmentStatus;
-  }[]) {
+  async bulkCreateEnrollment(
+    data: {
+      organization_id: string;
+      student_id: string;
+      course_id: string;
+      status?: LocalEnrollmentStatus;
+    }[],
+  ) {
     return LocalEnrollment.bulkCreate(data, { ignoreDuplicates: true });
   }
 
-  async getEnrollmentsByStudentsAndCourses(organizationId: string, studentIds: string[], courseIds: string[]) {
+  async getEnrollmentsByStudentsAndCourses(
+    organizationId: string,
+    studentIds: string[],
+    courseIds: string[],
+  ) {
     return LocalEnrollment.findAll({
-      where: { 
+      where: {
         organization_id: organizationId,
         student_id: { [Op.in]: studentIds },
-        course_id: { [Op.in]: courseIds }
-      }
+        course_id: { [Op.in]: courseIds },
+      },
     });
   }
 
@@ -265,12 +271,14 @@ export class StudentRepository {
 
     const { rows, count } = await LocalEnrollment.findAndCountAll({
       where,
+      attributes: ["id", "status", "enrolled_at", "course_id"],
       include: [
         {
           model: Student,
           as: "student",
           where: studentWhere,
           required: Boolean(studentWhere),
+          attributes: ["id", "first_name", "last_name", "email"],
         },
       ],
       order: [["enrolled_at", "DESC"]],
@@ -308,13 +316,16 @@ export class StudentRepository {
   }
 
   async getDashboardCounts(organizationId: string) {
-    const [totalStudents, assignedCourses, completedCourses] = await Promise.all([
-      Student.count({ where: { organization_id: organizationId, status: "active" } }),
-      LocalEnrollment.count({ where: { organization_id: organizationId } }),
-      LocalEnrollment.count({
-        where: { organization_id: organizationId, status: "completed" },
-      }),
-    ]);
+    const [totalStudents, assignedCourses, completedCourses] =
+      await Promise.all([
+        Student.count({
+          where: { organization_id: organizationId, status: "active" },
+        }),
+        LocalEnrollment.count({ where: { organization_id: organizationId } }),
+        LocalEnrollment.count({
+          where: { organization_id: organizationId, status: "completed" },
+        }),
+      ]);
 
     return {
       total_students: totalStudents,

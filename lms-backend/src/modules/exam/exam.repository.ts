@@ -256,10 +256,18 @@ export class ExamRepository {
   }
 
   async getAllExams(organizationId: string, limit: number, skip: number) {
-    // const includeOptions = [{ model: Question, as: "questions", separate: true }];
 
     const { count, rows } = await Exam.findAndCountAll({
       where: organizationId ? { organization_id: organizationId } : undefined,
+      attributes: [
+        "id",
+        "title",
+        "subject",
+        "total_marks",
+        "passing_marks",
+        "exam_date",
+        "exam_start_time",
+      ],
       include: [
         {
           model: Question,
@@ -271,7 +279,6 @@ export class ExamRepository {
             "text",
             "marks",
             "is_mandatory",
-            "organization_id",
             "options",
           ],
           separate: true,
@@ -505,6 +512,16 @@ export class ExamRepository {
 
   async paginateExams(page: number, limit: number, examIds: string[]) {
     return paginate(Exam, {
+      attributes: [
+        "id",
+        "title",
+        "subject",
+        "total_marks",
+        "passing_marks",
+        "duration_minutes",
+        "exam_date",
+        "exam_start_time",
+      ],
       page,
       limit,
       filters: { id: examIds },
@@ -519,7 +536,6 @@ export class ExamRepository {
             "text",
             "marks",
             "is_mandatory",
-            "organization_id",
             "options",
           ],
           separate: true,

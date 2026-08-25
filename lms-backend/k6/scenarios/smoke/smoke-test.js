@@ -6,6 +6,8 @@ import { testStudents, testStudentById } from '../../modules/students.js';
 import { testEnrollments } from '../../modules/enrollments.js';
 import { testExams, testExamById } from '../../modules/exams.js';
 import { testDashboard, testMeDashboard } from '../../modules/dashboard.js';
+import { authenticate } from '../../lib/auth.js';
+import { ENV } from '../../config/environments.js';
 
 export const options = {
   vus: 1,
@@ -15,7 +17,16 @@ export const options = {
   },
 };
 
-export default function () {
+export function setup() {
+  const token = authenticate();
+  return { token };
+}
+
+export default function (data) {
+  if (data && data.token) {
+    ENV.AUTH_TOKEN = data.token;
+  }
+
   testCourses(10, 1);
   testCourseById();
   sleep(1);

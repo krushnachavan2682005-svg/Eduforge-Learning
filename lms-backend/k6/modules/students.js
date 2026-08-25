@@ -5,7 +5,8 @@ import { is200, hasData } from '../helpers/checks.js';
 import { metrics } from '../helpers/metrics.js';
 
 export function testStudents(limit = 10, page = 1) {
-  const url = `${ENV.BASE_URL}/students?limit=${limit}&page=${page}`;
+  const baseUrl = ENV.BASE_URL.replace('/eduforge/api', '');
+  const url = `${baseUrl}/students?limit=${limit}&page=${page}`;
   
   const res = http.get(url, { headers: getAuthHeaders() });
   
@@ -20,7 +21,8 @@ export function testStudents(limit = 10, page = 1) {
 
 export function testStudentById(studentId = ENV.STUDENT_ID) {
   if (!studentId) return;
-  const url = `${ENV.BASE_URL}/students/${studentId}`;
+  const baseUrl = ENV.BASE_URL.replace('/eduforge/api', '');
+  const url = `${baseUrl}/students/${studentId}`;
   
   const res = http.get(url, { headers: getAuthHeaders() });
   

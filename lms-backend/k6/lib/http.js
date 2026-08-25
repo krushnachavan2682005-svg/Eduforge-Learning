@@ -10,14 +10,19 @@ export function getHeaders(token = null) {
   return headers;
 }
 
-export function logError(res, moduleName, method, url) {
+export function logError(res, moduleName, method, url, params) {
   if (res.status >= 400) {
-    console.error(`[K6 ERROR]`);
-    console.error(`Module: ${moduleName}`);
-    console.error(`Method: ${method}`);
-    console.error(`URL: ${url}`);
-    console.error(`Status: ${res.status}`);
-    console.error(`Body: ${res.body}`);
+    const hasToken = params && params.headers && params.headers["Authorization"];
+    const authHeaderPresent = !!hasToken;
+    const shortBody = String(res.body).substring(0, 100);
+    
+    console.info(`Endpoint: ${moduleName}`);
+    console.info(`Method: ${method}`);
+    console.info(`URL: ${url}`);
+    console.info(`Status: ${res.status}`);
+    console.info(`Body: ${shortBody}`);
+    console.info(`Token present: ${authHeaderPresent}`);
+    console.info(`Authorization header present: ${authHeaderPresent}`);
   }
 }
 
@@ -37,6 +42,6 @@ export function request(method, url, body, params, moduleName) {
     throw new Error(`Unsupported method ${method}`);
   }
 
-  logError(res, moduleName, method, url);
+  logError(res, moduleName, method, url, params);
   return res;
 }

@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DB_NAME=baap_lms_dev
+      - DB_USER=postgres
+      - DB_PASS=krushna123
+      - DB_HOST=db
+      - DB_PORT=5432
+      - EXT_DB_NAME=platform_development
+      - EXT_DB_USER=postgres
+      - EXT_DB_PASS=krushna123
+      - EXT_DB_HOST=db
+      - EXT_DB_PORT=5432
+      - JWT_SECRET=lms-local-dev-secret-change-this
+      - JWT_EXPIRES_IN=1h
+      - AWS_REGION=ap-south-1
+      - AWS_BUCKET_NAME=
+      - AWS_ACCESS_KEY_ID=
+      - AWS_SECRET_ACCESS_KEY=
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - lms-network
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=krushna123
+      # Postgres allows creating only one db out-of-the-box via POSTGRES_DB
+      # If you need platform_development created as well, you'll need an init script
+      - POSTGRES_DB=baap_lms_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d baap_lms_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lms-network
+
+volumes:
+  postgres_data:
+
+networks:
+  lms-network:
+    driver: bridge

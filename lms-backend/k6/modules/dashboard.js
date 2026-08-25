@@ -5,7 +5,8 @@ import { is200 } from '../helpers/checks.js';
 import { metrics } from '../helpers/metrics.js';
 
 export function testDashboard() {
-  const url = `${ENV.BASE_URL}/dashboard/admin`;
+  if (!ENV.USER_ID) return;
+  const url = `${ENV.BASE_URL}/dashboard/${ENV.USER_ID}`;
   
   const res = http.get(url, { headers: getAuthHeaders() });
   
@@ -19,7 +20,8 @@ export function testDashboard() {
 }
 
 export function testMeDashboard() {
-  const url = `${ENV.BASE_URL}/dashboard/student`;
+  const baseUrl = ENV.BASE_URL.replace('/eduforge/api', '');
+  const url = `${baseUrl}/dashboard/me`;
   
   const res = http.get(url, { headers: getAuthHeaders() });
   
