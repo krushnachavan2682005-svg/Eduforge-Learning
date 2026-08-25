@@ -12,19 +12,23 @@ import examRoutes from "../modules/exam/exam.routes";
 import actionItemsRoute from "../modules/actionItems/actionItems.routes";
 import assignActionItemsRoutes from "../modules/assignActionItems/assignActionItems.routes";
 import uploadRoutes from "../modules/upload/upload.routes";
-// import creditRoutes from "./credit.route";
 import levelRoute from "../modules/level/level.routes";
 import studentResultsRoutes from "../modules/studentResults/studentResults.routes";
-import { dashboardRoutes } from "../modules/dashboard/dashboard.routes";
-
+import dashboardRoutes from "../modules/dashboard/dashboard.routes";
+import authRoutes from "../modules/auth/auth.routes";
+import userRoutes from "../modules/users/user.routes";
+import organizationRoutes from "../modules/organizations/organization.routes";
+import localDashboardRoutes from "../modules/dashboard/dashboard.routes";
+import studentRoutes from "../modules/students/student.routes";
+import memberRoutes from "../modules/members/member.routes";
 export default async function routes(
   fastify: FastifyInstance,
-  opts: FastifyPluginOptions
+  opts: FastifyPluginOptions,
 ) {
   fastify.get("/health", async (request, reply) => {
     return { status: "ok", timestamp: new Date().toISOString() };
   });
-  fastify.addHook("onRoute", (routeOptions) => { });
+  fastify.addHook("onRoute", (routeOptions) => {});
   fastify.register(uploadRoutes);
   fastify.register(courseRoutes);
   fastify.register(lessonRoutes);
@@ -37,5 +41,14 @@ export default async function routes(
   fastify.register(assignActionItemsRoutes);
   fastify.register(levelRoute);
   fastify.register(studentResultsRoutes);
+  fastify.register(enrollmentRoutes);
+  fastify.register(quizRoutes);
+  fastify.register(reviewsRoutes);
   fastify.register(dashboardRoutes);
+  fastify.register(authRoutes, { prefix: "/auth" });
+  fastify.register(userRoutes, { prefix: "/users" });
+  fastify.register(organizationRoutes, { prefix: "/organizations" });
+  fastify.register(localDashboardRoutes, { prefix: "/dashboard" });
+  fastify.register(studentRoutes, { prefix: "/students" });
+  fastify.register(memberRoutes, { prefix: "/members" });
 }

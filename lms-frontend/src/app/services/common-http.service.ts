@@ -31,22 +31,22 @@ export class CommonHttpService {
   }
 
   getLocalUserMe(): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/users/me`;
+    const url = `${environment.LMS_BASE_URL}/users/me`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getCurrentOrganization(): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/organizations/current`;
+    const url = `${environment.LMS_BASE_URL}/organizations/current`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getLocalDashboardMe(): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/dashboard/me`;
+    const url = `${environment.LMS_BASE_URL}/dashboard/me`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getLocalStudents(): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/students`;
+    const url = `${environment.LMS_BASE_URL}/students/students`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
@@ -55,7 +55,7 @@ export class CommonHttpService {
   }
 
   createLocalStudent(data: any): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/students`;
+    const url = `${environment.LMS_BASE_URL}/students/students`;
     return this.http.post(url, data, { headers: this.getHeaders() });
   }
 
@@ -64,12 +64,12 @@ export class CommonHttpService {
   }
 
   getStudentById(id: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/students/${id}`;
+    const url = `${environment.LMS_BASE_URL}/students/students/${id}`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getLocalClasses(): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/classes`;
+    const url = `${environment.LMS_BASE_URL}/students/classes`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
@@ -78,7 +78,7 @@ export class CommonHttpService {
   }
 
   createLocalClass(data: any): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/classes`;
+    const url = `${environment.LMS_BASE_URL}/students/classes`;
     return this.http.post(url, data, { headers: this.getHeaders() });
   }
 
@@ -87,12 +87,12 @@ export class CommonHttpService {
   }
 
   getClassById(id: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/classes/${id}`;
+    const url = `${environment.LMS_BASE_URL}/students/classes/${id}`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   addLocalStudentToClass(classId: string, studentId: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/classes/${classId}/students/${studentId}`;
+    const url = `${environment.LMS_BASE_URL}/students/classes/${classId}/students/students/${studentId}`;
     return this.http.post(url, {}, { headers: this.getHeaders() });
   }
 
@@ -101,17 +101,17 @@ export class CommonHttpService {
   }
 
   getClassStudents(classId: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/classes/${classId}/students`;
+    const url = `${environment.LMS_BASE_URL}/students/classes/${classId}/students/students`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   removeStudentFromClass(classId: string, studentId: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/classes/${classId}/students/${studentId}`;
+    const url = `${environment.LMS_BASE_URL}/students/classes/${classId}/students/students/${studentId}`;
     return this.http.delete(url, { headers: this.getHeaders() });
   }
 
   createLocalEnrollment(data: any): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/enrollments`;
+    const url = `${environment.LMS_BASE_URL}/students/enrollments`;
     return this.http.post(url, data, { headers: this.getHeaders() });
   }
 
@@ -120,7 +120,7 @@ export class CommonHttpService {
   }
 
   getEnrollmentsByStudent(studentId: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/enrollments/student/${studentId}`;
+    const url = `${environment.LMS_BASE_URL}/students/enrollments/student/${studentId}`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
@@ -138,17 +138,17 @@ export class CommonHttpService {
       }
     });
     const qs = query.toString();
-    const url = `${environment.LOCAL_API_BASE_URL}/enrollments${qs ? `?${qs}` : ''}`;
+    const url = `${environment.LMS_BASE_URL}/students/enrollments${qs ? `?${qs}` : ''}`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getEnrollmentById(id: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/enrollments/${id}`;
+    const url = `${environment.LMS_BASE_URL}/students/enrollments/${id}`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   updateEnrollmentStatus(id: string, status: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/enrollments/${id}/status`;
+    const url = `${environment.LMS_BASE_URL}/students/enrollments/${id}/status`;
     return this.http.patch(url, { status }, { headers: this.getHeaders() });
   }
 
@@ -166,12 +166,12 @@ export class CommonHttpService {
       }
     });
     const qs = query.toString();
-    const url = `${environment.LOCAL_API_BASE_URL}/members${qs ? `?${qs}` : ''}`;
+    const url = `${environment.LMS_BASE_URL}/members/members${qs ? `?${qs}` : ''}`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getMember(id: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}`;
+    const url = `${environment.LMS_BASE_URL}/members/members/${id}`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
@@ -180,46 +180,47 @@ export class CommonHttpService {
   }
 
   createMember(data: any): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/members`;
+    const url = `${environment.LMS_BASE_URL}/members/members`;
     return this.http.post(url, data, { headers: this.getHeaders() });
   }
 
   updateMember(id: string, data: any): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}`;
+    const url = `${environment.LMS_BASE_URL}/members/members/${id}`;
     return this.http.patch(url, data, { headers: this.getHeaders() });
   }
 
   resetMemberPassword(id: string, data: any): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}/password`;
+    const url = `${environment.LMS_BASE_URL}/members/members/${id}/password`;
     return this.http.patch(url, data, { headers: this.getHeaders() });
   }
 
   deactivateMember(id: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}`;
+    const url = `${environment.LMS_BASE_URL}/members/members/${id}`;
     return this.http.delete(url, { headers: this.getHeaders() });
   }
 
   assignMemberRole(id: string, roleCode: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}/roles`;
+    const url = `${environment.LMS_BASE_URL}/members/members/${id}/roles`;
     return this.http.post(url, { role_code: roleCode }, { headers: this.getHeaders() });
   }
 
   removeMemberRole(id: string, roleId: string): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/members/${id}/roles/${roleId}`;
+    const url = `${environment.LMS_BASE_URL}/members/members/${id}/roles/${roleId}`;
     return this.http.delete(url, { headers: this.getHeaders() });
   }
 
   getRoles(): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/roles`;
+    const url = `${environment.LMS_BASE_URL}/members/roles`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
   getAllPermissions(): Observable<any> {
-    const url = `${environment.LOCAL_API_BASE_URL}/permissions`;
+    const url = `${environment.LMS_BASE_URL}/members/permissions`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
-  getCoursesForEnrollment(page = 1, limit = 100): Observable<any> {
+  getCoursesForEnrollment(page = 1, limit = 100): Observable<any> {
+
     return this.getCourse(`/all-courses?page=${page}&limit=${limit}`);
   }
 
@@ -297,7 +298,7 @@ export class CommonHttpService {
   }
 
   getPermissions(endpoint: string) {
-    const url = `${environment?.AUTH_BASE_URL}/permissions`;
+    const url = `${environment?.AUTH_BASE_URL}/members/permissions`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
 

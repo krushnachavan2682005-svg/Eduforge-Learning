@@ -11,6 +11,7 @@ export class CourseRepository {
     limit: number,
     filters?: Record<string, any>,
     parsed_skipped_lesson?: boolean,
+    includeLessons?: boolean,
   ) {
     const where: any = {
       ...filters,
@@ -19,16 +20,24 @@ export class CourseRepository {
 
     const include: any[] = [];
 
-    if (parsed_skipped_lesson === true) {
-      include.push({
+    if (includeLessons === true) {
+      const lessonInclude: any = {
         model: lesson,
         as: "lessons",
-        where: {
+        attributes: {
+          exclude: ["organization_id", "created_at", "updated_at"],
+        },
+      };
+
+      if (parsed_skipped_lesson === true) {
+        lessonInclude.where = {
           seq_no: {
             [Op.gt]: 1,
           },
-        },
-      });
+        };
+      }
+
+      include.push(lessonInclude);
     }
 
     const result = await paginate(Course, {
