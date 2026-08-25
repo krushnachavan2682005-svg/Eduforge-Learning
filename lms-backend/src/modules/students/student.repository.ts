@@ -295,6 +295,7 @@ export class StudentRepository {
 
   async getEnrollmentById(organizationId: string, enrollmentId: string) {
     return LocalEnrollment.findOne({
+      // attributes:[""],
       where: { id: enrollmentId, organization_id: organizationId },
       include: [{ model: Student, as: "student" }],
     });

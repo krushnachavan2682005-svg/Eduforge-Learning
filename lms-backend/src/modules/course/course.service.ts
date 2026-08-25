@@ -1,6 +1,10 @@
 import { Course } from "./course.model";
 import { CourseRepository } from "./course.repository";
-import { ConflictError, InternalServerError, NotFoundError } from "../../utils/globalErrorHandlingFile";
+import {
+  ConflictError,
+  InternalServerError,
+  NotFoundError,
+} from "../../utils/globalErrorHandlingFile";
 import S3_FOLDER from "../../constants/s3-folder-constant";
 import { handleFormDataFileUpload } from "../../utils/s3-upload-utility";
 import { ALLOWED_MIME_TYPES } from "../../constants/mimeType";
@@ -8,8 +12,22 @@ import { ALLOWED_MIME_TYPES } from "../../constants/mimeType";
 export class CourseService {
   private courseRepo = new CourseRepository();
 
-  async getAllCourses(organizationId: string, page: number, limit: number, filters: Record<string, any>, skipFirstLesson: boolean) {
-    return await this.courseRepo.getAllCourses(organizationId, page, limit, filters, skipFirstLesson);
+  async getAllCourses(
+    organizationId: string,
+    page: number,
+    limit: number,
+    filters: Record<string, any>,
+    skipFirstLesson: boolean,
+    includeLessons: boolean = false,
+  ) {
+    return await this.courseRepo.getAllCourses(
+      organizationId,
+      page,
+      limit,
+      filters,
+      skipFirstLesson,
+      includeLessons,
+    );
   }
 
   async getCourseById(organizationId: string, id: string) {
@@ -31,7 +49,11 @@ export class CourseService {
     }
   }
 
-  async updateCourse(organizationId: string, id: string, data: Partial<Course>) {
+  async updateCourse(
+    organizationId: string,
+    id: string,
+    data: Partial<Course>,
+  ) {
     const course = await this.courseRepo.findById(organizationId, id);
     if (!course) {
       throw new NotFoundError("Course not found");
@@ -57,7 +79,12 @@ export class CourseService {
     return await this.courseRepo.deleteCourse(course);
   }
 
-  async uploadCourseImage(organizationId: string, file: any, server: any, id: string) {
+  async uploadCourseImage(
+    organizationId: string,
+    file: any,
+    server: any,
+    id: string,
+  ) {
     const folder = S3_FOLDER.COURSR_FOLDER(organizationId, id);
 
     const result = await handleFormDataFileUpload(file, { server } as any, {

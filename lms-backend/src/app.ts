@@ -1,37 +1,30 @@
 import Fastify from "fastify";
 import { connectDB, sequelize } from "./config/database";
 import swagger from "@fastify/swagger";
-import swaggerUi from "@fastify/swagger-ui";
 import fastifyMultipart from "@fastify/multipart";
 import s3Plugin from "./plugins/s3-upload-plugins";
 import publicExamRoutes from "./modules/exam/publicExam.routes";
 import jwtPlugin from "./plugins/jwt.plugin";
-import authRoutes from "./modules/auth/auth.routes";
-import userRoutes from "./modules/users/user.routes";
-import organizationRoutes from "./modules/organizations/organization.routes";
-import localDashboardRoutes from "./modules/dashboard/dashboard.routes";
-import studentRoutes from "./modules/students/student.routes";
-import memberRoutes from "./modules/members/member.routes";
 import { seedRbac } from "./modules/rbac/rbac.seed";
 import "./modules/roles/role.model";
 import "./modules/sessions/session.model";
-import './models/model_join_association'
-import { asyncLocalStorage as cls} from "./constants/request-context";
+import "./models/model_join_association";
+import { asyncLocalStorage as cls } from "./constants/request-context";
 export const buildApp = async () => {
   const app = Fastify({ logger: true });
-  app.addHook("onRequest",(request,reply,done)=>{
-    cls.run({queryCount:0}, done);
-  })
-app.addHook("onResponse",(request,reply,done)=>{
-const store=cls.getStore();
-if(store){
-  reply.header('x-query-count',store.queryCount)
-}
-done();
-})
+  app.addHook("onRequest", (request, reply, done) => {
+    cls.run({ queryCount: 0 }, done);
+  });
+  app.addHook("onResponse", (request, reply, done) => {
+    const store = cls.getStore();
+    if (store) {
+      reply.header("x-query-count", store.queryCount);
+    }
+    done();
+  });
   await connectDB();
   // Sync Sequelize models with the database
-  await sequelize.sync()
+  await sequelize.sync();
   await seedRbac();
 
   await registerS3Plugin();
@@ -71,16 +64,9 @@ done();
     });
   }
 
-
-
   const routes = (await import("./routes/index")).default;
-  app.register(authRoutes, { prefix: "/auth" });
-  app.register(userRoutes, { prefix: "/users" });
-  app.register(organizationRoutes, { prefix: "/organizations" });
-  app.register(localDashboardRoutes, { prefix: "/dashboard" });
-  app.register(studentRoutes);
-  app.register(memberRoutes);
+
   app.register(routes, { prefix: "/eduforge/api" });
-  app.register(publicExamRoutes,{prefix:"/eduforge/api"})
+  app.register(publicExamRoutes, { prefix: "/eduforge/api" });
   return app;
 };
