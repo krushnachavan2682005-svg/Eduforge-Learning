@@ -14,19 +14,23 @@ export class AssiginCourseRepositorie {
 
   async findAllAssignedCourses(organizationId: string, userIds: string[]) {
     return AssignedCourseModel.findAll({
-      where: { user_id: { [Op.overlap]: userIds }, organization_id: organizationId },
+      where: {
+        user_id: { [Op.overlap]: userIds },
+        organization_id: organizationId,
+      },
+      attributes: ["user_id", "course_id"],
     });
   }
 
   async countValidMembers(organizationId: string, userIds: string[]) {
-    const validMembers = await OrganizationUser.findAll({
+    const validMembersCount = await OrganizationUser.count({
       where: {
         organization_id: organizationId,
         user_id: { [Op.in]: userIds },
-        is_active: true
-      }
+        is_active: true,
+      },
     });
-    return validMembers.length;
+    return validMembersCount;
   }
 
   async getCourseByUserId(organizationId: string, user_id: string) {
@@ -74,7 +78,7 @@ export class AssiginCourseRepositorie {
       {
         replacements: { organizationId, user_id },
         type: QueryTypes.SELECT,
-      }
+      },
     );
   }
 

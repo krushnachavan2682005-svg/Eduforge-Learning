@@ -29,6 +29,17 @@ export class StudentRepository {
   async listStudents(organizationId: string) {
     return Student.findAll({
       where: { organization_id: organizationId },
+      attributes: [
+        "id",
+        "user_id",
+        "first_name",
+        "last_name",
+        "email",
+        "phone",
+        "status",
+        "created_at",
+        "updated_at",
+      ],
       order: [["created_at", "DESC"]],
     });
   }
@@ -49,6 +60,7 @@ export class StudentRepository {
   async listClasses(organizationId: string) {
     return StudentClass.findAll({
       where: { organization_id: organizationId },
+      attributes: ["id", "name", "description", "created_by", "created_at"],
       order: [["created_at", "DESC"]],
     });
   }
@@ -163,6 +175,7 @@ export class StudentRepository {
   async getStudentDisplayName(organizationId: string, userId: string) {
     const student = await Student.findOne({
       where: { organization_id: organizationId, user_id: userId },
+      attributes: ["first_name", "last_name"],
     });
 
     if (student) {
@@ -176,6 +189,7 @@ export class StudentRepository {
 
     const students = await Student.findAll({
       where: { organization_id: organizationId, user_id: { [Op.in]: userIds } },
+      attributes: ["user_id", "first_name", "last_name"],
     });
 
     const names: Record<string, string> = {};
@@ -234,6 +248,7 @@ export class StudentRepository {
         student_id: { [Op.in]: studentIds },
         course_id: { [Op.in]: courseIds },
       },
+      attributes: ["student_id", "course_id"],
     });
   }
 
@@ -295,9 +310,15 @@ export class StudentRepository {
 
   async getEnrollmentById(organizationId: string, enrollmentId: string) {
     return LocalEnrollment.findOne({
-      // attributes:[""],
+      attributes: ["id", "status", "enrolled_at", "course_id", "student_id"],
       where: { id: enrollmentId, organization_id: organizationId },
-      include: [{ model: Student, as: "student" }],
+      include: [
+        {
+          model: Student,
+          as: "student",
+          attributes: ["first_name", "last_name", "email"],
+        },
+      ],
     });
   }
 

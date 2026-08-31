@@ -7,8 +7,9 @@ export class LevelRepository {
     return await Level.findOne({
       where: {
         organization_id: organizationId,
-        level_name: levelName
+        level_name: levelName,
       },
+      attributes: ["id"],
     });
   }
 
@@ -22,6 +23,14 @@ export class LevelRepository {
       where,
       limit,
       offset,
+      attributes: [
+        "id",
+        "level_name",
+        "start_date",
+        "end_date",
+        "created_at",
+        "updated_at",
+      ],
       order: [["created_at", "DESC"]],
     });
   }
@@ -32,7 +41,10 @@ export class LevelRepository {
     });
   }
 
-  async isLevelAssignedToUsers(levelName: string, clientId: string): Promise<boolean> {
+  async isLevelAssignedToUsers(
+    levelName: string,
+    clientId: string,
+  ): Promise<boolean> {
     const query = `
       SELECT COUNT(*) as count
       FROM assigned_action_items aai

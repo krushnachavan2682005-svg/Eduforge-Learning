@@ -38,7 +38,11 @@ export class MemberRepository {
   async createMember(input: CreateMemberInput) {
     return sequelize.transaction(async (transaction) => {
       const email = input.email.trim().toLowerCase();
-      let user = await User.findOne({ where: { email }, transaction });
+      let user = await User.findOne({
+        where: { email },
+        transaction,
+        attributes: ["id", "password_hash"],
+      });
 
       if (!user) {
         user = await User.create(
@@ -57,6 +61,7 @@ export class MemberRepository {
             organization_id: input.organization_id,
             user_id: user.id,
           },
+          attributes: ["id"],
           transaction,
         });
 
@@ -158,9 +163,35 @@ export class MemberRepository {
       where: {
         organization_id: input.organization_id,
       },
+      attributes: [
+        "id",
+        "user_id",
+        "organization_id",
+        "role",
+        "is_active",
+        "created_at",
+        "updated_at",
+      ],
       include: [
-        { model: User, as: "user", where: userWhere },
-        { model: Organization, as: "organization" },
+        {
+          model: User,
+          as: "user",
+          where: userWhere,
+          attributes: [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "is_active",
+            "created_at",
+            "updated_at",
+          ],
+        },
+        {
+          model: Organization,
+          as: "organization",
+          attributes: ["id", "name", "slug"],
+        },
       ],
       order: [["created_at", "DESC"]],
       limit: input.limit,
@@ -200,9 +231,34 @@ export class MemberRepository {
   async getMemberById(organizationId: string, userId: string) {
     const membership = await OrganizationUser.findOne({
       where: { organization_id: organizationId, user_id: userId },
+      attributes: [
+        "id",
+        "user_id",
+        "organization_id",
+        "role",
+        "is_active",
+        "created_at",
+        "updated_at",
+      ],
       include: [
-        { model: User, as: "user" },
-        { model: Organization, as: "organization" },
+        {
+          model: User,
+          as: "user",
+          attributes: [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "is_active",
+            "created_at",
+            "updated_at",
+          ],
+        },
+        {
+          model: Organization,
+          as: "organization",
+          attributes: ["id", "name", "slug"],
+        },
       ],
     });
 
@@ -226,7 +282,13 @@ export class MemberRepository {
     return sequelize.transaction(async (transaction) => {
       const membership = await OrganizationUser.findOne({
         where: { organization_id: organizationId, user_id: userId },
-        include: [{ model: User, as: "user" }],
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: { exclude: ["password_hash"] },
+          },
+        ],
         transaction,
       });
 
@@ -262,6 +324,7 @@ export class MemberRepository {
 
       const student = await Student.findOne({
         where: { organization_id: organizationId, user_id: userId },
+        attributes: ["id"],
         transaction,
       });
 
@@ -301,7 +364,7 @@ export class MemberRepository {
   ) {
     const membership = await OrganizationUser.findOne({
       where: { organization_id: organizationId, user_id: userId },
-      include: [{ model: User, as: "user" }],
+      include: [{ model: User, as: "user", attributes: ["id"] }],
     });
 
     if (!membership) return null;
@@ -401,7 +464,14 @@ export class MemberRepository {
 
     const mappings = await UserRole.findAll({
       where: { organization_id: organizationId, user_id: { [Op.in]: userIds } },
-      include: [{ model: Role, as: "role" }],
+      attributes: ["user_id", "role_id"],
+      include: [
+        {
+          model: Role,
+          as: "role",
+          attributes: ["id", "code", "name", "description", "is_system_role"],
+        },
+      ],
     });
 
     return mappings.reduce((acc: Record<string, any[]>, mapping: any) => {
