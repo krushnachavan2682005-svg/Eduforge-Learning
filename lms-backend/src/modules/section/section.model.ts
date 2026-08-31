@@ -58,8 +58,7 @@ Section.init(
       references: { model: "lessons", key: "id" },
       allowNull: false,
     },
-    organization_id: { type: DataTypes.UUID, allowNull: false,
-    },
+    organization_id: { type: DataTypes.UUID, allowNull: false },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updated_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
   },
@@ -76,6 +75,7 @@ Section.init(
           const maxSection = await Section.findOne({
             where: { lesson_id: instance.lesson_id },
             order: [["seq_no", "DESC"]],
+            attributes: ["seq_no"],
           });
 
           instance.seq_no = maxSection ? maxSection.seq_no + 1 : 1;
@@ -93,7 +93,7 @@ Section.init(
         caseInsensitive: true,
       }),
     },
-  }
+  },
 );
 
 Section.belongsTo(Course, { foreignKey: "course_id" });

@@ -24,9 +24,7 @@ export class CourseRepository {
       const lessonInclude: any = {
         model: lesson,
         as: "lessons",
-        attributes: {
-          exclude: ["organization_id", "created_at", "updated_at"],
-        },
+        attributes: ["id", "title", "course_id", "seq_no"],
       };
 
       if (parsed_skipped_lesson === true) {

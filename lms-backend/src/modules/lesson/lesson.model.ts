@@ -56,6 +56,7 @@ lesson.init(
           const maxLesson = await lesson.findOne({
             where: { course_id: instance.course_id },
             order: [["seq_no", "DESC"]],
+            attributes: ["seq_no"],
           });
 
           instance.seq_no = maxLesson ? maxLesson.seq_no + 1 : 1;

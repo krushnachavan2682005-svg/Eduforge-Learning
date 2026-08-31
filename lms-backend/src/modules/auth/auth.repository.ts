@@ -54,18 +54,38 @@ export class AuthRepository {
   }
 
   async findActiveUserByEmail(email: string) {
-    const normalizedEmail = String(email || "").trim().toLowerCase();
+    const normalizedEmail = String(email || "")
+      .trim()
+      .toLowerCase();
     if (!normalizedEmail) return null;
 
     return User.findOne({
       where: { email: normalizedEmail, is_active: true },
+      attributes: [
+        "id",
+        "first_name",
+        "last_name",
+        "email",
+        "password_hash",
+        "is_active",
+        "created_at",
+        "updated_at",
+      ],
     });
   }
 
   async findPrimaryMembership(userId: string) {
     return OrganizationUser.findOne({
       where: { user_id: userId, is_active: true },
-      include: [{ model: Organization, as: "organization", where: { is_active: true } }],
+      attributes: ["id", "user_id", "organization_id", "role"],
+      include: [
+        {
+          model: Organization,
+          as: "organization",
+          where: { is_active: true },
+          attributes: ["id", "name", "slug", "is_active"],
+        },
+      ],
       order: [["created_at", "ASC"]],
     });
   }
@@ -77,9 +97,28 @@ export class AuthRepository {
         is_active: true,
         ...(organizationId ? { organization_id: organizationId } : {}),
       },
+      attributes: ["id", "user_id", "organization_id", "role"],
       include: [
-        { model: User, as: "user", where: { is_active: true } },
-        { model: Organization, as: "organization", where: { is_active: true } },
+        {
+          model: User,
+          as: "user",
+          where: { is_active: true },
+          attributes: [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "is_active",
+            "created_at",
+            "updated_at",
+          ],
+        },
+        {
+          model: Organization,
+          as: "organization",
+          where: { is_active: true },
+          attributes: ["id", "name", "slug", "is_active"],
+        },
       ],
       order: [["created_at", "ASC"]],
     });
@@ -99,7 +138,13 @@ export class AuthRepository {
     let slug = baseSlug;
     let suffix = 1;
 
-    while (await Organization.findOne({ where: { slug }, transaction })) {
+    while (
+      await Organization.findOne({
+        where: { slug },
+        transaction,
+        attributes: ["id"],
+      })
+    ) {
       suffix += 1;
       slug = `${baseSlug}-${suffix}`;
     }

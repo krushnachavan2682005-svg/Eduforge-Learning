@@ -256,7 +256,6 @@ export class ExamRepository {
   }
 
   async getAllExams(organizationId: string, limit: number, skip: number) {
-
     const { count, rows } = await Exam.findAndCountAll({
       where: organizationId ? { organization_id: organizationId } : undefined,
       attributes: [
@@ -298,7 +297,20 @@ export class ExamRepository {
     userId: string,
   ) {
     const includeOptions = [
-      { model: Question, as: "questions", separate: true },
+      {
+        model: Question,
+        as: "questions",
+        attributes: [
+          "id",
+          "exam_id",
+          "type",
+          "text",
+          "marks",
+          "is_mandatory",
+          "options",
+        ],
+        separate: true,
+      },
     ];
 
     const assignments = await ExamAssignment.findAll({
@@ -318,6 +330,15 @@ export class ExamRepository {
       where: organizationId
         ? { id: examIds, organization_id: organizationId }
         : { id: examIds },
+      attributes: [
+        "id",
+        "title",
+        "subject",
+        "total_marks",
+        "passing_marks",
+        "exam_date",
+        "exam_start_time",
+      ],
       include: includeOptions,
       limit,
       offset: skip,

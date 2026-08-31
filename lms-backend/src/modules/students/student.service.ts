@@ -174,7 +174,7 @@ export class StudentService {
         id: { [Op.in]: courseIds as string[] },
         organization_id: organizationId,
       },
-      attributes: ["id", "title", "description", "level", "is_published"],
+      attributes: ["id", "title"],
     });
 
     const courseById = new Map(
