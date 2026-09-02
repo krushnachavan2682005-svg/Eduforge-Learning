@@ -20,10 +20,12 @@ export class StudentResultsController {
         page = 1,
         limit = 10,
         review_status,
+        cursor,
       } = req.query as {
         page?: number;
         limit?: number;
         review_status?: string;
+        cursor?: string;
       };
 
       const storeClientId = req.user?.organization_id;
@@ -40,6 +42,7 @@ export class StudentResultsController {
         Number(page),
         Number(limit),
         review_status,
+        cursor,
       );
 
       return reply.code(200).send({
@@ -65,10 +68,12 @@ export class StudentResultsController {
         page = 1,
         limit = 10,
         review_status,
+        cursor,
       } = req.query as {
         page?: number;
         limit?: number;
         review_status?: string;
+        cursor?: string;
       };
 
       const storeClientId = req.user?.organization_id;
@@ -81,6 +86,7 @@ export class StudentResultsController {
         Number(page),
         Number(limit),
         review_status,
+        cursor,
       );
 
       return reply.code(200).send({

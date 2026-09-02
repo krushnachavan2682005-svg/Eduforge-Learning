@@ -95,12 +95,17 @@ export class QuizController {
   async getAllQuiz(req: FastifyRequest, reply: FastifyReply) {
     try {
       if (!req.user) return reply.code(401).send({ success: false });
-      const { page, limit } = req.query as { page?: string; limit?: string };
+      const { page, limit, cursor } = req.query as { 
+        page?: string; 
+        limit?: string;
+        cursor?: string;
+      };
 
       const quiz = await quizzeService.getQuiz(
         req.user.organization_id,
         Number(page),
         Number(limit),
+        cursor
       );
 
       return reply.status(200).send(quiz);

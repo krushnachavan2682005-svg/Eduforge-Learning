@@ -61,13 +61,18 @@ export class EnrollmentController {
   }
 
   async getAllEnrollment(req: FastifyRequest, reply: FastifyReply) {
-    const { page, limit } = req.query as { page?: string; limit?: string };
+    const { page, limit, cursor } = req.query as { 
+      page?: string; 
+      limit?: string;
+      cursor?: string;
+    };
     const organizationId = req.user?.organization_id as string;
 
     const enrollment = await enrollmentService.getAllEnrollment(
       organizationId,
       Number(page),
-      Number(limit)
+      Number(limit),
+      cursor
     );
 
     return reply.status(200).send(enrollment);

@@ -1,10 +1,10 @@
 import { PermissionDirective } from '../../services/permission-directive';
-import { CommonHttpService } from '../../services/common-http.service';
+import { CommonHttpService, CursorPaginationParams } from '../../services/common-http.service';
 import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
 import { StorageService } from '../../services/storage-service';
 import { HeaderComponent } from '../../shared/header.component';
 import { SkeletonTheme } from '../../services/skeleton-theme';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AssignTest } from '../assign-test/assign-test';
 import { STORAGEENUMS } from '../../shared/enum';
@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { Tooltip } from '../../shared/tooltip';
 import { Modal } from '../../modal/modal';
 import { IndividualConfig, ToastrService } from 'ngx-toastr';
-import { PaginationComponent } from '../../pagination/pagination';
+import { PaginationComponent, PaginationMetadata } from '../../pagination/pagination';
 import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
@@ -43,8 +43,9 @@ export class Test {
   TestList = signal<any[]>([]);
   isLoadingCourses = signal(false);
   pageSize = 10;
-  totalPages = 1;
-  currentPage = 1;
+  cursor: string | undefined = undefined;
+  paginationMeta: PaginationMetadata | null = null;
+  @ViewChild(PaginationComponent) paginationRef?: PaginationComponent;
   pageSizeOptions = [10, 20, 30, 40, 50];
 
   private router = inject(Router);
@@ -73,10 +74,16 @@ export class Test {
   getAllExams() {
     this.testsLoaded?.set(false);
     this.isLoadingCourses?.set(true);
+    const params: CursorPaginationParams = {
+      limit: this.pageSize,
+      user_id: this.user_id,
+    };
+    if (this.cursor) {
+      params.cursor = this.cursor;
+    }
+
     this.http
-      .getCourse(
-        `/exams/created-by/${this.user_id}?page=${this.currentPage}&limit=${this.pageSize}`,
-      )
+      .getExamsList(params)
       .subscribe((response) => {
         const tests =
           response?.data?.items?.map((test: any) => ({
@@ -89,16 +96,8 @@ export class Test {
           })) ||
           [];
 
-        const pagination = response?.pagination ?? response?.data?.pagination;
-        const total = pagination?.total ?? response?.data?.totalItems ?? response?.totalItems ?? response?.data?.total ?? response?.total ?? tests.length;
-
-        if (pagination?.totalPages) {
-          this.totalPages = pagination?.totalPages;
-        } else if (total) {
-          this.totalPages = Math.ceil(total / this.pageSize) || 1;
-        } else {
-          this.totalPages = 1;
-        }
+        this.paginationMeta = response?.pagination ?? response?.data?.pagination ?? null;
+        const total = this.paginationMeta?.total ?? response?.data?.totalItems ?? response?.totalItems ?? response?.data?.total ?? response?.total ?? tests.length;
 
         this.TestList?.set(tests);
         this.headers[0].subtitle = `YOU HAVE | ${total} TESTS TO CHECK`;
@@ -124,17 +123,19 @@ export class Test {
       });
   }
 
-  goToPage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.getAllExams();
-    }
+  onCursorChange(cursor: string | undefined) {
+    this.cursor = cursor;
+    this.getAllExams();
   }
 
   onPageSizeChange(newSize: number) {
     this.pageSize = newSize;
-    this.currentPage = 1;
-    this.getAllExams();
+    if (this.paginationRef) {
+      this.paginationRef.resetCursor();
+    } else {
+      this.cursor = undefined;
+      this.getAllExams();
+    }
   }
 
   deleteTest(examId: string) {

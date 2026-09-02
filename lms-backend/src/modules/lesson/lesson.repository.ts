@@ -7,6 +7,7 @@ export class lessonRepsitory {
     organizationId: string,
     page: number,
     limit: number,
+    cursor: string | undefined,
     filters: Record<string, any>,
   ) {
     const finalFilters = { ...filters, organization_id: organizationId };
@@ -14,6 +15,8 @@ export class lessonRepsitory {
     const data = await paginate(lesson, {
       page: Number(page),
       limit: Number(limit),
+      cursor,
+      cursorFields: ["created_at", "id"],
       filters: finalFilters,
       attributes: [
         "id",
@@ -32,7 +35,10 @@ export class lessonRepsitory {
           "course_id",
         ] as any,
       ],
-      order: [["seq_no", "ASC"]],
+      order: [
+        ["created_at", "DESC"],
+        ["id", "DESC"],
+      ],
     });
 
     return data;

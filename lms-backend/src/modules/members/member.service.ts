@@ -38,6 +38,7 @@ export class MemberService {
       active?: string;
       page?: string;
       limit?: string;
+      cursor?: string;
     },
   ) {
     const page = Math.max(Number(query.page || 1), 1);
@@ -56,6 +57,7 @@ export class MemberService {
       active,
       page,
       limit,
+      cursor: query.cursor,
     });
   }
 

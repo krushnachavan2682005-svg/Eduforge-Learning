@@ -16,6 +16,7 @@ export class StudentResultsService {
     page: number = 1,
     limit: number = 10,
     reviewStatus?: string,
+    cursor?: string,
   ) {
     const studentName = await this.studentRepository.getStudentDisplayName(
       organizationId,
@@ -28,6 +29,7 @@ export class StudentResultsService {
       page,
       limit,
       reviewStatus,
+      cursor,
     );
 
     return {
@@ -42,12 +44,14 @@ export class StudentResultsService {
     page: number = 1,
     limit: number = 10,
     reviewStatus?: string,
+    cursor?: string,
   ) {
     const result = await this.repository.getAllResults(
       organizationId,
       page,
       limit,
       reviewStatus,
+      cursor,
     );
 
     const userIds = [

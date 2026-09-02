@@ -33,8 +33,13 @@ export class ReviewsService {
     return true;
   }
 
-  async getAllReviews(page: number, limit: number, organizationId: string) {
-    return await this.repository.getAllReviews(page, limit, {
+  async getAllReviews(
+    page: number, 
+    limit: number, 
+    organizationId: string,
+    cursor?: string
+  ) {
+    return await this.repository.getAllReviews(page, limit, cursor, {
       organization_id: organizationId,
     });
   }

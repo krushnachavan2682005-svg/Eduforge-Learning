@@ -3,12 +3,14 @@ import { Section } from "./section.model";
 import { paginate } from "../../utils/pagination";
 
 export class sectionRepository {
-  async getSection(organizationId: string, page: number, limit: number) {
+  async getSection(organizationId: string, page: number, limit: number, cursor?: string) {
     const finalFilters = { organization_id: organizationId };
 
     const data = await paginate(Section, {
       page: Number(page),
       limit: Number(limit),
+      cursor,
+      cursorFields: ["created_at", "id"],
       filters: finalFilters,
       attributes: [
         "id",
@@ -35,8 +37,8 @@ export class sectionRepository {
         ] as any,
       ],
       order: [
-        ["updated_at", "DESC"],
         ["created_at", "DESC"],
+        ["id", "DESC"],
       ],
     });
 

@@ -255,9 +255,14 @@ export class ExamRepository {
     return exams;
   }
 
-  async getAllExams(organizationId: string, limit: number, skip: number) {
-    const { count, rows } = await Exam.findAndCountAll({
-      where: organizationId ? { organization_id: organizationId } : undefined,
+  async getAllExams(organizationId: string, limit: number, skip: number, cursor?: string) {
+    const where = organizationId ? { organization_id: organizationId } : {};
+    const result = await paginate(Exam, {
+      limit,
+      page: skip / limit + 1, // approximate conversion if skip is used
+      cursor,
+      cursorFields: ["created_on", "id"],
+      filters: where,
       attributes: [
         "id",
         "title",
@@ -283,11 +288,9 @@ export class ExamRepository {
           separate: true,
         },
       ],
-      limit,
-      offset: skip,
       order: [["created_on", "DESC"]],
     });
-    return { exams: rows, total: count };
+    return { exams: result.data, total: result.pagination.total, pagination: result.pagination };
   }
 
   async getAssignedExamsForUserFilter(
@@ -295,6 +298,7 @@ export class ExamRepository {
     limit: number,
     skip: number,
     userId: string,
+    cursor?: string,
   ) {
     const includeOptions = [
       {
@@ -326,10 +330,14 @@ export class ExamRepository {
 
     const examIds = assignments.map((a) => a.exam_id);
 
-    const { count, rows } = await Exam.findAndCountAll({
-      where: organizationId
+    const result = await paginate(Exam, {
+      filters: organizationId
         ? { id: examIds, organization_id: organizationId }
         : { id: examIds },
+      cursor,
+      cursorFields: ["created_on", "id"],
+      limit,
+      page: Math.floor(skip / limit) + 1,
       attributes: [
         "id",
         "title",
@@ -340,11 +348,9 @@ export class ExamRepository {
         "exam_start_time",
       ],
       include: includeOptions,
-      limit,
-      offset: skip,
-      order: [["created_on", "DESC"]],
+      order: [["created_on", "DESC"], ["id", "DESC"]],
     });
-    return { exams: rows, total: count };
+    return { exams: result.data, total: result.pagination.total, pagination: result.pagination };
   }
 
   async getExamsByCreator(
@@ -352,22 +358,25 @@ export class ExamRepository {
     userId: string,
     limit: number,
     skip: number,
+    cursor?: string,
   ) {
-    const { count, rows } = await Exam.findAndCountAll({
-      where: organizationId
+    const result = await paginate(Exam, {
+      filters: organizationId
         ? { created_by: userId, organization_id: organizationId }
         : { created_by: userId },
+      cursor,
+      cursorFields: ["created_on", "id"],
+      limit,
+      page: Math.floor(skip / limit) + 1,
       include: [
         {
           model: Question,
           as: "questions",
         },
       ],
-      limit,
-      offset: skip,
-      order: [["created_on", "DESC"]],
+      order: [["created_on", "DESC"], ["id", "DESC"]],
     });
-    return { exams: rows, total: count };
+    return { exams: result.data, total: result.pagination.total, pagination: result.pagination };
   }
 
   async updateExam(organizationId: string, examId: string, data: IExamUpdate) {
@@ -692,10 +701,12 @@ export class ExamRepository {
       where: { session_id },
     });
   }
-  async getPublicExamResult(page: number, limit: number) {
+  async getPublicExamResult(page: number, limit: number, cursor?: string) {
     const result = paginate(ExamUserMappingPublic, {
       page: page,
       limit: limit,
+      cursor,
+      cursorFields: ["submitted_at", "id"],
       attributes: ["name", "exam_id", "submitted_at"],
 
       order: [

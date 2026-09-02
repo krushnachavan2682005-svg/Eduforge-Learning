@@ -8,10 +8,11 @@ const lessonService = new LessonService();
 export class lessonController {
   async getAllLesson(req: FastifyRequest, reply: FastifyReply) {
     if (!req.user) return reply.code(401).send({ success: false });
-    const { page, limit, course_id } = req.query as {
+    const { page, limit, course_id, cursor } = req.query as {
       page?: string;
       limit?: string;
       course_id?: string;
+      cursor?: string;
     };
 
     const filters: any = {};
@@ -23,6 +24,7 @@ export class lessonController {
       req.user.organization_id,
       Number(page),
       Number(limit),
+      cursor,
       filters,
     );
 

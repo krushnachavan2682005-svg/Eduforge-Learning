@@ -25,8 +25,8 @@ export const routes = {
     detail: (id) => `/members/${id}`,
   },
   courses: {
-    list: "/eduforge/api/courses",
-    create: "/eduforge/api/courses",
-    detail: (id) => `/eduforge/api/courses/${id}`,
+    list: "/courses",
+    create: "/courses",
+    detail: (id) => `/courses/${id}`,
   },
 };

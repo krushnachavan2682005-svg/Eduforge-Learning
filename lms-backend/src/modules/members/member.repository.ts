@@ -8,6 +8,7 @@ import { Role } from "../rbac/role.model";
 import { UserRole } from "../rbac/user-role.model";
 import { Student } from "../students/student.model";
 import { User } from "../users/user.model";
+import { paginate } from "../../utils/pagination";
 
 export type MemberRoleCode =
   | "teacher"
@@ -32,6 +33,7 @@ export interface ListMembersInput {
   active?: boolean;
   page: number;
   limit: number;
+  cursor?: string;
 }
 
 export class MemberRepository {
@@ -159,10 +161,15 @@ export class MemberRepository {
       userWhere.is_active = input.active;
     }
 
-    const memberships = await OrganizationUser.findAndCountAll({
-      where: {
+    const memberships = await paginate(OrganizationUser, {
+      filters: {
         organization_id: input.organization_id,
       },
+      page: input.page,
+      limit: input.limit,
+      cursor: input.cursor,
+      cursorFields: ["created_at", "id"],
+      order: [["created_at", "DESC"], ["id", "DESC"]],
       attributes: [
         "id",
         "user_id",
@@ -193,19 +200,15 @@ export class MemberRepository {
           attributes: ["id", "name", "slug"],
         },
       ],
-      order: [["created_at", "DESC"]],
-      limit: input.limit,
-      offset,
-      distinct: true,
     });
 
-    const userIds = memberships.rows.map((membership) => membership.user_id);
+    const userIds = memberships.data.map((membership: any) => membership.user_id);
     const rolesByUser = await this.getRolesByUserIds(
       input.organization_id,
       userIds,
     );
 
-    let items = memberships.rows.map((membership: any) =>
+    let items = memberships.data.map((membership: any) =>
       this.serializeMember(membership, rolesByUser[membership.user_id] || []),
     );
 
@@ -218,11 +221,10 @@ export class MemberRepository {
     return {
       items,
       pagination: {
-        page: input.page,
-        limit: input.limit,
-        total: input.role ? items.length : memberships.count,
+        ...memberships.pagination,
+        total: input.role ? items.length : memberships.pagination.total,
         totalPages: Math.ceil(
-          (input.role ? items.length : memberships.count) / input.limit,
+          (input.role ? items.length : memberships.pagination.total || 0) / input.limit,
         ),
       },
     };

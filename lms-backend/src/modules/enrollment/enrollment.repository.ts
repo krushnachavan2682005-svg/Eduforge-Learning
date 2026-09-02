@@ -5,14 +5,20 @@ export class EnrollmentRepsitory {
   async getEnrollment(
     page: number,
     limit: number,
-    filters: Record<string, any>
+    cursor?: string,
+    filters?: Record<string, any>
   ) {
     const data = await paginate(Enrollment, {
       page: Number(page),
       limit: Number(limit),
+      cursor,
+      cursorFields: ["created_at", "id"],
       filters,
       attributes: ["id", "enrolled_at", "course_id", "user_id", "created_at"],
-      order: [["created_at", "DESC"]],
+      order: [
+        ["created_at", "DESC"],
+        ["id", "DESC"],
+      ],
     });
     return data;
   }

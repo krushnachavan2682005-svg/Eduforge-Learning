@@ -11,6 +11,8 @@ type EnrollmentListFilters = {
   search?: string;
   status?: LocalEnrollmentStatus;
   student_id?: string;
+  cursorData?: { enrolledAt: Date; id: string };
+  useCursorPagination?: boolean;
 };
 
 export class StudentRepository {
@@ -261,7 +263,6 @@ export class StudentRepository {
   }
 
   async listEnrollments(filters: EnrollmentListFilters) {
-    const offset = (filters.page - 1) * filters.limit;
     const where: Record<string, unknown> = {
       organization_id: filters.organizationId,
     };
@@ -274,6 +275,16 @@ export class StudentRepository {
       where.student_id = filters.student_id;
     }
 
+    if (filters.cursorData) {
+      where[Op.or as any] = [
+        { enrolled_at: { [Op.lt]: filters.cursorData.enrolledAt } },
+        {
+          enrolled_at: filters.cursorData.enrolledAt,
+          id: { [Op.lt]: filters.cursorData.id },
+        },
+      ];
+    }
+
     const studentWhere = filters.search
       ? {
           [Op.or]: [
@@ -284,7 +295,7 @@ export class StudentRepository {
         }
       : undefined;
 
-    const { rows, count } = await LocalEnrollment.findAndCountAll({
+    const queryOptions: any = {
       where,
       attributes: ["id", "status", "enrolled_at", "course_id"],
       include: [
@@ -296,16 +307,22 @@ export class StudentRepository {
           attributes: ["id", "first_name", "last_name", "email"],
         },
       ],
-      order: [["enrolled_at", "DESC"]],
+      order: [
+        ["enrolled_at", "DESC"],
+        ["id", "DESC"],
+      ],
       limit: filters.limit,
-      offset,
-      distinct: true,
-    });
-
-    return {
-      data: rows,
-      count,
     };
+
+    if (filters.useCursorPagination) {
+      const rows = await LocalEnrollment.findAll(queryOptions);
+      return { data: rows, count: undefined };
+    } else {
+      queryOptions.offset = (filters.page - 1) * filters.limit;
+      queryOptions.distinct = true;
+      const { rows, count } = await LocalEnrollment.findAndCountAll(queryOptions);
+      return { data: rows, count };
+    }
   }
 
   async getEnrollmentById(organizationId: string, enrollmentId: string) {

@@ -83,13 +83,18 @@ export class ReviewsController {
 
   async getAllReviews(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { page, limit } = req.query as { page?: string; limit?: string };
+      const { page, limit, cursor } = req.query as { 
+        page?: string; 
+        limit?: string;
+        cursor?: string;
+      };
       const organization_id = req.user?.organization_id as string;
 
       const reviews = await reviewsService.getAllReviews(
         Number(page),
         Number(limit),
         organization_id,
+        cursor
       );
 
       return reply.status(200).send(reviews);

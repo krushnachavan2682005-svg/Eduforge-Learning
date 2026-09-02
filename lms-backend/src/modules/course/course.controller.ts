@@ -54,9 +54,10 @@ export class CourseController {
 
   async getAllCourses(req: FastifyRequest, reply: FastifyReply) {
     if (!req.user) return reply.code(401).send({ success: false });
-    const { page, limit, title, skipFirstLesson, includeLessons } = (req.query || {}) as {
+    const { page, limit, cursor, title, skipFirstLesson, includeLessons } = (req.query || {}) as {
       page?: string;
       limit?: string;
+      cursor?: string;
       title?: string;
       skipFirstLesson?: string;
       includeLessons?: string;
@@ -68,6 +69,7 @@ export class CourseController {
       req.user.organization_id,
       Number(page),
       Number(limit),
+      cursor,
       {},
       parsed_skipped_lesson,
       parsed_include_lessons

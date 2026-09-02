@@ -8,11 +8,14 @@ export class ActionItemRepository {
   async getActionItems(
     filters: Record<string, any>,
     page: number,
-    limit: number
+    limit: number,
+    cursor?: string
   ) {
     return paginate(ActionItems, {
       page,
       limit,
+      cursor,
+      cursorFields: ["created_at", "id"],
       filters,
       attributes: [
         "id",
@@ -25,7 +28,10 @@ export class ActionItemRepository {
         "created_at",
         "updated_at",
       ],
-      order: [["created_at", "DESC"]],
+      order: [
+        ["created_at", "DESC"],
+        ["id", "DESC"],
+      ],
     });
   }
 

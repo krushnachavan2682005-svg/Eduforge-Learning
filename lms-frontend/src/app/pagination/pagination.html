@@ -1,24 +1,37 @@
 <div class="fixed bottom-0 bg-white flex flex-col sm:flex-row sm:justify-between items-center gap-3 p-2 shadow-2xl border-t theme-border z-10 left-2 right-2 sm:left-3 sm:right-3 md:left-6 md:right-6 lg:left-8 lg:right-8"
     [class.md:ml-[250px]]="sidebarService.isOpen()" [class.md:ml-0]="!sidebarService.isOpen()">
     <div class="flex flex-wrap justify-center sm:justify-start gap-2">
-        <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
-            class="px-3 py-1 rounded border bg-white disabled:opacity-50 theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out">
-            Prev
-        </button>
+        
+        @if (mode === 'legacy') {
+            <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
+                class="px-3 py-1 rounded border bg-white disabled:opacity-50 theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out">
+                Prev
+            </button>
 
-        @for (page of pages; track page) {
-        <button
-            class="px-3 py-1 rounded theme-text-dark theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out border"
-            (click)="goToPage(page)" [class.font-bold]="currentPage === page"
-            [class.theme-bg-secondary]="currentPage === page">
-            {{ page }}
-        </button>
+            @for (page of pages; track page) {
+                <button
+                    class="px-3 py-1 rounded theme-text-dark theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out border"
+                    (click)="goToPage(page)" [class.font-bold]="currentPage === page"
+                    [class.theme-bg-secondary]="currentPage === page">
+                    {{ page }}
+                </button>
+            }
+
+            <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+                class="px-3 py-1 rounded border bg-white disabled:opacity-50 theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out">
+                Next
+            </button>
+        } @else {
+            <button (click)="goPrevCursor()" [disabled]="cursorHistory.length === 0"
+                class="px-3 py-1 rounded border bg-white disabled:opacity-50 theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out">
+                Prev
+            </button>
+
+            <button (click)="goNextCursor()" [disabled]="!paginationMeta?.has_next"
+                class="px-3 py-1 rounded border bg-white disabled:opacity-50 theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out">
+                Next
+            </button>
         }
-
-        <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages"
-            class="px-3 py-1 rounded border bg-white disabled:opacity-50 theme-bg-gray theme-bg-secondary transition duration-200 ease-in-out">
-            Next
-        </button>
     </div>
 
     <div class="flex items-center justify-center sm:justify-end gap-3 relative mr-1">
