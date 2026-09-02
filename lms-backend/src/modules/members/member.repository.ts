@@ -168,6 +168,7 @@ export class MemberRepository {
       page: input.page,
       limit: input.limit,
       cursor: input.cursor,
+      useCursorPagination:true,
       cursorFields: ["created_at", "id"],
       order: [["created_at", "DESC"], ["id", "DESC"]],
       attributes: [

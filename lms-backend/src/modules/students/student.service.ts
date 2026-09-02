@@ -12,6 +12,7 @@ import { OrganizationUser } from "../roles/role.model";
 import { User } from "../users/user.model";
 import { Course } from "../course/course.model";
 import { Op } from "sequelize";
+import { Student } from "./student.model";
 
 export class StudentService {
   private repository = new StudentRepository();
@@ -188,6 +189,38 @@ export class StudentService {
     }));
   }
 
+  private async attachStudentSummaries(
+    organizationId: string,
+    enrollments: any[],
+  ) {
+    const studentIds = Array.from(
+      new Set(
+        enrollments
+          .map((enrollment: any) => enrollment.student_id)
+          .filter(Boolean),
+      ),
+    );
+
+    if (!studentIds.length) return enrollments;
+
+    const students = await Student.findAll({
+      where: {
+        id: { [Op.in]: studentIds as string[] },
+        organization_id: organizationId,
+      },
+      attributes: ["id", "first_name", "last_name", "email"],
+    });
+
+    const studentById = new Map(
+      students.map((student: any) => [student.id, student.toJSON()]),
+    );
+
+    return enrollments.map((enrollment: any) => ({
+      ...enrollment,
+      student: studentById.get(enrollment.student_id) || null,
+    }));
+  }
+
   async listEnrollments(orgId: string, query: any) {
     const page = Math.max(Number(query.page || 1), 1);
     const limit = Math.min(Math.max(Number(query.limit || 20), 1), 100);
@@ -221,15 +254,51 @@ export class StudentService {
       }
     }
 
+    let studentIds: string[] | undefined = undefined;
+
+    if (query.search) {
+      studentIds = await this.repository.getStudentIdsBySearch(orgId, query.search);
+      if (studentIds.length === 0) {
+        if (useCursorPagination) {
+          return {
+            data: [],
+            pagination: { limit, next_cursor: null, has_next: false },
+          };
+        } else {
+          return {
+            data: [],
+            meta: { page, limit, total: 0, total_pages: 0 },
+          };
+        }
+      }
+
+      if (query.student_id) {
+        if (!studentIds.includes(query.student_id)) {
+          if (useCursorPagination) {
+            return {
+              data: [],
+              pagination: { limit, next_cursor: null, has_next: false },
+            };
+          } else {
+            return {
+              data: [],
+              meta: { page, limit, total: 0, total_pages: 0 },
+            };
+          }
+        }
+        studentIds = [query.student_id];
+      }
+    }
+
     const fetchLimit = useCursorPagination ? limit + 1 : limit;
 
     const { data: rawRows, count } = await this.repository.listEnrollments({
       organizationId: orgId,
       page,
       limit: fetchLimit,
-      search: query.search,
+      student_ids: studentIds,
       status,
-      student_id: query.student_id,
+      student_id: query.search ? undefined : query.student_id,
       cursorData,
       useCursorPagination,
     });
@@ -252,7 +321,8 @@ export class StudentService {
       }
     }
 
-    const data = await this.attachCourseSummaries(orgId, processedRows);
+    const dataWithCourses = await this.attachCourseSummaries(orgId, processedRows);
+    const data = await this.attachStudentSummaries(orgId, dataWithCourses);
 
     if (useCursorPagination) {
       return {

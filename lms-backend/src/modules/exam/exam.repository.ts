@@ -261,6 +261,7 @@ export class ExamRepository {
       limit,
       page: skip / limit + 1, // approximate conversion if skip is used
       cursor,
+      useCursorPagination: true,
       cursorFields: ["created_on", "id"],
       filters: where,
       attributes: [
@@ -335,6 +336,7 @@ export class ExamRepository {
         ? { id: examIds, organization_id: organizationId }
         : { id: examIds },
       cursor,
+      useCursorPagination:true,
       cursorFields: ["created_on", "id"],
       limit,
       page: Math.floor(skip / limit) + 1,
@@ -365,6 +367,7 @@ export class ExamRepository {
         ? { created_by: userId, organization_id: organizationId }
         : { created_by: userId },
       cursor,
+      useCursorPagination: true,
       cursorFields: ["created_on", "id"],
       limit,
       page: Math.floor(skip / limit) + 1,
@@ -706,6 +709,7 @@ export class ExamRepository {
       page: page,
       limit: limit,
       cursor,
+      useCursorPagination: true,
       cursorFields: ["submitted_at", "id"],
       attributes: ["name", "exam_id", "submitted_at"],
 

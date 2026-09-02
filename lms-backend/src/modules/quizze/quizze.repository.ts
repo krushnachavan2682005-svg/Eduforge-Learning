@@ -7,6 +7,7 @@ export class QuizRepsitory {
       page: Number(page),
       limit: Number(limit),
       cursor,
+      useCursorPagination:true,
       cursorFields: ["created_at", "id"],
       filters: { organization_id: organizationId },
       attributes: ["id", "lesson_id", "question", "options", "created_at"],

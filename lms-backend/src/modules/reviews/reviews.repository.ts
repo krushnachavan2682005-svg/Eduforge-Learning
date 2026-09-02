@@ -12,6 +12,7 @@ export class ReviewsRepository {
       page: Number(page),
       limit: Number(limit),
       cursor,
+      useCursorPagination:true,
       cursorFields: ["created_at", "id"],
       filters,
       attributes: [

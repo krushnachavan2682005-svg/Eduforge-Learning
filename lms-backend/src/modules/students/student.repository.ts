@@ -13,6 +13,7 @@ type EnrollmentListFilters = {
   student_id?: string;
   cursorData?: { enrolledAt: Date; id: string };
   useCursorPagination?: boolean;
+  student_ids?: string[];
 };
 
 export class StudentRepository {
@@ -271,7 +272,9 @@ export class StudentRepository {
       where.status = filters.status;
     }
 
-    if (filters.student_id) {
+    if (filters.student_ids) {
+      where.student_id = { [Op.in]: filters.student_ids };
+    } else if (filters.student_id) {
       where.student_id = filters.student_id;
     }
 
@@ -285,28 +288,9 @@ export class StudentRepository {
       ];
     }
 
-    const studentWhere = filters.search
-      ? {
-          [Op.or]: [
-            { first_name: { [Op.iLike]: `%${filters.search}%` } },
-            { last_name: { [Op.iLike]: `%${filters.search}%` } },
-            { email: { [Op.iLike]: `%${filters.search}%` } },
-          ],
-        }
-      : undefined;
-
     const queryOptions: any = {
       where,
-      attributes: ["id", "status", "enrolled_at", "course_id"],
-      include: [
-        {
-          model: Student,
-          as: "student",
-          where: studentWhere,
-          required: Boolean(studentWhere),
-          attributes: ["id", "first_name", "last_name", "email"],
-        },
-      ],
+      attributes: ["id", "status", "enrolled_at", "course_id", "student_id"],
       order: [
         ["enrolled_at", "DESC"],
         ["id", "DESC"],
@@ -323,6 +307,21 @@ export class StudentRepository {
       const { rows, count } = await LocalEnrollment.findAndCountAll(queryOptions);
       return { data: rows, count };
     }
+  }
+
+  async getStudentIdsBySearch(organizationId: string, search: string) {
+    const students = await Student.findAll({
+      where: {
+        organization_id: organizationId,
+        [Op.or]: [
+          { first_name: { [Op.iLike]: `%${search}%` } },
+          { last_name: { [Op.iLike]: `%${search}%` } },
+          { email: { [Op.iLike]: `%${search}%` } },
+        ],
+      },
+      attributes: ["id"],
+    });
+    return students.map((s: any) => s.id);
   }
 
   async getEnrollmentById(organizationId: string, enrollmentId: string) {
