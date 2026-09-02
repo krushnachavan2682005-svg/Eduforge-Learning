@@ -75,6 +75,7 @@ export class StudentResultsRepository {
     const result = await paginate(ExamUserMapping, {
       filters,
       cursor,
+      useCursorPagination:true,
       cursorFields: ["submitted_at", "id"],
       limit,
       page,

@@ -11,6 +11,7 @@ export class sectionRepository {
       limit: Number(limit),
       cursor,
       cursorFields: ["created_at", "id"],
+      useCursorPagination:true,
       filters: finalFilters,
       attributes: [
         "id",

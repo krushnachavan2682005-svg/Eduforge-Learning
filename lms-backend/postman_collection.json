@@ -304,7 +304,18 @@
                     "200": {
                         "description": "Default Response"
                     }
-                }
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "description": "Cursor for pagination. Use the next_cursor returned in the pagination metadata of the previous response."
+                    }
+                ]
             }
         },
         "/enrollments/student/{student_id}": {
@@ -752,7 +763,18 @@
                     "200": {
                         "description": "Default Response"
                     }
-                }
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "description": "Cursor for pagination. Use the next_cursor returned in the pagination metadata of the previous response."
+                    }
+                ]
             }
         },
         "/eduforge/api/course/{id}": {
@@ -915,7 +937,18 @@
                     "200": {
                         "description": "Default Response"
                     }
-                }
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "description": "Cursor for pagination. Use the next_cursor returned in the pagination metadata of the previous response."
+                    }
+                ]
             }
         },
         "/eduforge/api/lesson/{id}": {
@@ -1095,7 +1128,18 @@
                     "200": {
                         "description": "Default Response"
                     }
-                }
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "description": "Cursor for pagination. Use the next_cursor returned in the pagination metadata of the previous response."
+                    }
+                ]
             }
         },
         "/eduforge/api/section/{id}": {
@@ -1772,7 +1816,18 @@
                     "200": {
                         "description": "Default Response"
                     }
-                }
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "description": "Cursor for pagination. Use the next_cursor returned in the pagination metadata of the previous response."
+                    }
+                ]
             }
         },
         "/eduforge/api/exam/{id}": {
@@ -2689,7 +2744,18 @@
                     "200": {
                         "description": "Default Response"
                     }
-                }
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "description": "Cursor for pagination. Use the next_cursor returned in the pagination metadata of the previous response."
+                    }
+                ]
             }
         },
         "/eduforge/api/action-items/{id}": {
@@ -3303,17 +3369,6 @@
                         "schema": {
                             "type": "number",
                             "minimum": 1,
-                            "default": 1
-                        },
-                        "in": "query",
-                        "name": "page",
-                        "required": false,
-                        "description": "Page number for pagination"
-                    },
-                    {
-                        "schema": {
-                            "type": "number",
-                            "minimum": 1,
                             "maximum": 100,
                             "default": 10
                         },
@@ -3342,6 +3397,15 @@
                         "name": "search",
                         "required": false,
                         "description": "Search keyword for filtering results"
+                    },
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "description": "Cursor for pagination. Use the next_cursor returned in the pagination metadata of the previous response."
                     }
                 ],
                 "responses": {
@@ -3354,17 +3418,6 @@
         "/eduforge/api/get-student-results/{user_id}": {
             "get": {
                 "parameters": [
-                    {
-                        "schema": {
-                            "type": "number",
-                            "minimum": 1,
-                            "default": 1
-                        },
-                        "in": "query",
-                        "name": "page",
-                        "required": false,
-                        "description": "Page number for pagination"
-                    },
                     {
                         "schema": {
                             "type": "number",
@@ -3405,6 +3458,15 @@
                         "in": "path",
                         "name": "user_id",
                         "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "description": "Cursor for pagination. Use the next_cursor returned in the pagination metadata of the previous response."
                     }
                 ],
                 "responses": {
@@ -3550,7 +3612,18 @@
                     "200": {
                         "description": "Default Response"
                     }
-                }
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "name": "cursor",
+                        "required": false,
+                        "description": "Cursor for pagination. Use the next_cursor returned in the pagination metadata of the previous response."
+                    }
+                ]
             }
         }
     },

@@ -15,6 +15,7 @@ export class ActionItemRepository {
       page,
       limit,
       cursor,
+      useCursorPagination:true,
       cursorFields: ["created_at", "id"],
       filters,
       attributes: [
