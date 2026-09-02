@@ -117,5 +117,5 @@
     }
   </div>
 
-  <app-pagination [currentPage]="currentPage" [totalPages]="totalPages" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (pageChange)="goToPage($event)" (pageSizeChange)="onPageSizeChange($event)"></app-pagination>
+  <app-pagination mode="cursor" [paginationMeta]="paginationMeta" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (cursorChange)="onCursorChange($event)" (pageSizeChange)="onPageSizeChange($event)"></app-pagination>
 </div>

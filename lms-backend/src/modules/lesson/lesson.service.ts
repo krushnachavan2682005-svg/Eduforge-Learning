@@ -15,12 +15,14 @@ export class LessonService {
     organizationId: string,
     page: number,
     limit: number,
+    cursor: string | undefined,
     filters: Record<string, any>,
   ) {
     return await this.lessonRepo.getLesson(
       organizationId,
       page,
       limit,
+      cursor,
       filters,
     );
   }

@@ -68,28 +68,16 @@ export class ExamController {
 
   async getExams(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        user_id,
-      } = req.query as {
-        page: number;
-        limit: number;
-        user_id?: string;
-      };
+      const { page = 1, limit = 10, cursor, user_id } = req.query as { page: number; limit: number; cursor?: string; user_id?: string; };
       const organizationId = req.user?.organization_id as string;
 
-      const { exams, total } = await examService.getExams(
-        organizationId,
-        Number(page) || 1,
-        Number(limit) || 10,
-        user_id,
-      );
+      const { exams, total, pagination } = await examService.getExams(organizationId, Number(page) || 1, Number(limit) || 10, cursor, user_id);
 
       return reply.send({
         success: true,
         data: exams,
         total,
+        pagination,
         message: "Exams fetched successfully",
       });
     } catch (error) {
@@ -118,23 +106,26 @@ export class ExamController {
   async getExamsByCreator(req: FastifyRequest, reply: FastifyReply) {
     try {
       const { userId } = req.params as { userId: string };
-      const { page = 1, limit = 10 } = req.query as {
+      const { page = 1, limit = 10, cursor } = req.query as {
         page: number;
         limit: number;
+        cursor?: string;
       };
       const organizationId = req.user?.organization_id as string;
 
-      const { exams, total } = await examService.getExamsByCreator(
+      const { exams, total, pagination } = await examService.getExamsByCreator(
         organizationId,
         userId,
         Number(page) || 1,
         Number(limit) || 10,
+        cursor,
       );
 
       return reply.send({
         success: true,
         data: exams,
         total,
+        pagination,
         message: "Exams created by user fetched successfully",
       });
     } catch (error) {
@@ -372,13 +363,15 @@ export class ExamController {
 
   async getPublicExamResult(req: FastifyRequest, reply: FastifyReply) {
     try {
-      const { page = "1", limit = "10" } = req.query as {
+      const { page = "1", limit = "10", cursor } = req.query as {
         page?: string;
         limit?: string;
+        cursor?: string;
       };
       const data = await examService.getPublicExamResult(
         Number(page),
         Number(limit),
+        cursor
       );
 
       return reply.send({

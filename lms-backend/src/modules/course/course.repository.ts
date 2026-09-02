@@ -9,6 +9,7 @@ export class CourseRepository {
     organizationId: string,
     page: number,
     limit: number,
+    cursor: string | undefined,
     filters?: Record<string, any>,
     parsed_skipped_lesson?: boolean,
     includeLessons?: boolean,
@@ -41,6 +42,8 @@ export class CourseRepository {
     const result = await paginate(Course, {
       page: Number(page),
       limit: Number(limit),
+      cursor,
+      cursorFields: ["created_at", "id"],
       filters: where,
 
       attributes: [

@@ -40,10 +40,11 @@ export class EnrollmentService {
     return await this.enrollmentRepo.deleteEnrollment(enrollment);
   }
 
-  async getAllEnrollment(organizationId: string, page?: number, limit?: number) {
+  async getAllEnrollment(organizationId: string, page?: number, limit?: number, cursor?: string) {
     return this.enrollmentRepo.getEnrollment(
       page || 1,
       limit || 20,
+      cursor,
       { organization_id: organizationId }
     );
   }

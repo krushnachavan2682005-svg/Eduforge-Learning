@@ -10,15 +10,17 @@ export class ActionItemsController {
     try {
       const organization_id = req.user?.organization_id;
       if (!organization_id) throw new UnauthorizedError("Tenant context missing");
-      const { page = "1", limit = "10" } = req.query as {
+      const { page = "1", limit = "10", cursor } = req.query as {
         page?: string;
         limit?: string;
+        cursor?: string;
       };
 
       const items = await service.getAllActionItems(
         organization_id,
         page,
-        limit
+        limit,
+        cursor
       );
 
       return reply.code(200).send({

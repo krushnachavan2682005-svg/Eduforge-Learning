@@ -1,4 +1,4 @@
-import { CommonHttpService } from './../../services/common-http.service';
+import { CommonHttpService, CursorPaginationParams } from './../../services/common-http.service';
 import { ChangeDetectorRef, Component, ViewChild, inject } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { CommonModule } from '@angular/common';
@@ -14,7 +14,7 @@ import { AssginCourse } from '../assgin-course/assgin-course';
 import { SidebarService } from '../../services/sidebar.service';
 import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
-import { PaginationComponent } from '../../pagination/pagination';
+import { PaginationComponent, PaginationMetadata } from '../../pagination/pagination';
 
 @Component({
   selector: 'app-courses-list',
@@ -31,9 +31,9 @@ import { PaginationComponent } from '../../pagination/pagination';
   styleUrl: './courses-list.scss',
 })
 export class CoursesList {
-  pageSize = 10;
-  totalPages = 1;
-  currentPage = 1;
+  pageSize = 10;
+  cursor: string | undefined = undefined;
+  paginationMeta: PaginationMetadata | null = null;
   isDropdownOpen = false;
   openAssignMenubar = false;
   isLoading: boolean = false;
@@ -51,21 +51,23 @@ export class CoursesList {
   private toastr = inject(ToastrService);
   public sidebarService = inject(SidebarService);
   @ViewChild(AddCourses) addCoursesComponent?: AddCourses;
+  @ViewChild(PaginationComponent) paginationRef?: PaginationComponent;
 
-  ngOnInit() {
+  ngOnInit() {
     this.PageLimit();
-    this.getCourses(this.currentPage);
+    this.getCourses();
   }
 
   PageLimit() {
     const qp = this.route?.snapshot?.queryParamMap;
-    const qpPage = Number(qp?.get('page'));
     const qpLimit = Number(qp?.get('limit'));
-    if (!Number.isNaN(qpPage) && qpPage > 0) {
-      this.currentPage = qpPage;
-    }
+    const qpCursor = qp?.get('cursor');
+    
     if (!Number.isNaN(qpLimit) && qpLimit > 0) {
       this.pageSize = qpLimit;
+    }
+    if (qpCursor) {
+      this.cursor = qpCursor;
     }
   }
 
@@ -86,7 +88,7 @@ export class CoursesList {
   goToViewCourse(course: any) {
     if (course?.id) {
       this.router?.navigate([this.workspaceNav.getCourseDetailRoute(course?.id)], {
-        queryParams: { page: this.currentPage, limit: this.pageSize },
+        queryParams: { limit: this.pageSize, cursor: this.cursor || null },
       });
     }
   }
@@ -122,12 +124,17 @@ export class CoursesList {
       });
   }
 
-  getCourses(page: number = this.currentPage) {
+  getCourses() {
     this.isLoading = true;
+    const params: CursorPaginationParams = {
+      limit: this.pageSize,
+    };
+    if (this.cursor) {
+      params.cursor = this.cursor;
+    }
+
     this.commonHttp
-      .getCourse(
-        `/all-courses?page=${page}&limit=${this.pageSize}`,
-      )
+      .getCoursesList(params)
       .subscribe((response: any) => {
         // Use 'items' for the array, fallback to 'courses' if needed
         const coursesArray =
@@ -135,15 +142,7 @@ export class CoursesList {
         this.courses?.set(coursesArray ?? []);
         this.isLoading = false;
 
-        // Use totalPages from pagination if available
-        const pagination = response?.pagination ?? response?.data?.pagination;
-        if (pagination && pagination?.totalPages) {
-          this.totalPages = pagination?.totalPages;
-        } else if (pagination && pagination?.total && pagination?.limit) {
-          this.totalPages = Math?.ceil(pagination?.total / pagination?.limit);
-        } else {
-          this.totalPages = 1;
-        }
+        this.paginationMeta = response?.pagination ?? response?.data?.pagination ?? null;
 
         this.cdr?.detectChanges();
       });
@@ -153,27 +152,29 @@ export class CoursesList {
     return this.courses();
   }
 
-  goToPage(page: number) {
-    if (page >= 1) {
-      this.currentPage = page;
-      this.getCourses(page);
-      this.router?.navigate([], {
-        relativeTo: this.route,
-        queryParams: { page: this.currentPage, limit: this.pageSize },
-        queryParamsHandling: 'merge',
-      });
-    }
+  onCursorChange(cursor: string | undefined) {
+    this.cursor = cursor;
+    this.getCourses();
+    this.router?.navigate([], {
+      relativeTo: this.route,
+      queryParams: { limit: this.pageSize, cursor: this.cursor || null },
+      queryParamsHandling: 'merge',
+    });
   }
 
   onPageSizeChange(newSize: number) {
     this.pageSize = newSize;
-    this.currentPage = 1;
-    this.getCourses(1);
-    this.router?.navigate([], {
-      relativeTo: this.route,
-      queryParams: { page: this.currentPage, limit: this.pageSize },
-      queryParamsHandling: 'merge',
-    });
+    if (this.paginationRef) {
+      this.paginationRef.resetCursor();
+    } else {
+      this.cursor = undefined;
+      this.getCourses();
+      this.router?.navigate([], {
+        relativeTo: this.route,
+        queryParams: { limit: this.pageSize, cursor: null },
+        queryParamsHandling: 'merge',
+      });
+    }
   }
 }
 

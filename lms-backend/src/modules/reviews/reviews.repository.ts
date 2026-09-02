@@ -5,11 +5,14 @@ export class ReviewsRepository {
   async getAllReviews(
     page: number,
     limit: number,
+    cursor?: string,
     filters?: Record<string, any>,
   ) {
     return paginate(Reviews, {
       page: Number(page),
       limit: Number(limit),
+      cursor,
+      cursorFields: ["created_at", "id"],
       filters,
       attributes: [
         "id",
@@ -19,7 +22,10 @@ export class ReviewsRepository {
         "comment",
         "created_at",
       ],
-      order: [["created_at", "DESC"]],
+      order: [
+        ["created_at", "DESC"],
+        ["id", "DESC"],
+      ],
     });
   }
 

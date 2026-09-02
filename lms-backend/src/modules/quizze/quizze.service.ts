@@ -5,8 +5,8 @@ import { NotFoundError } from "../../utils/globalErrorHandlingFile";
 export class QuizzeService {
   private quizRepo = new QuizRepsitory();
 
-  async getQuiz(organizationId: string, page: number, limit: number) {
-    return await this.quizRepo.getQuiz(organizationId, page, limit);
+  async getQuiz(organizationId: string, page: number, limit: number, cursor?: string) {
+    return await this.quizRepo.getQuiz(organizationId, page, limit, cursor);
   }
 
   async getQuizById(organizationId: string, id: string) {

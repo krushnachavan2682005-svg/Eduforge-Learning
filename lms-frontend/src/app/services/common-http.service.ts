@@ -5,6 +5,14 @@ import { environment } from '../../environment/env';
 import { STORAGEENUMS } from '../shared/enum';
 import { StorageService } from './storage-service';
 
+export interface CursorPaginationParams {
+  limit?: number;
+  cursor?: string;
+  page?: number;
+  search?: string;
+  [key: string]: any;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -23,6 +31,18 @@ export class CommonHttpService {
     }
 
     return headers;
+  }
+
+  private buildQueryParams(params: Record<string, any>): string {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        // Do not add 'page' if 'cursor' is present
+        if (key === 'page' && params['cursor']) return;
+        query.set(key, String(value));
+      }
+    });
+    return query.toString();
   }
 
   getCourse(endpoint: string): Observable<any> {
@@ -124,23 +144,12 @@ export class CommonHttpService {
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
-  getEnrollments(params: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    status?: string;
-    student_id?: string;
-  } = {}): Observable<any> {
-    const query = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        query.set(key, String(value));
-      }
-    });
-    const qs = query.toString();
+  getEnrollments(params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
     const url = `${environment.LMS_BASE_URL}/students/enrollments${qs ? `?${qs}` : ''}`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
+
 
   getEnrollmentById(id: string): Observable<any> {
     const url = `${environment.LMS_BASE_URL}/students/enrollments/${id}`;
@@ -152,23 +161,12 @@ export class CommonHttpService {
     return this.http.patch(url, { status }, { headers: this.getHeaders() });
   }
 
-  getMembers(params: {
-    search?: string;
-    role?: string;
-    active?: string;
-    page?: number;
-    limit?: number;
-  } = {}): Observable<any> {
-    const query = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        query.set(key, String(value));
-      }
-    });
-    const qs = query.toString();
+  getMembers(params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
     const url = `${environment.LMS_BASE_URL}/members/members${qs ? `?${qs}` : ''}`;
     return this.http.get(url, { headers: this.getHeaders() });
   }
+
 
   getMember(id: string): Observable<any> {
     const url = `${environment.LMS_BASE_URL}/members/members/${id}`;
@@ -223,6 +221,55 @@ export class CommonHttpService {
 
     return this.getCourse(`/all-courses?page=${page}&limit=${limit}`);
   }
+
+  // --- Batch 2: Cursor Pagination Methods ---
+
+  getCoursesList(params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
+    return this.http.get(`${environment.LMS_BASE_URL}/all-courses${qs ? `?${qs}` : ''}`, { headers: this.getHeaders() });
+  }
+
+  getExamsList(params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
+    return this.http.get(`${environment.LMS_BASE_URL}/exams${qs ? `?${qs}` : ''}`, { headers: this.getHeaders() });
+  }
+
+  getLessonsList(courseId: string, params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
+    return this.http.get(`${environment.LMS_BASE_URL}/lessons/course/${courseId}${qs ? `?${qs}` : ''}`, { headers: this.getHeaders() });
+  }
+
+  getSectionsList(courseId: string, params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
+    return this.http.get(`${environment.LMS_BASE_URL}/sections/course/${courseId}${qs ? `?${qs}` : ''}`, { headers: this.getHeaders() });
+  }
+
+  getActionItems(params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
+    return this.http.get(`${environment.LMS_BASE_URL}/action-items${qs ? `?${qs}` : ''}`, { headers: this.getHeaders() });
+  }
+
+  getExamPublicResults(examId: string, params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
+    return this.http.get(`${environment.LMS_BASE_URL}/student-results/public/${examId}${qs ? `?${qs}` : ''}`, { headers: this.getHeaders() });
+  }
+
+  getAssignedExams(params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
+    return this.http.get(`${environment.LMS_BASE_URL}/exams/assigned${qs ? `?${qs}` : ''}`, { headers: this.getHeaders() });
+  }
+
+  getExamsByCreator(userId: string, params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
+    return this.http.get(`${environment.LMS_BASE_URL}/exams/created-by/${userId}${qs ? `?${qs}` : ''}`, { headers: this.getHeaders() });
+  }
+
+  getStudentResults(params: CursorPaginationParams = {}): Observable<any> {
+    const qs = this.buildQueryParams(params);
+    return this.http.get(`${environment.LMS_BASE_URL}/student-results${qs ? `?${qs}` : ''}`, { headers: this.getHeaders() });
+  }
+
+  // -------------------------------------------
 
   postCourse(endpoint: string, data: any): Observable<any> {
     const url = `${environment?.LMS_BASE_URL}${endpoint}`;

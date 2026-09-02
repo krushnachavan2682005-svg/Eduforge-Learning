@@ -31,6 +31,7 @@ export class ExamService {
     organizationId: string,
     page: number,
     limit: number,
+    cursor: string | undefined,
     userId?: string,
   ) {
     const skip = (page - 1) * limit;
@@ -41,10 +42,11 @@ export class ExamService {
         limit,
         skip,
         userId,
+        cursor,
       );
     }
 
-    return this.repository.getAllExams(organizationId, limit, skip);
+    return this.repository.getAllExams(organizationId, limit, skip, cursor);
   }
 
   async getExamById(organizationId: string, examId: string) {
@@ -60,6 +62,7 @@ export class ExamService {
     userId: string,
     page: number,
     limit: number,
+    cursor?: string,
   ) {
     const skip = (page - 1) * limit;
     return this.repository.getExamsByCreator(
@@ -67,6 +70,7 @@ export class ExamService {
       userId,
       limit,
       skip,
+      cursor,
     );
   }
 
@@ -506,8 +510,8 @@ export class ExamService {
     };
   }
 
-  async getPublicExamResult(page: number, limit: number) {
-    return this.repository.getPublicExamResult(page, limit);
+  async getPublicExamResult(page: number, limit: number, cursor?: string) {
+    return this.repository.getPublicExamResult(page, limit, cursor);
   }
 
   // --- Batch 3 Endpoints ---

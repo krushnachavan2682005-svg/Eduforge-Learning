@@ -9,11 +9,12 @@ export class SectionService {
     this.repository = new sectionRepository();
   }
 
-  async getAllSection(organizationId: string, page: string, limit: string) {
+  async getAllSection(organizationId: string, page: string, limit: string, cursor?: string) {
     return this.repository.getSection(
       organizationId,
       Number(page),
       Number(limit),
+      cursor
     );
   }
 

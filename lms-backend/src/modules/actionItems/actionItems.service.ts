@@ -19,10 +19,11 @@ export class ActionItemsService {
     organizationId: string,
     page: string,
     limit: string,
+    cursor?: string,
     filters: Record<string, any> = {}
   ) {
     filters.organization_id = organizationId;
-    return this.repository.getActionItems(filters, Number(page), Number(limit));
+    return this.repository.getActionItems(filters, Number(page), Number(limit), cursor);
   }
 
   async getActionItemById(organizationId: string, id: string) {

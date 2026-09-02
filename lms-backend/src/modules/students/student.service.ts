@@ -1,4 +1,5 @@
 import { StudentRepository } from "./student.repository";
+import { encodeCursor, decodeCursor } from "../../utils/cursor";
 import {
   ForbiddenError,
   NotFoundError,
@@ -202,26 +203,77 @@ export class StudentService {
       ? query.status
       : undefined;
 
-    const { data: rows, count } = await this.repository.listEnrollments({
+    let cursorData: { enrolledAt: Date; id: string } | undefined = undefined;
+    const useCursorPagination = query.cursor !== undefined;
+
+    if (useCursorPagination && query.cursor) {
+      try {
+        const decoded = decodeCursor<{ enrolledAt: string; id: string }>(query.cursor);
+        if (!decoded.enrolledAt || !decoded.id) {
+          throw new Error("Missing cursor fields");
+        }
+        cursorData = {
+          enrolledAt: new Date(decoded.enrolledAt),
+          id: decoded.id,
+        };
+      } catch (err) {
+        throw new ValidationError("Invalid cursor format");
+      }
+    }
+
+    const fetchLimit = useCursorPagination ? limit + 1 : limit;
+
+    const { data: rawRows, count } = await this.repository.listEnrollments({
       organizationId: orgId,
       page,
-      limit,
+      limit: fetchLimit,
       search: query.search,
       status,
       student_id: query.student_id,
+      cursorData,
+      useCursorPagination,
     });
 
-    const data = await this.attachCourseSummaries(orgId, rows as any[]);
+    let hasNext = false;
+    let nextCursor: string | null = null;
+    let processedRows = rawRows as any[];
 
-    return {
-      data,
-      meta: {
-        page,
-        limit,
-        total: count,
-        total_pages: Math.ceil(count / limit),
-      },
-    };
+    if (useCursorPagination) {
+      if (processedRows.length > limit) {
+        hasNext = true;
+        processedRows.pop();
+      }
+      if (processedRows.length > 0) {
+        const lastRow = processedRows[processedRows.length - 1];
+        nextCursor = encodeCursor({
+          enrolledAt: lastRow.enrolled_at,
+          id: lastRow.id,
+        });
+      }
+    }
+
+    const data = await this.attachCourseSummaries(orgId, processedRows);
+
+    if (useCursorPagination) {
+      return {
+        data,
+        pagination: {
+          limit,
+          next_cursor: nextCursor,
+          has_next: hasNext,
+        },
+      };
+    } else {
+      return {
+        data,
+        meta: {
+          page,
+          limit,
+          total: count,
+          total_pages: Math.ceil((count || 0) / limit),
+        },
+      };
+    }
   }
 
   async getEnrollment(orgId: string, id: string) {
