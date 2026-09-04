@@ -14,13 +14,15 @@ import assignActionItemsRoutes from "../modules/assignActionItems/assignActionIt
 import uploadRoutes from "../modules/upload/upload.routes";
 import levelRoute from "../modules/level/level.routes";
 import studentResultsRoutes from "../modules/studentResults/studentResults.routes";
-import dashboardRoutes from "../modules/dashboard/dashboard.routes";
+import { dashboardRoutes } from "../modules/dashboard/dashboard.routes";
 import authRoutes from "../modules/auth/auth.routes";
 import userRoutes from "../modules/users/user.routes";
 import organizationRoutes from "../modules/organizations/organization.routes";
 import localDashboardRoutes from "../modules/dashboard/dashboard.routes";
 import studentRoutes from "../modules/students/student.routes";
 import memberRoutes from "../modules/members/member.routes";
+import aiDocumentRoutes from "../modules/ai-documents/ai-document.routes";
+
 export default async function routes(
   fastify: FastifyInstance,
   opts: FastifyPluginOptions,
@@ -51,4 +53,5 @@ export default async function routes(
   fastify.register(localDashboardRoutes, { prefix: "/dashboard" });
   fastify.register(studentRoutes, { prefix: "/students" });
   fastify.register(memberRoutes, { prefix: "/members" });
+  fastify.register(aiDocumentRoutes, { prefix: "/ai-documents" });
 }

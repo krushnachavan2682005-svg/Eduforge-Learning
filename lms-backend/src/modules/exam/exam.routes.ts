@@ -27,6 +27,10 @@ export default async function examRoutes(fastify: FastifyInstance) {
     (req, reply) => Controller.createExam(req, reply),
   );
 
+  fastify.get("/exams", { preHandler: verifyToken }, (req, reply) =>
+    Controller.getExams(req, reply),
+  );
+
   fastify.get("/all-exams", { preHandler: verifyToken }, (req, reply) =>
     Controller.getExams(req, reply),
   );

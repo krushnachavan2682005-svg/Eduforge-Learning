@@ -42,6 +42,9 @@ const permissions = [
   ["ACTION_ITEM_ASSIGN", "Assign action items"],
   ["AI_ACCESS", "Access AI features"],
   ["ORG_ADMIN", "Manage organization"],
+  ["AI_DOCUMENT_CREATE", "Create Student AI Documents"],
+  ["AI_DOCUMENT_VIEW", "View Student AI Documents"],
+  ["AI_DOCUMENT_DELETE", "Delete Student AI Documents"],
 ] as const;
 
 const rolePermissions: Record<string, string[]> = {
@@ -74,7 +77,15 @@ const rolePermissions: Record<string, string[]> = {
     "ACTION_ITEM_ASSIGN",
     "AI_ACCESS",
   ],
-  student: ["LMS_VIEW", "LMS_R", "LMS_ML", "LMS_CT"],
+  student: [
+    "LMS_VIEW",
+    "LMS_R",
+    "LMS_ML",
+    "LMS_CT",
+    "AI_DOCUMENT_CREATE",
+    "AI_DOCUMENT_VIEW",
+    "AI_DOCUMENT_DELETE",
+  ],
   reviewer: ["LMS_VIEW", "LMS_R", "EXAM_UPDATE", "STUDENT_VIEW"],
 };
 

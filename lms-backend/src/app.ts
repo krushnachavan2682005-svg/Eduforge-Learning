@@ -23,6 +23,8 @@ export const buildApp = async () => {
     done();
   });
   await connectDB();
+  // Ensure pgvector extension is enabled
+  await sequelize.query('CREATE EXTENSION IF NOT EXISTS vector;');
   // Sync Sequelize models with the database
   await sequelize.sync();
   await seedRbac();

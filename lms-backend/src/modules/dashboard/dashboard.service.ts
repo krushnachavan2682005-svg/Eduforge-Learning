@@ -236,7 +236,7 @@ export class DashboardService {
     };
 
     if (actionItemIds.length > 0) {
-      const aRows = await this.repository.getAssignedActionItems(organizationId);
+      const aRows = await this.repository.getAssignedActionItems(organizationId,actionItemIds);
 
       aRows.forEach((r: any) => {
         const ids: string[] = r.action_item_id || [];
@@ -261,13 +261,9 @@ export class DashboardService {
     const createdCourses = await this.repository.getCreatedCoursesCount(organizationId, userId, hasCreatedByCourse);
     const tutorCourseIds = await this.repository.getCourseIdsCreatedByTutor(organizationId, userId, hasCreatedByCourse);
 
-    let courseAssignRows = await this.repository.getCourseUserMappings(organizationId);
+    let courseAssignRows = await this.repository.getCourseUserMappings(organizationId,actionItemIds);
     
-    if (tutorCourseIds.length > 0) {
-      courseAssignRows = courseAssignRows.filter((r: any) =>
-        (r.course_id || []).some((cid: string) => tutorCourseIds.includes(cid)),
-      );
-    }
+
 
     let assignedCourses = new Set<string>();
     let totalCourseStudents = 0;
@@ -280,12 +276,8 @@ export class DashboardService {
       totalCourseStudents += studentCount;
     });
 
-    let sectionRows = await this.repository.getSectionUserMappings(organizationId);
-    if (tutorCourseIds.length > 0) {
-      sectionRows = sectionRows.filter((r: any) =>
-        tutorCourseIds.includes(r.course_id),
-      );
-    }
+    let sectionRows = await this.repository.getSectionUserMappings(organizationId,actionItemIds);
+  
     const completedSet = new Set<string>();
     sectionRows.forEach((r: any) => {
       if (r.is_completed) {
