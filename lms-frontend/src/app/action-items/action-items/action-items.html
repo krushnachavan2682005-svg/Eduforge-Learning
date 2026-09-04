@@ -136,11 +136,11 @@
   </section>
 
   <app-pagination
-    [currentPage]="currentPage"
-    [totalPages]="totalPages"
+    mode="cursor"
+    [paginationMeta]="paginationMeta"
     [pageSize]="pageSize"
     [pageSizeOptions]="pageSizeOptions"
-    (pageChange)="goToPage($event)"
+    (cursorChange)="onCursorChange($event)"
     (pageSizeChange)="onPageSizeChange($event)"
   ></app-pagination>
 

@@ -14,7 +14,7 @@ import { NgxSkeletonLoaderComponent } from 'ngx-skeleton-loader';
 import { AddActionItems } from '../add-action-items/add-action-items';
 import { CommonHttpService } from '../../services/common-http.service';
 import { PermissionDirective } from '../../services/permission-directive';
-import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, signal, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { AssignActionItems } from '../assign-action-items/assign-action-items';
 import { SafeUrlPipe } from '../../my-learning/student-view/student-view';
 import { PaginationComponent } from '../../pagination/pagination';
@@ -40,8 +40,9 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
 })
 export class ActionItems {
   pageSize = 10;
-  totalPages = 1;
-  currentPage = 1;
+  cursor: string | undefined;
+  paginationMeta: any = null;
+  @ViewChild(PaginationComponent) paginationRef!: PaginationComponent;
   apiService: any;
   attachments: any;
   isCollapsed = false;
@@ -76,10 +77,10 @@ export class ActionItems {
   private workspaceNav = inject(WorkspaceNavigationService);
   public sidebarService = inject(SidebarService);
 
-  ngOnInit() {
+  ngOnInit() {
     this.userId = this.str?.getItem(STORAGEENUMS?.USER_ID);
     this.PageLimit();
-    this.getAllActionItem(this.currentPage);
+    this.getAllActionItem();
   }
 
   isExpanded(card: any) {
@@ -185,24 +186,21 @@ export class ActionItems {
 
   PageLimit() {
     const qp = this.route?.snapshot?.queryParamMap;
-    const qpPage = Number(qp?.get('page'));
     const qpLimit = Number(qp?.get('limit'));
-    if (!Number.isNaN(qpPage) && qpPage > 0) {
-      this.currentPage = qpPage;
-    }
     if (!Number.isNaN(qpLimit) && qpLimit > 0) {
       this.pageSize = qpLimit;
     }
   }
 
-  getAllActionItem(page: number = this.currentPage) {
+  getAllActionItem() {
 
     this.isLoadingAction.set(true);
     this.actionLoaded.set(false);
     this.commonHttp
-      .getCourse(
-        `/action-items?page=${page}&limit=${this.pageSize}`,
-      )
+      .getActionItems({
+        limit: this.pageSize,
+        cursor: this.cursor,
+      })
       .subscribe({
         next: (res: any) => {
           const items = res?.data?.items ?? [];
@@ -214,14 +212,7 @@ export class ActionItems {
             });
           }
           this.ActionItems?.set(Array?.isArray(items) ? items : []);
-          const pagination = res?.pagination ?? res?.data?.pagination;
-          if (pagination?.totalPages) {
-            this.totalPages = pagination?.totalPages;
-          } else if (pagination?.total && pagination?.limit) {
-            this.totalPages = Math?.ceil(pagination?.total / pagination?.limit);
-          } else {
-            this.totalPages = 1;
-          }
+          this.paginationMeta = res?.pagination ?? res?.data?.pagination ?? null;
           items.forEach((action: any) => {
             if (action?.pdf_attachment) {
               this.getPresignedUrl(action);
@@ -254,24 +245,21 @@ export class ActionItems {
       });
   }
 
-  goToPage(page: number) {
-    if (page >= 1) {
-      this.currentPage = page;
-      this.getAllActionItem(page);
-      this.router?.navigate([], {
-        relativeTo: this.route,
-        queryParams: { page: this.currentPage, limit: this.pageSize },
-        queryParamsHandling: 'merge',
-      });
-    }
+  onCursorChange(cursor: string | undefined) {
+    this.cursor = cursor;
+    this.getAllActionItem();
   }
   onPageSizeChange(newSize: number) {
     this.pageSize = newSize;
-    this.currentPage = 1;
-    this.getAllActionItem(1);
+    if (this.paginationRef) {
+      this.paginationRef.resetCursor();
+    } else {
+      this.cursor = undefined;
+      this.getAllActionItem();
+    }
     this.router?.navigate([], {
       relativeTo: this.route,
-      queryParams: { page: this.currentPage, limit: this.pageSize },
+      queryParams: { limit: this.pageSize },
       queryParamsHandling: 'merge',
     });
   }
@@ -290,7 +278,12 @@ export class ActionItems {
     this.showAddCourseModal = false;
     this.openAssignMenubar?.set(false);
     this.editData?.set(null);
-    this.getAllActionItem();
+    if (this.paginationRef) {
+      this.paginationRef.resetCursor();
+    } else {
+      this.cursor = undefined;
+      this.getAllActionItem();
+    }
   }
   goToAddNewTest() {
     this.router?.navigate([this.workspaceNav.getActionItemCreateRoute()]);
@@ -342,7 +335,6 @@ export class ActionItems {
       )
       .subscribe(() => {
         this.toastr?.success('Action item successfully deleted');
-        this.getAllActionItem();
         this.closeAddCourseModal();
         this.closeModal();
       });

@@ -8,20 +8,6 @@
         Build, teach, assess, and learn from one intelligent LMS workspace.
       </p>
 
-      <div class="feature-list" aria-label="Platform highlights">
-        <div class="feature-item">
-          <span class="feature-index">1</span>
-          <span>Role-based learning workspaces</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-index">2</span>
-          <span>Timed exams with immutable submissions</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-index">3</span>
-          <span>AI-ready assessment and document intelligence</span>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -58,17 +44,19 @@
           (input)="onInputAndHandleChange($event)"
         />
 
-        @if (showError && loginForm.get("email")?.invalid) {
-          <div class="field-error" role="alert">
-            @if (loginForm.get("email")?.errors?.["required"]) {
-              <span>Please enter a valid email address.</span>
-            } @else if (loginForm.get("email")?.errors?.["invalidEmail"]) {
-              <span>Invalid email format.</span>
-            } @else if (loginForm.get("email")?.errors?.["invalidPhone"]) {
-              <span>Phone login is not available for this workspace.</span>
-            }
-          </div>
-        }
+        <div style="min-height: 20px;">
+          @if (showError && loginForm.get("email")?.invalid) {
+            <div class="field-error" style="margin-top: 4px;" role="alert">
+              @if (loginForm.get("email")?.errors?.["required"]) {
+                <span>Please enter a valid email address.</span>
+              } @else if (loginForm.get("email")?.errors?.["invalidEmail"]) {
+                <span>Invalid email format.</span>
+              } @else if (loginForm.get("email")?.errors?.["invalidPhone"]) {
+                <span>Phone login is not available for this workspace.</span>
+              }
+            </div>
+          }
+        </div>
       </div>
 
       <div class="field-group">
@@ -99,24 +87,28 @@
           </button>
         </div>
 
-        @if (
-          loginForm.get("password")?.invalid &&
-          loginForm.get("password")?.touched
-        ) {
-          <div class="field-error" role="alert">
-            @if (loginForm.get("password")?.errors?.["required"]) {
-              <span>Password is required.</span>
-            }
-            @if (loginForm.get("password")?.errors?.["minlength"]) {
-              <span>Password must be at least 6 characters.</span>
-            }
-          </div>
-        }
+        <div style="min-height: 20px;">
+          @if (
+            loginForm.get("password")?.invalid &&
+            loginForm.get("password")?.touched
+          ) {
+            <div class="field-error" style="margin-top: 4px;" role="alert">
+              @if (loginForm.get("password")?.errors?.["required"]) {
+                <span>Password is required.</span>
+              }
+              @if (loginForm.get("password")?.errors?.["minlength"]) {
+                <span>Password must be at least 6 characters.</span>
+              }
+            </div>
+          }
+        </div>
       </div>
 
-      @if (loginError) {
-        <div class="login-error" role="alert">{{ loginError }}</div>
-      }
+      <div style="min-height: 44px; margin-bottom: 8px; display: flex; align-items: center; justify-content: center;">
+        @if (loginError) {
+          <div class="login-error" style="margin-top: 0; width: 100%;" role="alert">{{ loginError }}</div>
+        }
+      </div>
 
       <button
         type="submit"

@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonHttpService } from '../../../services/common-http.service';
 import { HeaderComponent } from '../../../shared/header.component';
+import { PaginationComponent } from '../../../pagination/pagination';
 
 @Component({
   selector: 'app-member-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, HeaderComponent],
+  imports: [CommonModule, FormsModule, RouterModule, HeaderComponent, PaginationComponent],
   template: `
     <div class="min-h-full bg-slate-50 p-5 md:p-6">
       <div class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
@@ -33,12 +34,12 @@ import { HeaderComponent } from '../../../shared/header.component';
             class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
             placeholder="Search members"
             [(ngModel)]="search"
-            (ngModelChange)="loadMembers(1)"
+            (ngModelChange)="onFilterChange()"
           />
           <select
             class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
             [(ngModel)]="role"
-            (ngModelChange)="loadMembers(1)"
+            (ngModelChange)="onFilterChange()"
           >
             <option value="">All roles</option>
             <option value="organization_admin">Organization Admin</option>
@@ -49,7 +50,7 @@ import { HeaderComponent } from '../../../shared/header.component';
           <select
             class="h-11 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
             [(ngModel)]="active"
-            (ngModelChange)="loadMembers(1)"
+            (ngModelChange)="onFilterChange()"
           >
             <option value="">All status</option>
             <option value="true">Active</option>
@@ -117,17 +118,13 @@ import { HeaderComponent } from '../../../shared/header.component';
           </div>
         </div>
 
-        <div class="mt-4 flex flex-col gap-3 rounded-3xl border border-slate-200/80 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-          <span>Page {{ pagination()?.page || 1 }} of {{ pagination()?.totalPages || 1 }}</span>
-          <div class="flex gap-2">
-            <button class="rounded-xl border border-slate-200 bg-white px-3 py-2 font-bold disabled:opacity-50" [disabled]="page <= 1" (click)="loadMembers(page - 1)">
-              Previous
-            </button>
-            <button class="rounded-xl border border-slate-200 bg-white px-3 py-2 font-bold disabled:opacity-50" [disabled]="page >= (pagination()?.totalPages || 1)" (click)="loadMembers(page + 1)">
-              Next
-            </button>
-          </div>
-        </div>
+        <app-pagination
+          mode="cursor"
+          [paginationMeta]="paginationMeta"
+          [pageSize]="limit"
+          (cursorChange)="onCursorChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+        ></app-pagination>
       }
     </div>
   `,
@@ -136,10 +133,11 @@ export class MemberList {
   search = '';
   role = '';
   active = '';
-  page = 1;
   limit = 10;
+  cursor: string | undefined;
+  paginationMeta: any = null;
+  @ViewChild(PaginationComponent) paginationRef!: PaginationComponent;
   members = signal<any[]>([]);
-  pagination = signal<any>(null);
   isLoading = signal(false);
 
   private router = inject(Router);
@@ -149,29 +147,52 @@ export class MemberList {
     this.loadMembers();
   }
 
-  loadMembers(page = this.page) {
-    this.page = page;
+  loadMembers() {
     this.isLoading.set(true);
     this.commonHttp
       .getMembers({
         search: this.search,
         role: this.role,
         active: this.active,
-        page: this.page,
         limit: this.limit,
+        cursor: this.cursor,
       })
       .subscribe({
         next: (res: any) => {
           this.members.set(res?.data?.items || []);
-          this.pagination.set(res?.data?.pagination || null);
+          this.paginationMeta = res?.pagination ?? res?.data?.pagination ?? null;
           this.isLoading.set(false);
         },
         error: () => {
           this.members.set([]);
-          this.pagination.set(null);
+          this.paginationMeta = null;
           this.isLoading.set(false);
         },
       });
+  }
+
+  onFilterChange() {
+    if (this.paginationRef) {
+      this.paginationRef.resetCursor();
+    } else {
+      this.cursor = undefined;
+      this.loadMembers();
+    }
+  }
+
+  onCursorChange(cursor: string | undefined) {
+    this.cursor = cursor;
+    this.loadMembers();
+  }
+
+  onPageSizeChange(newSize: number) {
+    this.limit = newSize;
+    if (this.paginationRef) {
+      this.paginationRef.resetCursor();
+    } else {
+      this.cursor = undefined;
+      this.loadMembers();
+    }
   }
 
   viewMember(id: string) {
