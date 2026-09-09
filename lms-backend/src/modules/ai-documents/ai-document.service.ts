@@ -2,12 +2,15 @@ import { FastifyInstance } from "fastify";
 import { Readable } from "stream";
 import { randomUUID } from "crypto";
 import { AiDocumentRepository } from "./ai-document.repository";
+import { DocumentIntelligenceClient } from "../../integrations/document-intelligence/DocumentIntelligenceClient";
 
 export class AiDocumentService {
   private repository: AiDocumentRepository;
+  private documentIntelligenceClient: DocumentIntelligenceClient;
 
   constructor() {
     this.repository = new AiDocumentRepository();
+    this.documentIntelligenceClient = new DocumentIntelligenceClient();
   }
 
   async createDocument(data: {
@@ -79,6 +82,9 @@ export class AiDocumentService {
         file_size_bytes: fileSize,
       });
 
+      // Background processing trigger
+      this.triggerDocumentProcessing(document).catch(console.error);
+
       return document;
     } catch (error) {
       // 3. Compensation: Delete from S3 if DB fails
@@ -90,6 +96,97 @@ export class AiDocumentService {
       }
       throw new Error("Failed to store document metadata. Upload reverted.");
     }
+  }
+
+  async triggerDocumentProcessing(document: any) {
+    const STALE_TIMEOUT_MS = parseInt(process.env.DOCUMENT_PROCESSING_STALE_TIMEOUT_MS || "300000", 10);
+    const staleThreshold = new Date(Date.now() - STALE_TIMEOUT_MS);
+    const jobId = randomUUID();
+    let leaseAcquired = false;
+
+    try {
+      // 1. Safe transition to PROCESSING (acquire lease)
+      const affected = await this.repository.acquireProcessingLease(
+        document.id,
+        document.organization_id,
+        document.student_id,
+        jobId,
+        staleThreshold
+      );
+
+      if (affected === 0) {
+        console.warn(`[AiDocumentService] Document ${document.id} cannot be processed (already actively processing or in an invalid state)`);
+        throw new Error("Document is already processing or in an invalid state");
+      }
+      
+      leaseAcquired = true;
+
+      const response = await this.documentIntelligenceClient.processDocument({
+        job_id: jobId,
+        document_id: document.id,
+        organization_id: document.organization_id,
+        owner_user_id: document.owner_user_id,
+        storage_bucket: document.storage_bucket,
+        storage_key: document.storage_key,
+        mime_type: document.mime_type,
+        file_size_bytes: document.file_size_bytes,
+        processing_type: "PREPROCESS_PDF"
+      });
+
+      if (response.success) {
+        const releasedCount = await this.repository.releaseProcessingLease(
+          document.id, 
+          document.organization_id, 
+          document.student_id, 
+          "COMPLETED",
+          jobId
+        );
+        if (releasedCount === 0) {
+          console.warn(`[AiDocumentService] Job ${jobId} finished for doc ${document.id} but lease was no longer current (stale recovery occurred). Status update ignored.`);
+        }
+      } else {
+        const releasedCount = await this.repository.releaseProcessingLease(
+          document.id, 
+          document.organization_id, 
+          document.student_id, 
+          "FAILED",
+          jobId
+        );
+        if (releasedCount === 0) {
+          console.warn(`[AiDocumentService] Job ${jobId} failed for doc ${document.id} but lease was no longer current. Status update ignored.`);
+        }
+      }
+    } catch (error) {
+      console.error(`Failed to process document ${document.id}:`, error);
+      if (leaseAcquired) {
+        const releasedCount = await this.repository.releaseProcessingLease(
+          document.id, 
+          document.organization_id, 
+          document.student_id, 
+          "FAILED",
+          jobId
+        );
+        if (releasedCount === 0) {
+          console.warn(`[AiDocumentService] Failed job ${jobId} error caught for doc ${document.id} but lease was no longer current. Status update ignored.`);
+        }
+      }
+    }
+  }
+
+  async retryProcessing(id: string, organization_id: string, student_id: string) {
+    const document = await this.getDocument(id, organization_id, student_id);
+    if (!document) {
+      throw new Error("Document not found");
+    }
+    
+    // Check if it's eligible for retry (FAILED, UPLOADED, or stuck PROCESSING)
+    if (document.processing_status === "COMPLETED") {
+      throw new Error("Document is already fully processed");
+    }
+
+    // Trigger asynchronously so we don't block the HTTP request
+    this.triggerDocumentProcessing(document).catch(console.error);
+    return true;
   }
 
   async listDocuments(

@@ -145,4 +145,28 @@ export class AiDocumentController {
 
     return reply.status(200).send({ message: "Document deleted successfully" });
   };
+
+  processDocument = async (request: FastifyRequest, reply: FastifyReply) => {
+    const user = request.user as any;
+    const studentId = await this.getStudentId(request);
+
+    if (!studentId) {
+      return reply.status(403).send({ message: "Forbidden: Only students can access this feature." });
+    }
+
+    const { id } = request.params as any;
+
+    try {
+      await this.service.retryProcessing(id, user.organization_id, studentId);
+      return reply.status(202).send({ message: "Processing started" });
+    } catch (error: any) {
+      if (error.message === "Document not found") {
+        return reply.status(404).send({ message: error.message });
+      }
+      if (error.message === "Document is already fully processed" || error.message === "Document is already processing or in an invalid state") {
+        return reply.status(409).send({ message: error.message });
+      }
+      return reply.status(400).send({ message: error.message || "Failed to trigger processing" });
+    }
+  };
 }

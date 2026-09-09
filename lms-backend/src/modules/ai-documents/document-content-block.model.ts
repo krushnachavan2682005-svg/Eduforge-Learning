@@ -10,6 +10,20 @@ export interface DocumentContentBlockAttributes {
   block_order: number;
   content_text?: string;
   readable_text?: string;
+  block_type?: string;
+  source_type?: string;
+  page_text_id?: string;
+  table_id?: string;
+  image_id?: string;
+  image_text_id?: string;
+  x0?: number;
+  y0?: number;
+  x1?: number;
+  y1?: number;
+  page_width?: number;
+  page_height?: number;
+  extraction_method?: string;
+  metadata?: any;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -28,6 +42,20 @@ export class DocumentContentBlock
   public block_order!: number;
   public content_text?: string;
   public readable_text?: string;
+  public block_type?: string;
+  public source_type?: string;
+  public page_text_id?: string;
+  public table_id?: string;
+  public image_id?: string;
+  public image_text_id?: string;
+  public x0?: number;
+  public y0?: number;
+  public x1?: number;
+  public y1?: number;
+  public page_width?: number;
+  public page_height?: number;
+  public extraction_method?: string;
+  public metadata?: any;
   public created_at?: Date;
   public updated_at?: Date;
 }
@@ -63,6 +91,62 @@ DocumentContentBlock.init(
     },
     readable_text: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    block_type: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    source_type: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    page_text_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    table_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    image_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    image_text_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
+    x0: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
+    y0: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
+    x1: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
+    y1: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
+    page_width: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
+    page_height: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+    },
+    extraction_method: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    metadata: {
+      type: DataTypes.JSONB,
       allowNull: true,
     },
     created_at: {

@@ -12,7 +12,6 @@ import { CommonModule } from '@angular/common';
 import { Tooltip } from '../../shared/tooltip';
 import { Modal } from '../../modal/modal';
 import { IndividualConfig, ToastrService } from 'ngx-toastr';
-import { PaginationComponent, PaginationMetadata } from '../../pagination/pagination';
 import { WorkspaceNavigationService } from '../../core/navigation/workspace-navigation.service';
 
 @Component({
@@ -25,13 +24,13 @@ import { WorkspaceNavigationService } from '../../core/navigation/workspace-navi
     HeaderComponent,
     PermissionDirective,
     NgxSkeletonLoaderComponent,
-    PaginationComponent,
   ],
   templateUrl: './test.html',
   styleUrl: './test.scss',
 })
 export class Test {
-  user_id = '';
+  user_id = '';
+
   showModal = false;
   examId: string = '';
   isCollapsed = false;
@@ -43,10 +42,8 @@ export class Test {
   TestList = signal<any[]>([]);
   isLoadingCourses = signal(false);
   pageSize = 10;
-  cursor: string | undefined = undefined;
-  paginationMeta: PaginationMetadata | null = null;
-  @ViewChild(PaginationComponent) paginationRef?: PaginationComponent;
-  pageSizeOptions = [10, 20, 30, 40, 50];
+  cursor: string | null = null;
+  paginationMeta: any = null;
 
   private router = inject(Router);
   private str = inject(StorageService);
@@ -64,16 +61,20 @@ export class Test {
   ];
   toastOptions: Partial<IndividualConfig<any>> | undefined;
   ngOnInit() {
-    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
+    this.user_id = this.str?.getItem(STORAGEENUMS?.USER_ID) || '';
+
     this.route?.params?.subscribe((params: any) => {
       this.examId = params['id'];
     });
     this.getAllExams();
   }
 
-  getAllExams() {
-    this.testsLoaded?.set(false);
-    this.isLoadingCourses?.set(true);
+  getAllExams(isLoadMore = false) {
+    if (!isLoadMore) {
+      this.cursor = null;
+      this.testsLoaded?.set(false);
+      this.isLoadingCourses?.set(true);
+    }
     const params: CursorPaginationParams = {
       limit: this.pageSize,
       user_id: this.user_id,
@@ -99,7 +100,12 @@ export class Test {
         this.paginationMeta = response?.pagination ?? response?.data?.pagination ?? null;
         const total = this.paginationMeta?.total ?? response?.data?.totalItems ?? response?.totalItems ?? response?.data?.total ?? response?.total ?? tests.length;
 
-        this.TestList?.set(tests);
+        if (isLoadMore) {
+          this.TestList.update(list => [...list, ...tests]);
+        } else {
+          this.TestList?.set(tests);
+        }
+        
         this.headers[0].subtitle = `YOU HAVE | ${total} TESTS TO CHECK`;
         this.testsLoaded?.set(true);
         this.isLoadingCourses?.set(false);
@@ -117,24 +123,16 @@ export class Test {
                 );
               }
             },
-            error: () => {}
+            error: () => { }
           });
         });
       });
   }
 
-  onCursorChange(cursor: string | undefined) {
-    this.cursor = cursor;
-    this.getAllExams();
-  }
-
-  onPageSizeChange(newSize: number) {
-    this.pageSize = newSize;
-    if (this.paginationRef) {
-      this.paginationRef.resetCursor();
-    } else {
-      this.cursor = undefined;
-      this.getAllExams();
+  loadMore() {
+    if (this.paginationMeta?.next_cursor) {
+      this.cursor = this.paginationMeta.next_cursor;
+      this.getAllExams(true);
     }
   }
 
@@ -226,7 +224,7 @@ export class Test {
 
     const date = new Date(
       typeof test.exam_start_time === 'string' &&
-      /^\d{2}:\d{2}$/.test(test.exam_start_time)
+        /^\d{2}:\d{2}$/.test(test.exam_start_time)
         ? `1970-01-01T${test.exam_start_time}`
         : test.exam_start_time,
     );

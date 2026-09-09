@@ -37,11 +37,11 @@ export class ExamService {
     const skip = (page - 1) * limit;
 
     if (userId) {
-      return this.repository.getAssignedExamsForUserFilter(
+      return this.repository.getExamsByCreator(
         organizationId,
+        userId,
         limit,
         skip,
-        userId,
         cursor,
       );
     }
@@ -1234,7 +1234,7 @@ export class ExamService {
       );
     const { mapping, exam } = res;
     if (mapping.review_status !== "completed")
-      throw new Error(
+      throw new ForbiddenError(
         `Exam review not yet available. Current status: ${mapping.review_status}`,
       );
     const studentName = await this.studentRepository.getStudentDisplayName(
@@ -1283,9 +1283,7 @@ export class ExamService {
 
     const reviewRecord = await this.repository.getExamReviewRecord(mapping.id);
     let reviewerName = "System";
-    let reviewerComments = null;
     if (reviewRecord) {
-      reviewerComments = (reviewRecord as any).reviewer_comment;
       const reviewerId = mapping?.reviewed_by;
       if (reviewerId) {
         const reviewerObj = mapping?.reviewers?.find(
@@ -1328,5 +1326,9 @@ export class ExamService {
       },
       review_details: reviewDetails,
     };
+  }
+  async getExamLeaderboard(organization_id:string,examId:string){
+   let result=await this.repository.getExamLeaderboard(organization_id,examId)
+   return result
   }
 }

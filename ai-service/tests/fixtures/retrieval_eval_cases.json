@@ -1,0 +1,1117 @@
+{
+  "version": "1.0.0",
+  "corpus_version": "1.0.0",
+  "cases": [
+    {
+      "case_id": "SEMANTIC_PARAPHRASE_001",
+      "category": "SEMANTIC_PARAPHRASE",
+      "tenant_key": "TENANT_A",
+      "query": "How many items were missing at goods intake?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WAREHOUSE_C02",
+          "document_key": "A_WAREHOUSE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WAREHOUSE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "SEMANTIC_PARAPHRASE_002",
+      "category": "SEMANTIC_PARAPHRASE",
+      "tenant_key": "TENANT_A",
+      "query": "What protection delay applies after water inundation?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INSURANCE_C01",
+          "document_key": "A_INSURANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INSURANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "SEMANTIC_PARAPHRASE_003",
+      "category": "SEMANTIC_PARAPHRASE",
+      "tenant_key": "TENANT_A",
+      "query": "How long does the maker stand behind the Z9 controller?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WARRANTY_C01",
+          "document_key": "A_WARRANTY",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WARRANTY"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "EXACT_PHRASE_001",
+      "category": "EXACT_PHRASE",
+      "tenant_key": "TENANT_A",
+      "query": "\"exponential backoff with jitter\"",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_API_C02",
+          "document_key": "A_API",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_API"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "EXACT_PHRASE_002",
+      "category": "EXACT_PHRASE",
+      "tenant_key": "TENANT_A",
+      "query": "\"five working days for immediate family\"",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_LEAVE_C04",
+          "document_key": "A_LEAVE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_LEAVE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "EXACT_PHRASE_003",
+      "category": "EXACT_PHRASE",
+      "tenant_key": "TENANT_A",
+      "query": "\"seven years after the relationship ends\"",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_COMPLIANCE_C02",
+          "document_key": "A_COMPLIANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_COMPLIANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "INVOICE_OR_REFERENCE_ID_001",
+      "category": "INVOICE_OR_REFERENCE_ID",
+      "tenant_key": "TENANT_A",
+      "query": "ACME-INV-77821",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INVOICE_C01",
+          "document_key": "A_INVOICE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INVOICE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "INVOICE_OR_REFERENCE_ID_002",
+      "category": "INVOICE_OR_REFERENCE_ID",
+      "tenant_key": "TENANT_A",
+      "query": "acme inv 77821",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INVOICE_C01",
+          "document_key": "A_INVOICE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INVOICE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "INVOICE_OR_REFERENCE_ID_003",
+      "category": "INVOICE_OR_REFERENCE_ID",
+      "tenant_key": "TENANT_A",
+      "query": "SHIP/C07/2026",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_SHIPPING_C01",
+          "document_key": "A_SHIPPING",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_SHIPPING"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "AMOUNT_OR_CURRENCY_001",
+      "category": "AMOUNT_OR_CURRENCY",
+      "tenant_key": "TENANT_A",
+      "query": "₹45814.94 invoice total",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INVOICE_C01",
+          "document_key": "A_INVOICE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INVOICE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "AMOUNT_OR_CURRENCY_002",
+      "category": "AMOUNT_OR_CURRENCY",
+      "tenant_key": "TENANT_A",
+      "query": "$12,750 deductible",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INSURANCE_C02",
+          "document_key": "A_INSURANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INSURANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "AMOUNT_OR_CURRENCY_003",
+      "category": "AMOUNT_OR_CURRENCY",
+      "tenant_key": "TENANT_A",
+      "query": "€8240.50 EMEA revenue",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_FINANCE_C01",
+          "document_key": "A_FINANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_FINANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "DATE_LOOKUP_001",
+      "category": "DATE_LOOKUP",
+      "tenant_key": "TENANT_A",
+      "query": "What is due on 12 March 2026?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INVOICE_C01",
+          "document_key": "A_INVOICE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INVOICE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "DATE_LOOKUP_002",
+      "category": "DATE_LOOKUP",
+      "tenant_key": "TENANT_A",
+      "query": "2026-09-30 renewal",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_CONTRACT_C01",
+          "document_key": "A_CONTRACT",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_CONTRACT"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "DATE_LOOKUP_003",
+      "category": "DATE_LOOKUP",
+      "tenant_key": "TENANT_A",
+      "query": "March 31st 2027 carry forward",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_LEAVE_C03",
+          "document_key": "A_LEAVE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_LEAVE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "PERSON_OR_COMPANY_NAME_001",
+      "category": "PERSON_OR_COMPANY_NAME",
+      "tenant_key": "TENANT_A",
+      "query": "Priya Nair",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WAREHOUSE_C03",
+          "document_key": "A_WAREHOUSE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WAREHOUSE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "PERSON_OR_COMPANY_NAME_002",
+      "category": "PERSON_OR_COMPANY_NAME",
+      "tenant_key": "TENANT_A",
+      "query": "Orion Devices GmbH replacement freight",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WARRANTY_C03",
+          "document_key": "A_WARRANTY",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WARRANTY"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "PERSON_OR_COMPANY_NAME_003",
+      "category": "PERSON_OR_COMPANY_NAME",
+      "tenant_key": "TENANT_A",
+      "query": "Ravi Menon audit owner",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_FINANCE_C04",
+          "document_key": "A_FINANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_FINANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "ACRONYM_001",
+      "category": "ACRONYM",
+      "tenant_key": "TENANT_A",
+      "query": "What does PTO mean?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_LEAVE_C02",
+          "document_key": "A_LEAVE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_LEAVE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "ACRONYM_002",
+      "category": "ACRONYM",
+      "tenant_key": "TENANT_A",
+      "query": "Open Authorization token expiry",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_API_C03",
+          "document_key": "A_API",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_API"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "ACRONYM_003",
+      "category": "ACRONYM",
+      "tenant_key": "TENANT_A",
+      "query": "KYC",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_COMPLIANCE_C01",
+          "document_key": "A_COMPLIANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_COMPLIANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "HEADING_OR_SECTION_001",
+      "category": "HEADING_OR_SECTION",
+      "tenant_key": "TENANT_A",
+      "query": "POLICY-HX-4419 Section 7.2",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INSURANCE_C01",
+          "document_key": "A_INSURANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INSURANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "HEADING_OR_SECTION_002",
+      "category": "HEADING_OR_SECTION",
+      "tenant_key": "TENANT_A",
+      "query": "API guide section 6.3",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_API_C04",
+          "document_key": "A_API",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_API"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "HEADING_OR_SECTION_003",
+      "category": "HEADING_OR_SECTION",
+      "tenant_key": "TENANT_A",
+      "query": "warranty Section 9",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WARRANTY_C04",
+          "document_key": "A_WARRANTY",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WARRANTY"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "TABLE_CELL_LOOKUP_001",
+      "category": "TABLE_CELL_LOOKUP",
+      "tenant_key": "TENANT_A",
+      "query": "Table 1 received units",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WAREHOUSE_C04",
+          "document_key": "A_WAREHOUSE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WAREHOUSE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "TABLE_CELL_LOOKUP_002",
+      "category": "TABLE_CELL_LOOKUP",
+      "tenant_key": "TENANT_A",
+      "query": "Table 2 GST percentage and amount",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INVOICE_C03",
+          "document_key": "A_INVOICE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INVOICE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "TABLE_CELL_LOOKUP_003",
+      "category": "TABLE_CELL_LOOKUP",
+      "tenant_key": "TENANT_A",
+      "query": "Table 3 seal number",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_SHIPPING_C03",
+          "document_key": "A_SHIPPING",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_SHIPPING"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "MULTI_DOCUMENT_001",
+      "category": "MULTI_DOCUMENT",
+      "tenant_key": "TENANT_A",
+      "query": "Compare SHIP-C07-2026 expected and received quantities",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_SHIPPING_C02",
+          "document_key": "A_SHIPPING",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        },
+        {
+          "chunk_key": "A_WAREHOUSE_C01",
+          "document_key": "A_WAREHOUSE",
+          "grade": 2,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_SHIPPING",
+        "A_WAREHOUSE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "MULTI_DOCUMENT_002",
+      "category": "MULTI_DOCUMENT",
+      "tenant_key": "TENANT_A",
+      "query": "Find the invoice and contract entries for $12,750",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INSURANCE_C02",
+          "document_key": "A_INSURANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        },
+        {
+          "chunk_key": "A_CONTRACT_C04",
+          "document_key": "A_CONTRACT",
+          "grade": 2,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_CONTRACT",
+        "A_INSURANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "MULTI_DOCUMENT_003",
+      "category": "MULTI_DOCUMENT",
+      "tenant_key": "TENANT_A",
+      "query": "Who handled records dated 12 March 2026?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INVOICE_C01",
+          "document_key": "A_INVOICE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        },
+        {
+          "chunk_key": "A_SHIPPING_C04",
+          "document_key": "A_SHIPPING",
+          "grade": 2,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INVOICE",
+        "A_SHIPPING"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "CONFLICTING_EVIDENCE_001",
+      "category": "CONFLICTING_EVIDENCE",
+      "tenant_key": "TENANT_A",
+      "query": "What is the contract renewal date?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_CONTRACT_C01",
+          "document_key": "A_CONTRACT",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        },
+        {
+          "chunk_key": "A_CONTRACT_C03",
+          "document_key": "A_CONTRACT",
+          "grade": 2,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_CONTRACT"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "CONFLICTING_EVIDENCE_002",
+      "category": "CONFLICTING_EVIDENCE",
+      "tenant_key": "TENANT_A",
+      "query": "How often is compliance review required?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_COMPLIANCE_C04",
+          "document_key": "A_COMPLIANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_COMPLIANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "CONFLICTING_EVIDENCE_003",
+      "category": "CONFLICTING_EVIDENCE",
+      "tenant_key": "TENANT_A",
+      "query": "Were 46 or 48 vials received?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WAREHOUSE_C01",
+          "document_key": "A_WAREHOUSE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        },
+        {
+          "chunk_key": "A_SHIPPING_C02",
+          "document_key": "A_SHIPPING",
+          "grade": 2,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_SHIPPING",
+        "A_WAREHOUSE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "UNANSWERABLE_001",
+      "category": "UNANSWERABLE",
+      "tenant_key": "TENANT_A",
+      "query": "What is the cafeteria lunch menu?",
+      "document_filter_keys": [],
+      "answerability": "UNANSWERABLE",
+      "relevance": [],
+      "required_document_keys": [],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "UNANSWERABLE_002",
+      "category": "UNANSWERABLE",
+      "tenant_key": "TENANT_A",
+      "query": "Who is the chief astronaut?",
+      "document_filter_keys": [],
+      "answerability": "UNANSWERABLE",
+      "relevance": [],
+      "required_document_keys": [],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "UNANSWERABLE_003",
+      "category": "UNANSWERABLE",
+      "tenant_key": "TENANT_B",
+      "query": "What is the patent number for the Z9?",
+      "document_filter_keys": [],
+      "answerability": "UNANSWERABLE",
+      "relevance": [],
+      "required_document_keys": [],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "NUMERIC_ONLY_IDENTIFIER_001",
+      "category": "NUMERIC_ONLY_IDENTIFIER",
+      "tenant_key": "TENANT_A",
+      "query": "77821",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INVOICE_C04",
+          "document_key": "A_INVOICE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INVOICE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "NUMERIC_ONLY_IDENTIFIER_002",
+      "category": "NUMERIC_ONLY_IDENTIFIER",
+      "tenant_key": "TENANT_A",
+      "query": "88421",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_SHIPPING_C03",
+          "document_key": "A_SHIPPING",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_SHIPPING"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "NUMERIC_ONLY_IDENTIFIER_003",
+      "category": "NUMERIC_ONLY_IDENTIFIER",
+      "tenant_key": "TENANT_A",
+      "query": "4419",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INSURANCE_C01",
+          "document_key": "A_INSURANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INSURANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "STOPWORD_OR_PUNCTUATION_HEAVY_001",
+      "category": "STOPWORD_OR_PUNCTUATION_HEAVY",
+      "tenant_key": "TENANT_A",
+      "query": "the / of / 429 -- Retry-After?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_API_C02",
+          "document_key": "A_API",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_API"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "STOPWORD_OR_PUNCTUATION_HEAVY_002",
+      "category": "STOPWORD_OR_PUNCTUATION_HEAVY",
+      "tenant_key": "TENANT_A",
+      "query": "what, if any, is the -2 variance?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WAREHOUSE_C04",
+          "document_key": "A_WAREHOUSE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WAREHOUSE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "STOPWORD_OR_PUNCTUATION_HEAVY_003",
+      "category": "STOPWORD_OR_PUNCTUATION_HEAVY",
+      "tenant_key": "TENANT_A",
+      "query": "Section... 5.1; sanctions?",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_COMPLIANCE_C03",
+          "document_key": "A_COMPLIANCE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_COMPLIANCE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "REPEATED_BOILERPLATE_001",
+      "category": "REPEATED_BOILERPLATE",
+      "tenant_key": "TENANT_A",
+      "query": "controlled copy current revision warehouse",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WAREHOUSE_C05",
+          "document_key": "A_WAREHOUSE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WAREHOUSE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "REPEATED_BOILERPLATE_002",
+      "category": "REPEATED_BOILERPLATE",
+      "tenant_key": "TENANT_A",
+      "query": "controlled copy current revision API",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_API_C05",
+          "document_key": "A_API",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_API"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "REPEATED_BOILERPLATE_003",
+      "category": "REPEATED_BOILERPLATE",
+      "tenant_key": "TENANT_B",
+      "query": "controlled copy current revision operations",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "B_OPERATIONS_C05",
+          "document_key": "B_OPERATIONS",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "B_OPERATIONS"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "NEAR_DUPLICATE_001",
+      "category": "NEAR_DUPLICATE",
+      "tenant_key": "TENANT_A",
+      "query": "two fewer vials than required",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WAREHOUSE_C02",
+          "document_key": "A_WAREHOUSE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WAREHOUSE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "NEAR_DUPLICATE_002",
+      "category": "NEAR_DUPLICATE",
+      "tenant_key": "TENANT_A",
+      "query": "48 expected but 46 physically counted",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_WAREHOUSE_C01",
+          "document_key": "A_WAREHOUSE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_WAREHOUSE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "NEAR_DUPLICATE_003",
+      "category": "NEAR_DUPLICATE",
+      "tenant_key": "TENANT_A",
+      "query": "invoice total with GST ₹45,814.94",
+      "document_filter_keys": [],
+      "answerability": "ANSWERABLE",
+      "relevance": [
+        {
+          "chunk_key": "A_INVOICE_C01",
+          "document_key": "A_INVOICE",
+          "grade": 3,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        },
+        {
+          "chunk_key": "A_INVOICE_C03",
+          "document_key": "A_INVOICE",
+          "grade": 2,
+          "reason": "Known synthetic text directly answers or strongly supports this query."
+        }
+      ],
+      "required_document_keys": [
+        "A_INVOICE"
+      ],
+      "forbidden_chunk_keys": [],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "WRONG_TENANT_MATCH_001",
+      "category": "WRONG_TENANT_MATCH",
+      "tenant_key": "TENANT_A",
+      "query": "Tenant B API limit 90 requests per minute",
+      "document_filter_keys": [],
+      "answerability": "UNANSWERABLE",
+      "relevance": [],
+      "required_document_keys": [],
+      "forbidden_chunk_keys": [
+        "B_OVERLAP_C03"
+      ],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "WRONG_TENANT_MATCH_002",
+      "category": "WRONG_TENANT_MATCH",
+      "tenant_key": "TENANT_A",
+      "query": "Blue Yonder renewal 15 October 2026",
+      "document_filter_keys": [],
+      "answerability": "UNANSWERABLE",
+      "relevance": [],
+      "required_document_keys": [],
+      "forbidden_chunk_keys": [
+        "B_OPERATIONS_C02"
+      ],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "WRONG_TENANT_MATCH_003",
+      "category": "WRONG_TENANT_MATCH",
+      "tenant_key": "TENANT_B",
+      "query": "Priya Nair shortage approval",
+      "document_filter_keys": [],
+      "answerability": "UNANSWERABLE",
+      "relevance": [],
+      "required_document_keys": [],
+      "forbidden_chunk_keys": [
+        "A_WAREHOUSE_C03"
+      ],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "DELETED_DOCUMENT_TRAP_001",
+      "category": "DELETED_DOCUMENT_TRAP",
+      "tenant_key": "TENANT_A",
+      "query": "DELETED-ONLY-99173",
+      "document_filter_keys": [],
+      "answerability": "UNANSWERABLE",
+      "relevance": [],
+      "required_document_keys": [],
+      "forbidden_chunk_keys": [
+        "A_DELETED_SECRET_C01",
+        "A_DELETED_SECRET_C03",
+        "B_DELETED_C01"
+      ],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "DELETED_DOCUMENT_TRAP_002",
+      "category": "DELETED_DOCUMENT_TRAP",
+      "tenant_key": "TENANT_A",
+      "query": "POLICY-DELETED-777 volcanic ash",
+      "document_filter_keys": [],
+      "answerability": "UNANSWERABLE",
+      "relevance": [],
+      "required_document_keys": [],
+      "forbidden_chunk_keys": [
+        "A_DELETED_SECRET_C01",
+        "A_DELETED_SECRET_C03",
+        "B_DELETED_C01"
+      ],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    },
+    {
+      "case_id": "DELETED_DOCUMENT_TRAP_003",
+      "category": "DELETED_DOCUMENT_TRAP",
+      "tenant_key": "TENANT_B",
+      "query": "B-DELETED-44001",
+      "document_filter_keys": [],
+      "answerability": "UNANSWERABLE",
+      "relevance": [],
+      "required_document_keys": [],
+      "forbidden_chunk_keys": [
+        "A_DELETED_SECRET_C01",
+        "A_DELETED_SECRET_C03",
+        "B_DELETED_C01"
+      ],
+      "notes": "Labels derive from authored corpus semantics, not retrieval output."
+    }
+  ]
+}

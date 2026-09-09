@@ -44,4 +44,12 @@ export default async function aiDocumentRoutes(fastify: FastifyInstance) {
     },
     controller.deleteDocument
   );
+
+  fastify.post(
+    "/:id/process",
+    {
+      preHandler: [requirePermission("AI_DOCUMENT_CREATE")],
+    },
+    controller.processDocument
+  );
 }

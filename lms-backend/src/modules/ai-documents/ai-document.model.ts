@@ -15,6 +15,8 @@ export interface AiDocumentAttributes {
   file_size_bytes: number;
   processing_status: AiDocumentStatus;
   processing_type?: string;
+  processing_started_at?: Date | null;
+  current_processing_job_id?: string | null;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -22,7 +24,7 @@ export interface AiDocumentAttributes {
 export interface AiDocumentCreationAttributes
   extends Optional<
     AiDocumentAttributes,
-    "id" | "processing_status" | "processing_type" | "created_at" | "updated_at"
+    "id" | "processing_status" | "processing_type" | "processing_started_at" | "current_processing_job_id" | "created_at" | "updated_at"
   > {}
 
 export class AiDocument
@@ -40,6 +42,8 @@ export class AiDocument
   public file_size_bytes!: number;
   public processing_status!: AiDocumentStatus;
   public processing_type?: string;
+  public processing_started_at?: Date | null;
+  public current_processing_job_id?: string | null;
   public created_at?: Date;
   public updated_at?: Date;
 }
@@ -93,6 +97,14 @@ AiDocument.init(
     },
     processing_type: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    processing_started_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    current_processing_job_id: {
+      type: DataTypes.UUID,
       allowNull: true,
     },
     created_at: {

@@ -1,0 +1,959 @@
+{
+  "version": "1.0.0",
+  "language": "en",
+  "embedding_model": {
+    "name": "BAAI/bge-small-en-v1.5",
+    "revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+    "dimension": 384
+  },
+  "tenants": [
+    {
+      "tenant_key": "TENANT_A",
+      "documents": [
+        {
+          "document_key": "A_WAREHOUSE",
+          "tenant_key": "TENANT_A",
+          "title": "Warehouse Receipt Discrepancies",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_WAREHOUSE_C01",
+              "document_key": "A_WAREHOUSE",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "Bay C-07 receipt SHIP-C07-2026 expected 48 amber vials; physical count was 46, a shortage of 2 units.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_WAREHOUSE_C02",
+              "document_key": "A_WAREHOUSE",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "The warehouse intake team found two fewer vials than the shipping manifest required.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_WAREHOUSE_C03",
+              "document_key": "A_WAREHOUSE",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "Reconciliation must be signed by Priya Nair of Acme Logistics before 18 March 2026.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_WAREHOUSE_C04",
+              "document_key": "A_WAREHOUSE",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Table",
+              "content": "Table 1 | Expected units: 48 | Received units: 46 | Variance: -2.",
+              "block_type": "TABLE",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_WAREHOUSE_C05",
+              "document_key": "A_WAREHOUSE",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_INVOICE",
+          "tenant_key": "TENANT_A",
+          "title": "Invoice and Payment Register",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_INVOICE_C01",
+              "document_key": "A_INVOICE",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "Invoice ACME-INV-77821 from Acme Logistics totals ₹45,814.94 and is due 12 March 2026.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_INVOICE_C02",
+              "document_key": "A_INVOICE",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "Payment terms are net 30; remit to Northstar Components account ending 4821.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_INVOICE_C03",
+              "document_key": "A_INVOICE",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Table",
+              "content": "Table 2 | Subtotal ₹38,826.22 | GST 18% ₹6,988.72 | Total ₹45,814.94.",
+              "block_type": "TABLE",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_INVOICE_C04",
+              "document_key": "A_INVOICE",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Reference 77821 was approved by Elena García on 11 February 2026.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_INVOICE_C05",
+              "document_key": "A_INVOICE",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_INSURANCE",
+          "tenant_key": "TENANT_A",
+          "title": "Insurance Policy Clauses",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_INSURANCE_C01",
+              "document_key": "A_INSURANCE",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "POLICY-HX-4419 Section 7.2 covers flood damage after a 72-hour waiting period.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_INSURANCE_C02",
+              "document_key": "A_INSURANCE",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "The deductible is $12,750.00 per occurrence for Horizon Exchange Ltd.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_INSURANCE_C03",
+              "document_key": "A_INSURANCE",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "Business interruption cover is limited to 80% of documented gross profit.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_INSURANCE_C04",
+              "document_key": "A_INSURANCE",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Claims must be reported to Maya Chen within 14 calendar days.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_INSURANCE_C05",
+              "document_key": "A_INSURANCE",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_LEAVE",
+          "tenant_key": "TENANT_A",
+          "title": "Employee Leave Policy",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_LEAVE_C01",
+              "document_key": "A_LEAVE",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "EMP-LV-12 Section 4 grants 20 paid annual leave days to full-time employees.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_LEAVE_C02",
+              "document_key": "A_LEAVE",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "PTO means paid time off and requires manager approval for absences over three days.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_LEAVE_C03",
+              "document_key": "A_LEAVE",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "Carry-forward is capped at five days and expires on 31 March 2027.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_LEAVE_C04",
+              "document_key": "A_LEAVE",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Bereavement leave provides five working days for immediate family.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_LEAVE_C05",
+              "document_key": "A_LEAVE",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_WARRANTY",
+          "tenant_key": "TENANT_A",
+          "title": "Product Warranty Terms",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_WARRANTY_C01",
+              "document_key": "A_WARRANTY",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "WARRANTY-Z9-36M provides a 36-month limited warranty for the Z9 controller.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_WARRANTY_C02",
+              "document_key": "A_WARRANTY",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "Coverage begins on the purchase date and excludes misuse, corrosion, and unauthorized repair.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_WARRANTY_C03",
+              "document_key": "A_WARRANTY",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "Approved replacement shipping is paid by Orion Devices GmbH.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_WARRANTY_C04",
+              "document_key": "A_WARRANTY",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Section 9 requires the serial number and original invoice for a claim.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_WARRANTY_C05",
+              "document_key": "A_WARRANTY",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_FINANCE",
+          "tenant_key": "TENANT_A",
+          "title": "Quarterly Financial Tables",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_FINANCE_C01",
+              "document_key": "A_FINANCE",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Table",
+              "content": "Table 4 | Region: EMEA | Revenue: €8,240.50 | Quarter: Q1 2026.",
+              "block_type": "TABLE",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_FINANCE_C02",
+              "document_key": "A_FINANCE",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Table",
+              "content": "Table 4 | Region: APAC | Revenue: ₹45,814.94 | Quarter: Q1 2026.",
+              "block_type": "TABLE",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_FINANCE_C03",
+              "document_key": "A_FINANCE",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "Gross margin was 31.5%, compared with 29.0% in Q4 2025.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_FINANCE_C04",
+              "document_key": "A_FINANCE",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "The audit owner is Ravi Menon of Northstar Components.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_FINANCE_C05",
+              "document_key": "A_FINANCE",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_API",
+          "tenant_key": "TENANT_A",
+          "title": "Technical API Guide",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_API_C01",
+              "document_key": "A_API",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "API-RATE-429 indicates that the client exceeded 120 requests per minute.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_API_C02",
+              "document_key": "A_API",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "Retry-After is returned in seconds; clients should use exponential backoff with jitter.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_API_C03",
+              "document_key": "A_API",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "OAuth means Open Authorization and bearer tokens expire after 60 minutes.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_API_C04",
+              "document_key": "A_API",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Section 6.3 lists POST /v2/documents/{id}/search as the retrieval endpoint.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_API_C05",
+              "document_key": "A_API",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_SHIPPING",
+          "tenant_key": "TENANT_A",
+          "title": "Shipping Manifest",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_SHIPPING_C01",
+              "document_key": "A_SHIPPING",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "Manifest SHIP-C07-2026 departed Mumbai on 10 March 2026 aboard MV Narmada.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_SHIPPING_C02",
+              "document_key": "A_SHIPPING",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "Consignee Northstar Components receives 48 amber vials at Bay C-07.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_SHIPPING_C03",
+              "document_key": "A_SHIPPING",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Table",
+              "content": "Table 3 | Gross weight 128.4 kg | Pallets 3 | Seal NX-88421.",
+              "block_type": "TABLE",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_SHIPPING_C04",
+              "document_key": "A_SHIPPING",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Customs broker Aisha Rahman filed entry on 12 March 2026.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_SHIPPING_C05",
+              "document_key": "A_SHIPPING",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_CONTRACT",
+          "tenant_key": "TENANT_A",
+          "title": "Contract Renewal Schedule",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_CONTRACT_C01",
+              "document_key": "A_CONTRACT",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "The Acme Logistics master services agreement renews on 30 September 2026.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_CONTRACT_C02",
+              "document_key": "A_CONTRACT",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "Either party may prevent automatic renewal with 60 days written notice.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_CONTRACT_C03",
+              "document_key": "A_CONTRACT",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "The 2025 addendum states renewal on 31 August 2026, conflicting with the signed master agreement.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_CONTRACT_C04",
+              "document_key": "A_CONTRACT",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Section 12 sets the annual service fee at $12,750.00.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_CONTRACT_C05",
+              "document_key": "A_CONTRACT",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_COMPLIANCE",
+          "tenant_key": "TENANT_A",
+          "title": "Compliance Instructions",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_COMPLIANCE_C01",
+              "document_key": "A_COMPLIANCE",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "KYC means Know Your Customer; enhanced review is required for high-risk counterparties.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_COMPLIANCE_C02",
+              "document_key": "A_COMPLIANCE",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "Records must be retained for seven years after the relationship ends.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_COMPLIANCE_C03",
+              "document_key": "A_COMPLIANCE",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "Section 5.1 directs staff to report sanctions matches to Elena García immediately.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_COMPLIANCE_C04",
+              "document_key": "A_COMPLIANCE",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "The January bulletin says review every 12 months; the April bulletin says every 6 months.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "A_COMPLIANCE_C05",
+              "document_key": "A_COMPLIANCE",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "A_DELETED_SECRET",
+          "tenant_key": "TENANT_A",
+          "title": "Deleted Exact Answers",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": true,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "A_DELETED_SECRET_C01",
+              "document_key": "A_DELETED_SECRET",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "DELETED-ONLY-99173 authorizes a €8,240.50 emergency payment on 2 April 2026.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            },
+            {
+              "chunk_key": "A_DELETED_SECRET_C02",
+              "document_key": "A_DELETED_SECRET",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "The deleted warehouse record says all 48 units were received with no discrepancy.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            },
+            {
+              "chunk_key": "A_DELETED_SECRET_C03",
+              "document_key": "A_DELETED_SECRET",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "POLICY-DELETED-777 covers volcanic ash without a waiting period.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            },
+            {
+              "chunk_key": "A_DELETED_SECRET_C04",
+              "document_key": "A_DELETED_SECRET",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Deleted record owner was Devika Shah.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            },
+            {
+              "chunk_key": "A_DELETED_SECRET_C05",
+              "document_key": "A_DELETED_SECRET",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tenant_key": "TENANT_B",
+      "documents": [
+        {
+          "document_key": "B_OVERLAP",
+          "tenant_key": "TENANT_B",
+          "title": "Tenant B Overlapping Records",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "B_OVERLAP_C01",
+              "document_key": "B_OVERLAP",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "Invoice ACME-INV-77821 totals ₹45,814.94 but belongs exclusively to Tenant B.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "B_OVERLAP_C02",
+              "document_key": "B_OVERLAP",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "Bay C-07 receipt SHIP-C07-2026 expected 48 units and received all 48 units.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "B_OVERLAP_C03",
+              "document_key": "B_OVERLAP",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "API-RATE-429 indicates a Tenant B limit of 90 requests per minute.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "B_OVERLAP_C04",
+              "document_key": "B_OVERLAP",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "POLICY-HX-4419 Section 7.2 has a 24-hour waiting period for Tenant B.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "B_OVERLAP_C05",
+              "document_key": "B_OVERLAP",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "B_OPERATIONS",
+          "tenant_key": "TENANT_B",
+          "title": "Tenant B Operations",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": false,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "B_OPERATIONS_C01",
+              "document_key": "B_OPERATIONS",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "WARRANTY-Z9-36M is 24 months for Tenant B distributor inventory.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "B_OPERATIONS_C02",
+              "document_key": "B_OPERATIONS",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "Contract renewal for Blue Yonder Ltd occurs on 15 October 2026.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "B_OPERATIONS_C03",
+              "document_key": "B_OPERATIONS",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Table",
+              "content": "Table B | EMEA Revenue €8,240.50 | Quarter Q1 2026.",
+              "block_type": "TABLE",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "B_OPERATIONS_C04",
+              "document_key": "B_OPERATIONS",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Compliance review interval is nine months and owner is Omar Haddad.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            },
+            {
+              "chunk_key": "B_OPERATIONS_C05",
+              "document_key": "B_OPERATIONS",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "ACTIVE"
+            }
+          ]
+        },
+        {
+          "document_key": "B_DELETED",
+          "tenant_key": "TENANT_B",
+          "title": "Tenant B Deleted Record",
+          "status": "COMPLETED",
+          "processing_stage": "RETRIEVAL_READY",
+          "deleted": true,
+          "pages": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "chunks": [
+            {
+              "chunk_key": "B_DELETED_C01",
+              "document_key": "B_DELETED",
+              "page_number": 1,
+              "chunk_index": 0,
+              "section_heading": "Section 1",
+              "content": "B-DELETED-44001 is the exact cancellation approval code.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            },
+            {
+              "chunk_key": "B_DELETED_C02",
+              "document_key": "B_DELETED",
+              "page_number": 2,
+              "chunk_index": 1,
+              "section_heading": "Section 2",
+              "content": "Deleted invoice payment was $12,750.00.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            },
+            {
+              "chunk_key": "B_DELETED_C03",
+              "document_key": "B_DELETED",
+              "page_number": 3,
+              "chunk_index": 2,
+              "section_heading": "Section 3",
+              "content": "Deleted API limit was 500 requests per minute.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            },
+            {
+              "chunk_key": "B_DELETED_C04",
+              "document_key": "B_DELETED",
+              "page_number": 4,
+              "chunk_index": 3,
+              "section_heading": "Section 4",
+              "content": "Deleted contact was Morgan Lee.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            },
+            {
+              "chunk_key": "B_DELETED_C05",
+              "document_key": "B_DELETED",
+              "page_number": 5,
+              "chunk_index": 4,
+              "section_heading": "Section 5",
+              "content": "Controlled copy. Verify the current revision before operational use.",
+              "block_type": "TEXT",
+              "expected_state": "DELETED"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

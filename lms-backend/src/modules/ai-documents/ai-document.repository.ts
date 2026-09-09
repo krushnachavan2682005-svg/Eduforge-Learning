@@ -77,4 +77,92 @@ export class AiDocumentRepository {
       },
     });
   }
+
+  async updateProcessingStatus(
+    id: string,
+    organization_id: string,
+    student_id: string,
+    status: "UPLOADED" | "PROCESSING" | "FAILED" | "COMPLETED",
+    expectedStatuses?: string[]
+  ) {
+    const whereClause: any = {
+      id,
+      organization_id,
+      student_id,
+    };
+
+    if (expectedStatuses && expectedStatuses.length > 0) {
+      const { Op } = require("sequelize");
+      whereClause.processing_status = {
+        [Op.in]: expectedStatuses,
+      };
+    }
+
+    const [affectedCount] = await AiDocument.update(
+      { processing_status: status },
+      { where: whereClause }
+    );
+    
+    return affectedCount;
+  }
+
+  async acquireProcessingLease(
+    id: string,
+    organization_id: string,
+    student_id: string,
+    newJobId: string,
+    staleTimeoutThreshold: Date
+  ) {
+    const { Op } = require("sequelize");
+
+    const whereClause = {
+      id,
+      organization_id,
+      student_id,
+      [Op.or]: [
+        { processing_status: { [Op.in]: ["UPLOADED", "FAILED"] } },
+        {
+          processing_status: "PROCESSING",
+          processing_started_at: { [Op.lt]: staleTimeoutThreshold },
+        },
+      ],
+    };
+
+    const [affectedCount] = await AiDocument.update(
+      {
+        processing_status: "PROCESSING",
+        processing_started_at: new Date(),
+        current_processing_job_id: newJobId,
+      },
+      { where: whereClause }
+    );
+
+    return affectedCount;
+  }
+
+  async releaseProcessingLease(
+    id: string,
+    organization_id: string,
+    student_id: string,
+    status: "COMPLETED" | "FAILED",
+    jobId: string
+  ) {
+    const whereClause = {
+      id,
+      organization_id,
+      student_id,
+      current_processing_job_id: jobId,
+    };
+
+    const [affectedCount] = await AiDocument.update(
+      {
+        processing_status: status,
+        processing_started_at: null,
+        current_processing_job_id: null,
+      },
+      { where: whereClause }
+    );
+
+    return affectedCount;
+  }
 }
