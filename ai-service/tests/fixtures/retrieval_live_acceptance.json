@@ -1,0 +1,9 @@
+[
+  {"query":"What is the invoice net payable?","expected_document_id":"3a77731f-d986-47f4-a68c-2e178b00d7c0","expected_pages":[2],"expected_text_marker":"45,814.94","top_k":5,"minimum_similarity":-1},
+  {"query":"What is the purchase order total?","expected_document_id":"3a77731f-d986-47f4-a68c-2e178b00d7c0","expected_pages":[3],"expected_text_marker":"5,72,890.00","top_k":5,"minimum_similarity":-1},
+  {"query":"What is the closing balance in the account statement?","expected_document_id":"3a77731f-d986-47f4-a68c-2e178b00d7c0","expected_pages":[4],"expected_text_marker":"1,89,250.52","top_k":5,"minimum_similarity":-1},
+  {"query":"What is the inspection risk rating?","expected_document_id":"3a77731f-d986-47f4-a68c-2e178b00d7c0","expected_pages":[5],"expected_text_marker":"Risk rating\n\nLow\nMedium","top_k":5,"minimum_similarity":-1},
+  {"query":"Which analyte failed in the laboratory report?","expected_document_id":"3a77731f-d986-47f4-a68c-2e178b00d7c0","expected_pages":[7],"expected_text_marker":"COD","top_k":5,"minimum_similarity":-1},
+  {"query":"Which package is being held?","expected_document_id":"3a77731f-d986-47f4-a68c-2e178b00d7c0","expected_pages":[8,9],"expected_text_marker":"BX-19-B","top_k":5,"minimum_similarity":-1},
+  {"query":"What did the Bay C-07 receipt note report?","expected_document_id":"3a77731f-d986-47f4-a68c-2e178b00d7c0","expected_pages":[9],"expected_text_marker":"Counted 46","top_k":5,"minimum_similarity":-1}
+]

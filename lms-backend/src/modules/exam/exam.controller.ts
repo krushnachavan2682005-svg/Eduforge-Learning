@@ -25,6 +25,7 @@ import {
   ExamSession,
   ExamUserMappingPublic,
   Question,
+  Exam,
 } from "./exam.model";
 
 import { ExamService } from "./exam.service";
@@ -792,5 +793,19 @@ export class ExamController {
       req.log.error(error);
       throw error;
     }
+  }
+  async getExamLeaderboard(req:FastifyRequest,reply:FastifyReply){
+    let organization_id:any=req.user?.organization_id
+    let {examId}=req.params as {examId:any}
+    if(!examId){
+      throw new ValidationError("ExamId not provided")
+    }
+    let found=await Exam.findOne({where:{id:examId,organization_id:organization_id}})
+    if(!found){
+      return reply.code(404).send({"message":"Exam Not Found"})
+    }
+    let result=await examService.getExamLeaderboard(organization_id,examId)
+    return result
+
   }
 }

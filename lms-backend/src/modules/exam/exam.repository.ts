@@ -123,6 +123,27 @@ export class ExamRepository {
     };
   }
 
+  async getExamLeaderboard(organization_id: string, examId: string) {
+    let sql = `
+    SELECT
+    user_id,
+    highest_marks,
+    RANK() OVER (
+        ORDER BY highest_marks DESC
+    ) AS rank
+FROM (
+    SELECT
+        user_id,
+        MAX(total_marks_obtained) AS highest_marks
+    FROM exam_user_mappings
+    WHERE exam_id = :examId
+    GROUP BY user_id
+) best_scores;
+    `;
+    const result=await sequelize.query(sql,{replacements:{examId},type:QueryTypes.SELECT})
+    return result
+  }
+
   async findAssignment(organizationId: string, userId: string, examId: string) {
     return ExamAssignment.findOne({
       where: {
@@ -255,7 +276,12 @@ export class ExamRepository {
     return exams;
   }
 
-  async getAllExams(organizationId: string, limit: number, skip: number, cursor?: string) {
+  async getAllExams(
+    organizationId: string,
+    limit: number,
+    skip: number,
+    cursor?: string,
+  ) {
     const where = organizationId ? { organization_id: organizationId } : {};
     const result = await paginate(Exam, {
       limit,
@@ -291,7 +317,11 @@ export class ExamRepository {
       ],
       order: [["created_on", "DESC"]],
     });
-    return { exams: result.data, total: result.pagination.total, pagination: result.pagination };
+    return {
+      exams: result.data,
+      total: result.pagination.total,
+      pagination: result.pagination,
+    };
   }
 
   async getAssignedExamsForUserFilter(
@@ -336,7 +366,7 @@ export class ExamRepository {
         ? { id: examIds, organization_id: organizationId }
         : { id: examIds },
       cursor,
-      useCursorPagination:true,
+      useCursorPagination: true,
       cursorFields: ["created_on", "id"],
       limit,
       page: Math.floor(skip / limit) + 1,
@@ -350,9 +380,16 @@ export class ExamRepository {
         "exam_start_time",
       ],
       include: includeOptions,
-      order: [["created_on", "DESC"], ["id", "DESC"]],
+      order: [
+        ["created_on", "DESC"],
+        ["id", "DESC"],
+      ],
     });
-    return { exams: result.data, total: result.pagination.total, pagination: result.pagination };
+    return {
+      exams: result.data,
+      total: result.pagination.total,
+      pagination: result.pagination,
+    };
   }
 
   async getExamsByCreator(
@@ -377,9 +414,16 @@ export class ExamRepository {
           as: "questions",
         },
       ],
-      order: [["created_on", "DESC"], ["id", "DESC"]],
+      order: [
+        ["created_on", "DESC"],
+        ["id", "DESC"],
+      ],
     });
-    return { exams: result.data, total: result.pagination.total, pagination: result.pagination };
+    return {
+      exams: result.data,
+      total: result.pagination.total,
+      pagination: result.pagination,
+    };
   }
 
   async updateExam(organizationId: string, examId: string, data: IExamUpdate) {
@@ -981,7 +1025,7 @@ export class ExamRepository {
   async getExamReviewRecord(mappingId: string) {
     return ExamReview.findOne({
       where: { exam_user_mapping_id: mappingId },
-      attributes: ["reviewed_at", "reviewers", "reviewer_comment"],
+      attributes: ["reviewed_at", "reviewers"],
     });
   }
 

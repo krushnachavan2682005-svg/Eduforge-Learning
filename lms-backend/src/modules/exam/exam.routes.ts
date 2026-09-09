@@ -139,4 +139,5 @@ export default async function examRoutes(fastify: FastifyInstance) {
     { schema: getSubmissionForReviewSchema, preHandler: verifyToken },
     (req, reply) => Controller.getSubmissionForReview(req, reply),
   );
+  fastify.get("/leaderboard/:examId",{preHandler:verifyToken},(req,reply)=>Controller.getExamLeaderboard(req,reply))
 }
