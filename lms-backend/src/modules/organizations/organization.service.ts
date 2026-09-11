@@ -1,6 +1,6 @@
 import { AuthRepository } from "../auth/auth.repository";
 import { NotFoundError } from "../../utils/globalErrorHandlingFile";
-
+import { organizationRepo } from "./organization.repository";
 export class OrganizationService {
   private authRepository: AuthRepository;
 
@@ -27,5 +27,9 @@ export class OrganizationService {
       is_active: organization.is_active,
       role: membership.role,
     };
+  }
+  async getActiveOrganizations(){
+    let data=await organizationRepo.getactiveOrganizations()
+    return data
   }
 }

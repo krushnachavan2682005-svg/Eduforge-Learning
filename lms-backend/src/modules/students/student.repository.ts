@@ -175,6 +175,23 @@ export class StudentRepository {
     });
   }
 
+  async resolveUserIds(organizationId: string, ids: string[]) {
+    if (!ids || ids.length === 0) return [];
+    
+    // Find students by their student ID
+    const students = await Student.findAll({
+      where: { organization_id: organizationId, id: { [Op.in]: ids } },
+      attributes: ["id", "user_id"]
+    });
+
+    const studentIdToUserId = new Map<string, string>();
+    students.forEach((s) => studentIdToUserId.set(s.id, s.user_id));
+
+    // Map each ID: if it's a student ID, return its user_id; otherwise assume it's already a user_id
+    return ids.map((id) => studentIdToUserId.get(id) || id);
+  }
+
+
   async getStudentDisplayName(organizationId: string, userId: string) {
     const student = await Student.findOne({
       where: { organization_id: organizationId, user_id: userId },
@@ -372,4 +389,12 @@ export class StudentRepository {
       pending_courses: Math.max(assignedCourses - completedCourses, 0),
     };
   }
+//   async getAtRiskStudents(
+//   organizationId: string,
+//   courseId: string,
+//   minSubmissionCount: number,
+//   maxAvgGrade?: number
+// ): Promise<any[]>{
+//   let sql=``
+// }
 }
