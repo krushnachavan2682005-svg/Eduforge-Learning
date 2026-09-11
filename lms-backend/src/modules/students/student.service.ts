@@ -17,23 +17,44 @@ import { Student } from "./student.model";
 export class StudentService {
   private repository = new StudentRepository();
 
-  async createStudent(userId: string, orgId: string, data: any) {
-    const membership = await OrganizationUser.findOne({
-      where: {
-        organization_id: orgId,
-        user_id: userId,
-        is_active: true,
-      },
-    });
+  async createStudent(userId: string | undefined, orgId: string, data: any) {
+    let finalUserId = userId;
 
-    if (!Boolean(membership)) {
-      throw new ForbiddenError(
-        "Student user does not belong to current organization",
-      );
+    if (!finalUserId) {
+      const { randomUUID } = require("crypto");
+      const user = await User.create({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        email: data.email,
+        password_hash: randomUUID(),
+        is_active: true,
+      });
+
+      await OrganizationUser.create({
+        organization_id: orgId,
+        user_id: user.id,
+        role: "student",
+      });
+
+      finalUserId = user.id;
+    } else {
+      const membership = await OrganizationUser.findOne({
+        where: {
+          organization_id: orgId,
+          user_id: finalUserId,
+          is_active: true,
+        },
+      });
+
+      if (!Boolean(membership)) {
+        throw new ForbiddenError(
+          "Student user does not belong to current organization",
+        );
+      }
     }
 
     const studentData = {
-      user_id: userId,
+      user_id: finalUserId,
       organization_id: orgId,
       first_name: data.first_name,
       last_name: data.last_name,

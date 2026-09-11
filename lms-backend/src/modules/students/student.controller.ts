@@ -7,7 +7,7 @@ export class StudentController {
   async createStudent(req: FastifyRequest, reply: FastifyReply) {
     if (!req.user) return reply.code(401).send({ success: false });
     const body = req.body as any;
-    const userId = body.user_id || req.user.sub;
+    const userId = body.user_id;
     
     const student = await service.createStudent(userId, req.user.organization_id, body);
     return reply.code(201).send({ success: true, data: student });
