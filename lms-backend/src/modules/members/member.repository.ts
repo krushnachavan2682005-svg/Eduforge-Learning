@@ -37,111 +37,109 @@ export interface ListMembersInput {
 }
 
 export class MemberRepository {
-  async createMember(input: CreateMemberInput) {
-    return sequelize.transaction(async (transaction) => {
-      const email = input.email.trim().toLowerCase();
-      let user = await User.findOne({
-        where: { email },
-        transaction,
-        attributes: ["id", "password_hash"],
-      });
+  async createMember(input: CreateMemberInput, transaction?: Transaction) {
+    const email = input.email.trim().toLowerCase();
+    let user = await User.findOne({
+      where: { email },
+      transaction,
+      attributes: ["id", "password_hash"],
+    });
 
-      if (!user) {
-        user = await User.create(
-          {
-            first_name: input.first_name.trim(),
-            last_name: input.last_name.trim(),
-            email,
-            password_hash: await hashPassword(input.password),
-            organization_id: input.organization_id,
-          },
-          { transaction },
-        );
-      } else {
-        const existingMembership = await OrganizationUser.findOne({
-          where: {
-            organization_id: input.organization_id,
-            user_id: user.id,
-          },
-          attributes: ["id"],
-          transaction,
-        });
-
-        if (existingMembership) {
-          const error = new Error("User already belongs to this organization");
-          (error as any).statusCode = 409;
-          throw error;
-        }
-
-        const activeMembershipCount = await OrganizationUser.count({
-          where: { user_id: user.id, is_active: true },
-          transaction,
-        });
-
-        if (!user.password_hash || activeMembershipCount === 0) {
-          await user.update(
-            { password_hash: await hashPassword(input.password) },
-            { transaction },
-          );
-        }
-      }
-
-      await OrganizationUser.create(
+    if (!user) {
+      user = await User.create(
         {
+          first_name: input.first_name.trim(),
+          last_name: input.last_name.trim(),
+          email,
+          password_hash: await hashPassword(input.password),
           organization_id: input.organization_id,
-          user_id: user.id,
-          role: this.toOrganizationRole(input.role),
-          is_active: true,
         },
         { transaction },
       );
-
-      const role = await this.findRoleByCode(
-        input.role,
-        input.organization_id,
-        transaction,
-      );
-      if (!role) {
-        const error = new Error(`Role '${input.role}' was not found`);
-        (error as any).statusCode = 404;
-        throw error;
-      }
-
-      await UserRole.findOrCreate({
+    } else {
+      const existingMembership = await OrganizationUser.findOne({
         where: {
           organization_id: input.organization_id,
           user_id: user.id,
-          role_id: role.id,
+        },
+        attributes: ["id"],
+        transaction,
+      });
+
+      if (existingMembership) {
+        const error = new Error("User already belongs to this organization");
+        (error as any).statusCode = 409;
+        throw error;
+      }
+
+      const activeMembershipCount = await OrganizationUser.count({
+        where: { user_id: user.id, is_active: true },
+        transaction,
+      });
+
+      if (!user.password_hash || activeMembershipCount === 0) {
+        await user.update(
+          { password_hash: await hashPassword(input.password) },
+          { transaction },
+        );
+      }
+    }
+
+    await OrganizationUser.create(
+      {
+        organization_id: input.organization_id,
+        user_id: user.id,
+        role: this.toOrganizationRole(input.role),
+        is_active: true,
+      },
+      { transaction },
+    );
+
+    const role = await this.findRoleByCode(
+      input.role,
+      input.organization_id,
+      transaction,
+    );
+    if (!role) {
+      const error = new Error(`Role '${input.role}' was not found`);
+      (error as any).statusCode = 404;
+      throw error;
+    }
+
+    await UserRole.findOrCreate({
+      where: {
+        organization_id: input.organization_id,
+        user_id: user.id,
+        role_id: role.id,
+      },
+      defaults: {
+        organization_id: input.organization_id,
+        user_id: user.id,
+        role_id: role.id,
+      },
+      transaction,
+    });
+
+    if (input.role === "student") {
+      await Student.findOrCreate({
+        where: {
+          organization_id: input.organization_id,
+          user_id: user.id,
         },
         defaults: {
           organization_id: input.organization_id,
           user_id: user.id,
-          role_id: role.id,
+          first_name: input.first_name.trim(),
+          last_name: input.last_name.trim(),
+          email,
+          phone: input.phone || null,
+          status: "active",
         },
         transaction,
       });
+    }
 
-      if (input.role === "student") {
-        await Student.findOrCreate({
-          where: {
-            organization_id: input.organization_id,
-            user_id: user.id,
-          },
-          defaults: {
-            organization_id: input.organization_id,
-            user_id: user.id,
-            first_name: input.first_name.trim(),
-            last_name: input.last_name.trim(),
-            email,
-            phone: input.phone || null,
-            status: "active",
-          },
-          transaction,
-        });
-      }
-
-      return { user };
-    });
+    return { user };
   }
 
   async listMembers(input: ListMembersInput) {

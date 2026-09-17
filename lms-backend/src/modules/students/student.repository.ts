@@ -389,12 +389,5 @@ export class StudentRepository {
       pending_courses: Math.max(assignedCourses - completedCourses, 0),
     };
   }
-//   async getAtRiskStudents(
-//   organizationId: string,
-//   courseId: string,
-//   minSubmissionCount: number,
-//   maxAvgGrade?: number
-// ): Promise<any[]>{
-//   let sql=``
-// }
+
 }

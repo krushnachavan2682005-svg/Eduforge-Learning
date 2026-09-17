@@ -1,3 +1,4 @@
+import { sequelize } from "../../config/database";
 import { MemberRepository } from "./member.repository";
 
 export class MemberService {
@@ -17,17 +18,27 @@ export class MemberService {
   ) {
     this.validatePassword(input.password, input.confirm_password);
 
-    const created = await this.repository.createMember({
-      organization_id: organizationId,
-      first_name: input.first_name,
-      last_name: input.last_name,
-      email: input.email,
-      phone: input.phone,
-      role: input.role,
-      password: input.password,
-    });
+    const t = await sequelize.transaction();
+    try {
+      const created = await this.repository.createMember(
+        {
+          organization_id: organizationId,
+          first_name: input.first_name,
+          last_name: input.last_name,
+          email: input.email,
+          phone: input.phone,
+          role: input.role,
+          password: input.password,
+        },
+        t,
+      );
 
-    return this.repository.getMemberById(organizationId, created.user.id);
+      await t.commit();
+      return this.repository.getMemberById(organizationId, created.user.id);
+    } catch (error) {
+      await t.rollback();
+      throw error;
+    }
   }
 
   async listMembers(

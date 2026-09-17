@@ -1,5 +1,6 @@
 import { QueryTypes } from "sequelize";
 import { sequelize } from "../../config/database";
+import { Course } from "../course/course.model";
 
 export class DashboardRepository {
   async hasCreatedByColumn(tableName: string): Promise<boolean> {
@@ -84,7 +85,7 @@ export class DashboardRepository {
     actionItemIds: string[],
   ): Promise<any[]> {
     if (actionItemIds.length == 0) {
-      return []
+      return [];
     }
     return sequelize.query(
       `SELECT action_item_id, user_id, status FROM assigned_action_items
@@ -112,39 +113,46 @@ export class DashboardRepository {
     hasCreatedBy: boolean,
   ): Promise<string[]> {
     if (!userId || !hasCreatedBy) return [];
-    const rows: any[] = await sequelize.query(
-      `SELECT id FROM courses
-       WHERE organization_id = :organizationId
-       AND created_by = :userId`,
-      { replacements: { organizationId, userId }, type: QueryTypes.SELECT },
-    );
+    const rows = await Course.findAll({
+      attributes: ["id"],
+      where: { organization_id: organizationId, created_by: userId },
+      raw: true,
+    });
+
     return rows.map((r) => r.id);
   }
 
-  async getCourseUserMappings(organizationId: string,tutorCourseIds:string[]): Promise<any[]> {
-    if(tutorCourseIds.length==0){
-      return []
+  async getCourseUserMappings(
+    organizationId: string,
+    tutorCourseIds: string[],
+  ): Promise<any[]> {
+    if (tutorCourseIds.length == 0) {
+      return [];
     }
     return sequelize.query(
       `SELECT course_id, user_id FROM course_user_mapping
        WHERE organization_id = :organizationId AND course_id IN (:tutorCourseIds)`,
-      { replacements: { organizationId ,tutorCourseIds}, type: QueryTypes.SELECT },
+      {
+        replacements: { organizationId, tutorCourseIds },
+        type: QueryTypes.SELECT,
+      },
     );
   }
 
-  async getSectionUserMappings(organizationId: string,tutorCourseIds: string[]): Promise<any[]> {
-    try {
-      if(tutorCourseIds.length==0){
-        return []
-      }
-      return await sequelize.query(
-        `SELECT course_id, user_id, is_completed FROM section_user_mapping
-         WHERE organization_id = :organizationId AND course_id IN (:tutorCourseIds)`,
-        { replacements: { organizationId ,tutorCourseIds}, type: QueryTypes.SELECT },
-      );
-    } catch (err: any) {
-      console.warn("dashboard: section_user_mapping query failed", err.message);
+  async getSectionUserMappings(
+    organizationId: string,
+    tutorCourseIds: string[],
+  ): Promise<any[]> {
+    if (tutorCourseIds.length == 0) {
       return [];
     }
+    return await sequelize.query(
+      `SELECT course_id, user_id, is_completed FROM section_user_mapping
+         WHERE organization_id = :organizationId AND course_id IN (:tutorCourseIds)`,
+      {
+        replacements: { organizationId, tutorCourseIds },
+        type: QueryTypes.SELECT,
+      },
+    );
   }
 }

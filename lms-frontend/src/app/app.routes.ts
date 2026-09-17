@@ -41,6 +41,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'organization-overview',
+        loadComponent: () =>
+          import('./features/platform/organization-overview/organization-overview').then(
+            (m) => m.OrganizationOverview,
+          ),
+      },
+      {
         path: '**',
         loadComponent: () =>
           import('./shared/workspace-placeholder/workspace-placeholder').then(

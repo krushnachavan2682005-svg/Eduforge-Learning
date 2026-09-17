@@ -11,4 +11,6 @@ export default async function organizationRoutes(fastify: FastifyInstance) {
   fastify.get("/active", { preHandler: authenticate }, (req, reply) =>
     organizationController.getActiveOrganiazations(req, reply),
   );
+  fastify.get("/organization-data/:organization_id",{preHandler:authenticate},(req,reply)=>
+  organizationController.getOrganizationCounts(req,reply))
 }

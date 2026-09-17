@@ -28,6 +28,7 @@ import {
 } from "./exam.interface";
 import { QueryTypes } from "sequelize";
 import { asyncLocalStorage as cls } from "../../constants/request-context";
+import { InternalServerError } from "../../utils/globalErrorHandlingFile";
 
 export class ExamRepository {
   private getTimestamps() {
@@ -140,8 +141,11 @@ FROM (
     GROUP BY user_id
 ) best_scores;
     `;
-    const result=await sequelize.query(sql,{replacements:{examId},type:QueryTypes.SELECT})
-    return result
+    const result = await sequelize.query(sql, {
+      replacements: { examId },
+      type: QueryTypes.SELECT,
+    });
+    return result;
   }
 
   async findAssignment(organizationId: string, userId: string, examId: string) {
@@ -427,156 +431,161 @@ FROM (
   }
 
   async updateExam(organizationId: string, examId: string, data: IExamUpdate) {
-    const transaction = await sequelize.transaction();
     try {
-      const exam = await Exam.findOne({
-        where: organizationId
-          ? { id: examId, organization_id: organizationId }
-          : { id: examId },
-        transaction,
-      });
-      if (!exam) {
-        return null;
-      }
-      const examUpdateData: any = { updated_on: new Date() };
-      if (data.title !== undefined) examUpdateData.title = data.title;
-      if (data.subject !== undefined) examUpdateData.subject = data.subject;
-      if (data.reviewers !== undefined)
-        examUpdateData.reviewers = data.reviewers;
-      if (data.total_marks !== undefined)
-        examUpdateData.total_marks = data.total_marks;
-      if (data.passing_marks !== undefined)
-        examUpdateData.passing_marks = data.passing_marks;
-      if (data.duration_minutes !== undefined)
-        examUpdateData.duration_minutes = data.duration_minutes;
-      if (data.exam_date !== undefined)
-        examUpdateData.exam_date = data.exam_date;
-      if (data.exam_start_time !== undefined)
-        examUpdateData.exam_start_time = new Date(data.exam_start_time);
-      // updated_by is now required on update
-      if (data.updated_by !== undefined) {
-        examUpdateData.updated_by = data.updated_by;
-      }
-      if (data.organization_id !== undefined)
-        examUpdateData.organization_id = data.organization_id;
-
-      await exam.update(examUpdateData, { transaction });
-
-      // If reviewers are updated, propagate the change to non-completed exam sessions.
-      if (data.reviewers !== undefined) {
-        await ExamSession.update(
-          { reviewers: data.reviewers },
-          { where: { exam_id: examId, is_completed: false }, transaction },
-        );
-      }
-
-      if (data.questions && data.questions.length > 0) {
-        // Identify incoming question IDs and existing question IDs
-        const incomingQuestionIds = new Set(
-          data.questions.map((q) => q.id).filter(Boolean),
-        );
-        const existingQuestions = await Question.findAll({
-          where: { exam_id: examId },
-          attributes: ["id"],
+      const result = await sequelize.transaction(async (transaction) => {
+        const exam = await Exam.findOne({
+          where: organizationId
+            ? { id: examId, organization_id: organizationId }
+            : { id: examId },
           transaction,
         });
-        const existingQuestionIds = new Set(existingQuestions.map((q) => q.id));
+        if (!exam) {
+          return null;
+        }
+        const examUpdateData: any = { updated_on: new Date() };
+        if (data.title !== undefined) examUpdateData.title = data.title;
+        if (data.subject !== undefined) examUpdateData.subject = data.subject;
+        if (data.reviewers !== undefined)
+          examUpdateData.reviewers = data.reviewers;
+        if (data.total_marks !== undefined)
+          examUpdateData.total_marks = data.total_marks;
+        if (data.passing_marks !== undefined)
+          examUpdateData.passing_marks = data.passing_marks;
+        if (data.duration_minutes !== undefined)
+          examUpdateData.duration_minutes = data.duration_minutes;
+        if (data.exam_date !== undefined)
+          examUpdateData.exam_date = data.exam_date;
+        if (data.exam_start_time !== undefined)
+          examUpdateData.exam_start_time = new Date(data.exam_start_time);
+        // updated_by is now required on update
+        if (data.updated_by !== undefined) {
+          examUpdateData.updated_by = data.updated_by;
+        }
+        if (data.organization_id !== undefined)
+          examUpdateData.organization_id = data.organization_id;
 
-        // Determine which questions to delete
-        const questionsToDelete = [...existingQuestionIds].filter(
-          (id) => !incomingQuestionIds.has(id),
-        );
+        await exam.update(examUpdateData, { transaction });
 
-        if (questionsToDelete.length > 0) {
-          await Question.destroy({
-            where: { id: questionsToDelete },
-            transaction,
-          });
+        // If reviewers are updated, propagate the change to non-completed exam sessions.
+        if (data.reviewers !== undefined) {
+          await ExamSession.update(
+            { reviewers: data.reviewers },
+            { where: { exam_id: examId, is_completed: false }, transaction },
+          );
         }
 
-        const questionsToCreate: any[] = [];
-        const questionsToUpdate: any[] = [];
+        if (data.questions && data.questions.length > 0) {
+          // Identify incoming question IDs and existing question IDs
+          const incomingQuestionIds = new Set(
+            data.questions.map((q) => q.id).filter(Boolean),
+          );
+          const existingQuestions = await Question.findAll({
+            where: { exam_id: examId },
+            attributes: ["id"],
+            transaction,
+          });
+          const existingQuestionIds = new Set(
+            existingQuestions.map((q) => q.id),
+          );
 
-        for (const questionData of data.questions) {
-          if (questionData.id) {
-            questionsToUpdate.push({
-              id: questionData.id,
-              exam_id: examId,
-              type: questionData.type,
-              text: questionData.text,
-              marks: questionData.marks,
-              is_mandatory: questionData.is_mandatory,
-              correct_answer: questionData.correct_answer,
-              options: questionData.options,
-              organization_id: organizationId || data.organization_id,
-              updated_on: new Date(),
+          // Determine which questions to delete
+          const questionsToDelete = [...existingQuestionIds].filter(
+            (id) => !incomingQuestionIds.has(id),
+          );
+
+          if (questionsToDelete.length > 0) {
+            await Question.destroy({
+              where: { id: questionsToDelete },
+              transaction,
             });
-          } else {
-            questionsToCreate.push({
-              exam_id: examId,
-              type: questionData.type!,
-              text: questionData.text!,
-              marks: questionData.marks!,
-              is_mandatory: questionData.is_mandatory!,
-              correct_answer: questionData.correct_answer,
-              options: questionData.options,
-              organization_id: organizationId || data.organization_id,
-              created_on: new Date(),
-              updated_on: new Date(),
+          }
+
+          const questionsToCreate: any[] = [];
+          const questionsToUpdate: any[] = [];
+
+          for (const questionData of data.questions) {
+            if (questionData.id) {
+              questionsToUpdate.push({
+                id: questionData.id,
+                exam_id: examId,
+                type: questionData.type,
+                text: questionData.text,
+                marks: questionData.marks,
+                is_mandatory: questionData.is_mandatory,
+                correct_answer: questionData.correct_answer,
+                options: questionData.options,
+                organization_id: organizationId || data.organization_id,
+                updated_on: new Date(),
+              });
+            } else {
+              questionsToCreate.push({
+                exam_id: examId,
+                type: questionData.type!,
+                text: questionData.text!,
+                marks: questionData.marks!,
+                is_mandatory: questionData.is_mandatory!,
+                correct_answer: questionData.correct_answer,
+                options: questionData.options,
+                organization_id: organizationId || data.organization_id,
+                created_on: new Date(),
+                updated_on: new Date(),
+              });
+            }
+          }
+
+          if (questionsToCreate.length > 0) {
+            await Question.bulkCreate(questionsToCreate, { transaction });
+          }
+
+          if (questionsToUpdate.length > 0) {
+            await Question.bulkCreate(questionsToUpdate, {
+              transaction,
+              updateOnDuplicate: [
+                "type",
+                "text",
+                "marks",
+                "is_mandatory",
+                "correct_answer",
+                "options",
+                "organization_id",
+                "updated_on",
+              ],
             });
           }
         }
+        return true; // Indicate success within the transaction
+      });
 
-        if (questionsToCreate.length > 0) {
-          await Question.bulkCreate(questionsToCreate, { transaction });
-        }
-
-        if (questionsToUpdate.length > 0) {
-          await Question.bulkCreate(questionsToUpdate, {
-            transaction,
-            updateOnDuplicate: [
-              "type",
-              "text",
-              "marks",
-              "is_mandatory",
-              "correct_answer",
-              "options",
-              "organization_id",
-              "updated_on",
-            ],
-          });
-        }
+      if (result === null) {
+        return null;
       }
 
-      await transaction.commit();
       return await this.getExamById(organizationId, examId);
-    } catch (error) {
-      await transaction.rollback();
-      throw error;
+    } catch (err) {
+      throw new InternalServerError("Failed to Update Exam");
     }
   }
 
   async deleteExam(organizationId: string, examId: string) {
-    const transaction = await sequelize.transaction();
     try {
-      const exam = await Exam.findOne({
-        where: organizationId
-          ? { id: examId, organization_id: organizationId }
-          : { id: examId },
-        transaction,
+      return await sequelize.transaction(async (transaction) => {
+        const exam = await Exam.findOne({
+          where: organizationId
+            ? { id: examId, organization_id: organizationId }
+            : { id: examId },
+          transaction,
+        });
+        if (!exam) {
+          return false;
+        }
+
+        await Question.destroy({ where: { exam_id: examId }, transaction });
+        await exam.destroy({ transaction });
+
+        return true;
       });
-      if (!exam) {
-        return false;
-      }
-
-      await Question.destroy({ where: { exam_id: examId }, transaction });
-      await exam.destroy({ transaction });
-
-      await transaction.commit();
-      return true;
-    } catch (error) {
-      await transaction.rollback();
-      throw error;
+    } catch (err) {
+      throw new InternalServerError("Failed to Deleted Exam");
     }
   }
 
