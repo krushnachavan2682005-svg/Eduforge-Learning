@@ -1,6 +1,7 @@
 import { AuthRepository } from "../auth/auth.repository";
 import { NotFoundError } from "../../utils/globalErrorHandlingFile";
 import { organizationRepo } from "./organization.repository";
+import { Organization } from "./organization.model";
 export class OrganizationService {
   private authRepository: AuthRepository;
 
@@ -28,8 +29,17 @@ export class OrganizationService {
       role: membership.role,
     };
   }
-  async getActiveOrganizations(){
-    let data=await organizationRepo.getactiveOrganizations()
-    return data
+  async getActiveOrganizations() {
+    let data = await organizationRepo.getactiveOrganizations();
+    return data;
+  }
+  async getOrganizationCounts(organization_id: string) {
+    let exist=Organization.findOne({where:{id:organization_id}})
+    if(!exist){
+         throw new Error("Organization Not Exist")
+    }
+    let organization_data =
+      await organizationRepo.getOrganizationCounts(organization_id);
+    return organization_data;
   }
 }

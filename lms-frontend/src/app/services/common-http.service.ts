@@ -60,6 +60,11 @@ export class CommonHttpService {
     return this.http.get(url, { headers: this.getHeaders() });
   }
 
+  getOrganizationOverview(organizationId: string): Observable<any> {
+    const url = `${environment.LMS_BASE_URL}/organizations/organization-data/${organizationId}`;
+    return this.http.get(url, { headers: this.getHeaders() });
+  }
+
   getLocalDashboardMe(): Observable<any> {
     const url = `${environment.LMS_BASE_URL}/dashboard/me`;
     return this.http.get(url, { headers: this.getHeaders() });
