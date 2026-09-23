@@ -1,4 +1,5 @@
 import { ExamRepository } from "./exam.repository";
+import { redis } from "../../config/redis_client";
 import {
   ForbiddenError,
   NotFoundError,
@@ -7,6 +8,8 @@ import {
 import { StudentRepository } from "../students/student.repository";
 import { IExamCreateRequest, IExamUpdate } from "./exam.interface";
 import { v4 as uuid } from "uuid";
+import { json } from "sequelize";
+import { Json } from "sequelize/types/utils";
 
 export class ExamService {
   private repository = new ExamRepository();
@@ -50,10 +53,41 @@ export class ExamService {
   }
 
   async getExamById(organizationId: string, examId: string) {
+    const key = `org:${organizationId}:exam:${examId}`;
+
+    // 1. Try Redis
+    let cachedExam: string | null = null;
+
+    try {
+      cachedExam = await redis.get(key);
+    } catch (err) {
+      console.error("Redis GET failed:", err);
+    }
+
+    // 2. Cache HIT
+    if (cachedExam) {
+      try {
+        return JSON.parse(cachedExam);
+      } catch (err) {
+        console.error("Corrupted Redis cache:", err);
+      }
+    }
+
+    // 3. Cache MISS / Redis unavailable / corrupted cache
     const exam = await this.repository.getExamById(organizationId, examId);
+
     if (!exam) {
       throw new NotFoundError("Exam not found");
     }
+
+    // 4. Try to populate Redis
+    try {
+      await redis.set(key, JSON.stringify(exam), { EX: 300 });
+    } catch (err) {
+      console.error("Redis SET failed:", err);
+    }
+
+    // 5. Always return PostgreSQL result
     return exam;
   }
 
@@ -1327,8 +1361,11 @@ export class ExamService {
       review_details: reviewDetails,
     };
   }
-  async getExamLeaderboard(organization_id:string,examId:string){
-   let result=await this.repository.getExamLeaderboard(organization_id,examId)
-   return result
+  async getExamLeaderboard(organization_id: string, examId: string) {
+    let result = await this.repository.getExamLeaderboard(
+      organization_id,
+      examId,
+    );
+    return result;
   }
 }

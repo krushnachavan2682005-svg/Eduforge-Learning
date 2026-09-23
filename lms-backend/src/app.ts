@@ -4,6 +4,7 @@ import swagger from "@fastify/swagger";
 import fastifyMultipart from "@fastify/multipart";
 import s3Plugin from "./plugins/s3-upload-plugins";
 import publicExamRoutes from "./modules/exam/publicExam.routes";
+import { redis } from "./config/redis_client";
 import jwtPlugin from "./plugins/jwt.plugin";
 import { seedRbac } from "./modules/rbac/rbac.seed";
 import "./modules/roles/role.model";
@@ -24,13 +25,17 @@ export const buildApp = async () => {
   });
   await connectDB();
   // Ensure pgvector extension is enabled
-  await sequelize.query('CREATE EXTENSION IF NOT EXISTS vector;');
+  await sequelize.query("CREATE EXTENSION IF NOT EXISTS vector;");
   // Sync Sequelize models with the database
   await sequelize.sync();
   await seedRbac();
 
   await registerS3Plugin();
   await app.register(jwtPlugin);
+  //redis connection
+  await redis.connect()
+
+  console.log();
   // Swagger Docs
   await app.register(swagger, {
     openapi: {
