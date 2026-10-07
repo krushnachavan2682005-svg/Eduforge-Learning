@@ -8,9 +8,7 @@ import {
 import { StudentRepository } from "../students/student.repository";
 import { IExamCreateRequest, IExamUpdate } from "./exam.interface";
 import { v4 as uuid } from "uuid";
-import { json } from "sequelize";
-import { Json } from "sequelize/types/utils";
-
+let examCacheMetrics = { hits: 0, misses: 0, errors: 0 };
 export class ExamService {
   private repository = new ExamRepository();
   private studentRepository = new StudentRepository();
@@ -37,37 +35,94 @@ export class ExamService {
     cursor: string | undefined,
     userId?: string,
   ) {
+    console.log(examCacheMetrics)
     const skip = (page - 1) * limit;
+    const key = `org:${organizationId}:exams:${page}:${limit}:${cursor ?? "NO_CURSOR"}:${userId ?? "NO_USER"}`;
+    let cashedExam: string | null = null;
+
+    try {
+      cashedExam = await redis.get(key);
+    } catch (err) {
+      examCacheMetrics.errors += 1;
+      console.error("Redis GET failed:", err);
+    }
+
+    if (cashedExam) {
+      try {
+        const parsedExam = JSON.parse(cashedExam);
+
+        // Validate parsed cache data
+        if (parsedExam !== null) {
+          examCacheMetrics.hits += 1;
+          return parsedExam;
+        }
+
+        examCacheMetrics.misses += 1;
+      } catch (err) {
+        examCacheMetrics.misses += 1;
+        console.error("Corrupted Cashe", err);
+      }
+    } else {
+      examCacheMetrics.misses += 1;
+    }
+
+    let exam = null;
+    console.log("Cashe Miss");
 
     if (userId) {
-      return this.repository.getExamsByCreator(
+      exam = await this.repository.getExamsByCreator(
         organizationId,
         userId,
         limit,
         skip,
         cursor,
       );
+
+      try {
+        await redis.set(key, JSON.stringify(exam), { EX: 60 });
+        return exam;
+      } catch (err) {
+        examCacheMetrics.errors += 1;
+        console.error("Error Occured While Creating The Key", err);
+        return exam;
+      }
     }
 
-    return this.repository.getAllExams(organizationId, limit, skip, cursor);
+    exam = await this.repository.getAllExams(
+      organizationId,
+      limit,
+      skip,
+      cursor,
+    );
+
+    try {
+      await redis.set(key, JSON.stringify(exam), { EX: 60 });
+      return exam;
+    } catch (err) {
+      examCacheMetrics.errors += 1;
+      console.error("Error Occured While Creating The Key", err);
+      return exam;
+      
+    }
+    
   }
 
   async getExamById(organizationId: string, examId: string) {
-    const key = `org:${organizationId}:exam:${examId}`;
+    const key = `org:${organizationId}:exam:meta:${examId}`;
 
     // 1. Try Redis
-    let cachedExam: string | null = null;
+    let cachedExam = null;
 
     try {
-      cachedExam = await redis.get(key);
+      cachedExam = await redis.hGetAll(key);
     } catch (err) {
       console.error("Redis GET failed:", err);
     }
 
     // 2. Cache HIT
-    if (cachedExam) {
+    if (cachedExam && Object.keys(cachedExam).length > 0) {
       try {
-        return JSON.parse(cachedExam);
+        return cachedExam;
       } catch (err) {
         console.error("Corrupted Redis cache:", err);
       }
@@ -82,7 +137,15 @@ export class ExamService {
 
     // 4. Try to populate Redis
     try {
-      await redis.set(key, JSON.stringify(exam), { EX: 300 });
+      let requiredFields = {
+        title: exam.title,
+        subject: exam.subject,
+        duration_minutes: exam.duration_minutes,
+        passing_marks: exam.passing_marks,
+        total_marks: exam.total_marks,
+      };
+      await redis.hSet(key, requiredFields);
+      await redis.expire(key, 300);
     } catch (err) {
       console.error("Redis SET failed:", err);
     }
@@ -120,14 +183,58 @@ export class ExamService {
       updated_by: userId || (data as any).updated_by,
     };
 
+    // 1. PostgreSQL first — source of truth
     const updated = await this.repository.updateExam(
       organizationId,
       examId,
       updateData,
     );
+
     if (!updated) {
       throw new NotFoundError("Exam not found");
     }
+
+    // 2. Redis metadata cache key
+    const key = `org:${organizationId}:exam:meta:${examId}`;
+
+    try {
+      // 3. Only update Redis if the metadata cache already exists
+      const exists = await redis.exists(key);
+
+      if (exists) {
+        // 4. Only cache fields that are actually present in the PATCH payload
+        const cacheFields: Record<string, string | number> = {};
+
+        if (data.title !== undefined) {
+          cacheFields.title = data.title;
+        }
+
+        if (data.subject !== undefined) {
+          cacheFields.subject = data.subject;
+        }
+
+        if (data.duration_minutes !== undefined) {
+          cacheFields.duration_minutes = data.duration_minutes;
+        }
+
+        if (data.passing_marks !== undefined) {
+          cacheFields.passing_marks = data.passing_marks;
+        }
+
+        if (data.total_marks !== undefined) {
+          cacheFields.total_marks = data.total_marks;
+        }
+
+        // 5. Update only the fields present in the PATCH
+        if (Object.keys(cacheFields).length > 0) {
+          await redis.hSet(key, cacheFields);
+        }
+      }
+    } catch (err) {
+      console.error("Redis cache update failed:", err);
+    }
+
+    // 6. Return PostgreSQL result
     return updated;
   }
 
@@ -924,7 +1031,16 @@ export class ExamService {
     classIds: string[],
   ) {
     const validExamIds: string[] = [];
+    console.time("Pipeline Time");
+    let pipeline = redis.multi();
+    for (let examId of examIds) {
+      const key = `org:${organizationId}:exam:meta:${examId}`;
 
+      pipeline.hGetAll(key);
+    }
+    await pipeline.exec();
+
+    console.timeEnd("Pipeline Time");
     // 1. Bulk validate exams
     const exams = await this.repository.getExamsByIds(organizationId, examIds);
     if (exams.length !== examIds.length) {
@@ -1369,3 +1485,4 @@ export class ExamService {
     return result;
   }
 }
+console.log(examCacheMetrics);

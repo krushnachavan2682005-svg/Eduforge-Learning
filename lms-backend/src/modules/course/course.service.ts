@@ -1,4 +1,5 @@
 import { Course } from "./course.model";
+import { redis } from "../../config/redis_client";
 import { CourseRepository } from "./course.repository";
 import {
   ConflictError,
@@ -33,9 +34,36 @@ export class CourseService {
   }
 
   async getCourseById(organizationId: string, id: string) {
+    const key = `org:${organizationId}:course:${id}`;
+
+    // Redis read — isolated try/catch, failure here means "treat as cache miss"
+    try {
+      const cached = await redis.get(key);
+      if (cached) {
+        try {
+          console.log("CACHE HIT");
+          return JSON.parse(cached);
+        } catch {
+          console.warn("Corrupted JSON in cache, falling back to DB");
+          // fall through to DB fetch below
+        }
+      }
+    } catch {
+      console.warn("Redis GET failed, falling back to DB");
+      // fall through to DB fetch below
+    }
+
+    console.log("CACHE MISS");
     const course = await this.courseRepo.getCourseById(organizationId, id);
-    if (!course || !course.length) {
+
+    if (!course) {
       throw new NotFoundError("Course not found");
+    }
+
+    try {
+      await redis.set(key, JSON.stringify(course), { EX: 300 });
+    } catch {
+      console.warn("Redis SET failed, serving DB result uncached");
     }
     return course;
   }
@@ -56,6 +84,7 @@ export class CourseService {
     id: string,
     data: Partial<Course>,
   ) {
+    const key = `org:${organizationId}:course:${id}`;
     const course = await this.courseRepo.findById(organizationId, id);
     if (!course) {
       throw new NotFoundError("Course not found");
@@ -63,6 +92,14 @@ export class CourseService {
 
     try {
       const updated = await this.courseRepo.updateCourse(course, data);
+      try {
+        await redis.del(key);
+      } catch (err) {
+        console.warn(
+          "Redis Key Deletation Failed The following error introduced",
+          err,
+        );
+      }
       return updated;
     } catch (error: any) {
       if (error?.message?.includes("already exists")) {
@@ -73,12 +110,28 @@ export class CourseService {
   }
 
   async deleteCourse(organizationId: string, id: string) {
+    const key = `org:${organizationId}:course:${id}`;
+
     const course = await this.courseRepo.findById(organizationId, id);
+
     if (!course) {
       throw new NotFoundError("Course not found");
     }
 
-    return await this.courseRepo.deleteCourse(course);
+    const result = await this.courseRepo.deleteCourse(course);
+
+    console.log("DB Course Deletion Successful, Deleting Redis Key");
+
+    try {
+      await redis.del(key);
+    } catch (err) {
+      console.warn(
+        "Redis Key Deletation Failed The following error introduced",
+        err,
+      );
+    }
+
+    return result;
   }
 
   async uploadCourseImage(
