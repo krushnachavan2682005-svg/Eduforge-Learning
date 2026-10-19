@@ -2,8 +2,10 @@ import { ExamRepository } from "./exam.repository";
 import { redis } from "../../config/redis_client";
 import {
   ForbiddenError,
+  InternalServerError,
   NotFoundError,
   ValidationError,
+  ServiceUnavailabelError
 } from "../../utils/globalErrorHandlingFile";
 import { StudentRepository } from "../students/student.repository";
 import { IExamCreateRequest, IExamUpdate } from "./exam.interface";
@@ -24,8 +26,19 @@ export class ExamService {
       created_by: userId || data.created_by,
       updated_by: userId || (data as any).updated_by || data.created_by,
     };
+    try {
+      let exam = await this.repository.createFullExam(organizationId, examData);
+      try {
+        let version_key = `org:${organizationId}:exams:version`;
+        await redis.incr(version_key);
+      } catch (err) {
+        console.warn("Redis key not updated");
+      }
 
-    return this.repository.createFullExam(organizationId, examData);
+      return exam;
+    } catch (err) {
+      throw new InternalServerError("Internal Server Error");
+    }
   }
 
   async getExams(
@@ -35,10 +48,20 @@ export class ExamService {
     cursor: string | undefined,
     userId?: string,
   ) {
-    console.log(examCacheMetrics)
     const skip = (page - 1) * limit;
-    const key = `org:${organizationId}:exams:${page}:${limit}:${cursor ?? "NO_CURSOR"}:${userId ?? "NO_USER"}`;
+    let version_key = `org:${organizationId}:exams:version`;
+    let existed_version_key: any = await redis.get(version_key);
+    existed_version_key = parseInt(existed_version_key);
+    if (!existed_version_key) {
+      existed_version_key = 0;
+    }
+    if (isNaN(existed_version_key)) {
+      existed_version_key = 0;
+    }
+    let key = `org:${organizationId}:v${existed_version_key}:exams:${page}:${limit}:${cursor ?? "NO_CURSOR"}:${userId ?? "NO_USER"}`;
+
     let cashedExam: string | null = null;
+    console.log("-------------------------", key, "--------------------------");
 
     try {
       cashedExam = await redis.get(key);
@@ -79,7 +102,8 @@ export class ExamService {
       );
 
       try {
-        await redis.set(key, JSON.stringify(exam), { EX: 60 });
+        let randomTime = Math.floor(Math.random() * 11) + 60;
+        await redis.set(key, JSON.stringify(exam), { EX: randomTime });
         return exam;
       } catch (err) {
         examCacheMetrics.errors += 1;
@@ -102,9 +126,7 @@ export class ExamService {
       examCacheMetrics.errors += 1;
       console.error("Error Occured While Creating The Key", err);
       return exam;
-      
     }
-    
   }
 
   async getExamById(organizationId: string, examId: string) {
@@ -144,8 +166,14 @@ export class ExamService {
         passing_marks: exam.passing_marks,
         total_marks: exam.total_marks,
       };
-      await redis.hSet(key, requiredFields);
-      await redis.expire(key, 300);
+      const multi= redis.MULTI()
+       multi.hSet(key, requiredFields);
+       multi.expire(key, 300);
+      let result=await multi.exec()
+      if(result===null){
+        throw new ServiceUnavailabelError("Redis Internal log error")
+      }
+      console.log(`=======================${result}======================================`)
     } catch (err) {
       console.error("Redis SET failed:", err);
     }
@@ -170,73 +198,125 @@ export class ExamService {
       cursor,
     );
   }
+  
+async updateExam(
+  organizationId: string,
+  examId: string,
+  userId: string,
+  data: IExamUpdate,
+) {
+  const updateData = {
+    ...data,
+    organization_id: organizationId,
+    updated_by: userId || (data as any).updated_by,
+  };
 
-  async updateExam(
-    organizationId: string,
-    examId: string,
-    userId: string,
-    data: IExamUpdate,
-  ) {
-    const updateData = {
-      ...data,
-      organization_id: organizationId,
-      updated_by: userId || (data as any).updated_by,
-    };
+  // 1. PostgreSQL first — source of truth
+  const updated = await this.repository.updateExam(
+    organizationId,
+    examId,
+    updateData,
+  );
 
-    // 1. PostgreSQL first — source of truth
-    const updated = await this.repository.updateExam(
-      organizationId,
-      examId,
-      updateData,
-    );
+  if (!updated) {
+    throw new NotFoundError("Exam not found");
+  }
 
-    if (!updated) {
-      throw new NotFoundError("Exam not found");
-    }
+  // 2. Redis metadata cache key
+  const key = `org:${organizationId}:exam:meta:${examId}`;
 
-    // 2. Redis metadata cache key
-    const key = `org:${organizationId}:exam:meta:${examId}`;
+  // 3. Only include fields present in the PATCH payload
+  const cacheFields: Record<string, string | number> = {};
 
-    try {
-      // 3. Only update Redis if the metadata cache already exists
-      const exists = await redis.exists(key);
+  if (data.title !== undefined) {
+    cacheFields.title = data.title;
+  }
 
-      if (exists) {
-        // 4. Only cache fields that are actually present in the PATCH payload
-        const cacheFields: Record<string, string | number> = {};
+  if (data.subject !== undefined) {
+    cacheFields.subject = data.subject;
+  }
 
-        if (data.title !== undefined) {
-          cacheFields.title = data.title;
-        }
+  if (data.duration_minutes !== undefined) {
+    cacheFields.duration_minutes = data.duration_minutes;
+  }
 
-        if (data.subject !== undefined) {
-          cacheFields.subject = data.subject;
-        }
+  if (data.passing_marks !== undefined) {
+    cacheFields.passing_marks = data.passing_marks;
+  }
 
-        if (data.duration_minutes !== undefined) {
-          cacheFields.duration_minutes = data.duration_minutes;
-        }
+  if (data.total_marks !== undefined) {
+    cacheFields.total_marks = data.total_marks;
+  }
 
-        if (data.passing_marks !== undefined) {
-          cacheFields.passing_marks = data.passing_marks;
-        }
-
-        if (data.total_marks !== undefined) {
-          cacheFields.total_marks = data.total_marks;
-        }
-
-        // 5. Update only the fields present in the PATCH
-        if (Object.keys(cacheFields).length > 0) {
-          await redis.hSet(key, cacheFields);
-        }
-      }
-    } catch (err) {
-      console.error("Redis cache update failed:", err);
-    }
-
-    // 6. Return PostgreSQL result
+  // No metadata fields to update
+  if (Object.keys(cacheFields).length === 0) {
     return updated;
   }
+
+  // 4. Use a dedicated Redis connection for WATCH
+  const cacheClient = redis.duplicate();
+  let connected = false;
+
+  try {
+    await cacheClient.connect();
+    connected = true;
+
+    // 5. Bounded optimistic-lock retries
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      await cacheClient.watch(key);
+
+      // Check existence and TTL AFTER WATCH
+      const exists = await cacheClient.exists(key);
+      const ttl = await cacheClient.ttl(key);
+
+      // Never create a partial hash or modify a key without expiry
+      if (exists !== 1 || ttl <= 0) {
+        await cacheClient.unwatch();
+        break;
+      }
+
+      // 6. Update only the supplied fields
+      const multi = cacheClient.multi();
+      multi.hSet(key, cacheFields);
+
+      const result = await multi.exec();
+
+      // EXEC returns null when the WATCH transaction is aborted
+      if (result !== null) {
+        break;
+      }
+
+      // A conflict occurred; retry at most 3 times
+      if (attempt === 3) {
+        console.warn(
+          "Redis cache update aborted after 3 attempts:",
+          key,
+        );
+      }
+    }
+  } catch (err) {
+    // PostgreSQL is already updated; Redis failure must not fail the API
+    console.error("Redis cache update failed:", err);
+  } finally {
+    // 7. Always clean up the dedicated connection
+    if (cacheClient.isOpen) {
+      try {
+        await cacheClient.quit();
+      } catch (cleanupError) {
+        console.error("Redis connection cleanup failed:", cleanupError);
+        try {
+          cacheClient.disconnect();
+        } catch (disconnectError) {
+          console.error("Redis disconnect failed:", disconnectError);
+        }
+      }
+    }
+  }
+
+  // 8. Return the committed PostgreSQL result
+  return updated;
+}
+
 
   async deleteExam(organizationId: string, examId: string) {
     const success = await this.repository.deleteExam(organizationId, examId);

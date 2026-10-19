@@ -9,6 +9,9 @@ import {
 import S3_FOLDER from "../../constants/s3-folder-constant";
 import { handleFormDataFileUpload } from "../../utils/s3-upload-utility";
 import { ALLOWED_MIME_TYPES } from "../../constants/mimeType";
+import { Json } from "sequelize/types/utils";
+import { resolve } from "path";
+import { resetMemberPasswordSchema } from "../members/member.schemas";
 
 export class CourseService {
   private courseRepo = new CourseRepository();
@@ -35,37 +38,55 @@ export class CourseService {
 
   async getCourseById(organizationId: string, id: string) {
     const key = `org:${organizationId}:course:${id}`;
+    const lockKey = `${key}:lock`;
+    let retries = 3; // जास्तीत जास्त ३ वेळा retry करणार
 
-    // Redis read — isolated try/catch, failure here means "treat as cache miss"
-    try {
-      const cached = await redis.get(key);
-      if (cached) {
-        try {
-          console.log("CACHE HIT");
-          return JSON.parse(cached);
-        } catch {
-          console.warn("Corrupted JSON in cache, falling back to DB");
-          // fall through to DB fetch below
+    while (retries >= 0) {
+      // १. तुझा जुना Cache Read चा पूर्ण try/catch ब्लॉक इथे ठेव...
+      try {
+        const cached = await redis.get(key);
+        if (cached) {
+          if (cached === "NOT_FOUND")
+            throw new NotFoundError("Course not found");
+          return JSON.parse(cached); // डेटा मिळाला, थेट रिटर्न करा!
         }
+      } catch {
+        console.warn("Redis GET failed...");
       }
-    } catch {
-      console.warn("Redis GET failed, falling back to DB");
-      // fall through to DB fetch below
+
+      console.log("CACHE MISS");
+
+      // २. Lock घेण्याचा प्रयत्न कर
+      let aquired_lock = await redis.set(lockKey, "1", { NX: true, EX: 5 });
+
+      if (aquired_lock) {
+        try {
+          // Master Process: DB मधून डेटा आणेल
+          const course = await this.courseRepo.getCourseById(
+            organizationId,
+            id,
+          );
+
+          if (!course) {
+            await redis.set(key, "NOT_FOUND", { EX: 60 });
+            throw new NotFoundError("Course not found");
+          }
+
+          await redis.set(key, JSON.stringify(course), { EX: 300 });
+          return course;
+        } finally {
+          // ३. सर्वात महत्त्वाचे: काम झाल्यावर Lock काढून टाक!
+          await redis.del(lockKey);
+        }
+      } else {
+        // ४. Lock मिळाला नाही: 50ms थांब आणि loop मुळे परत वर जाऊन cache check कर
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        retries--;
+      }
     }
 
-    console.log("CACHE MISS");
-    const course = await this.courseRepo.getCourseById(organizationId, id);
-
-    if (!course) {
-      throw new NotFoundError("Course not found");
-    }
-
-    try {
-      await redis.set(key, JSON.stringify(course), { EX: 300 });
-    } catch {
-      console.warn("Redis SET failed, serving DB result uncached");
-    }
-    return course;
+    // ५. ३ वेळा retry करूनही काहीच नाही झालं तर Error दे
+    throw new Error("503: Service is currently busy, try again later.");
   }
 
   async createCourse(organizationId: string, data: Partial<Course>) {
