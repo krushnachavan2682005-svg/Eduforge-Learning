@@ -12,14 +12,14 @@ const sequelize = new Sequelize(
     host: process.env.DB_HOST ?? "localhost",
     port: Number(process.env.DB_PORT) ?? 5432,
     dialect: "postgres",
-    logging: (sql,timing)=>{
-      const store=asyncLocalStorage.getStore();
+    // logging: (sql,timing)=>{
+    //   const store=asyncLocalStorage.getStore();
  
-      let timestamp=new Date().toISOString()
-      if(store){
-        store.queryCount++
-      }
-     console.log(`[${timestamp}] ${sql}`);    },
+    //   let timestamp=new Date().toISOString()
+    //   if(store){
+    //     store.queryCount++
+    //   }
+    //  console.log(`[${timestamp}] ${sql}`);    },
   }
 );
 

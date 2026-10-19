@@ -10,7 +10,9 @@ export class CourseController {
     if (!req.user) return reply.code(401).send({ success: false });
     const { id } = req.params as { id: string };
     const course = await courseService.getCourseById(req.user.organization_id, id);
-
+    if(!course || Object.keys(course).length === 0){
+      return reply.code(404).send({message:"Course Not Found"})
+    }
     return reply
       .code(200)
       .send({ data: course?.[0], message: "Course fetched successfully" });
