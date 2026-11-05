@@ -46,8 +46,9 @@ export class CourseService {
       try {
         const cached = await redis.get(key);
         if (cached) {
-          if (cached === "NOT_FOUND")
+          if (cached === "NOT_FOUND") {
             throw new NotFoundError("Course not found");
+          }
           return JSON.parse(cached); // डेटा मिळाला, थेट रिटर्न करा!
         }
       } catch {
