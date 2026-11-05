@@ -10,10 +10,24 @@ import {
 import { StudentRepository } from "../students/student.repository";
 import { IExamCreateRequest, IExamUpdate } from "./exam.interface";
 import { v4 as uuid } from "uuid";
-let examCacheMetrics = { hits: 0, misses: 0, errors: 0 };
+import { SingleFlightGroup } from "../../utils/single_flight";
+export let examCacheMetrics = { hits: 0, misses: 0, errors: 0 };
+export const examSingleFlight = new SingleFlightGroup();
+
+export const examLoaderDevCounter = {
+  count: 0,
+  reset() {
+    this.count = 0;
+  },
+  get() {
+    return this.count;
+  },
+};
+
 export class ExamService {
-  private repository = new ExamRepository();
-  private studentRepository = new StudentRepository();
+  private readonly repository = new ExamRepository();
+  private readonly studentRepository = new StudentRepository();
+  public readonly singleFlight = examSingleFlight;
 
   async createExam(
     organizationId: string,
@@ -50,83 +64,122 @@ export class ExamService {
   ) {
     const skip = (page - 1) * limit;
     let version_key = `org:${organizationId}:exams:version`;
-    let existed_version_key: any = await redis.get(version_key);
-    existed_version_key = parseInt(existed_version_key);
-    if (!existed_version_key) {
-      existed_version_key = 0;
-    }
-    if (isNaN(existed_version_key)) {
-      existed_version_key = 0;
-    }
-    let key = `org:${organizationId}:v${existed_version_key}:exams:${page}:${limit}:${cursor ?? "NO_CURSOR"}:${userId ?? "NO_USER"}`;
-
-    let cashedExam: string | null = null;
-    console.log("-------------------------", key, "--------------------------");
+    let isVersionDegraded = false;
+    let existed_version_key: any = null;
 
     try {
-      cashedExam = await redis.get(key);
+      existed_version_key = await redis.get(version_key);
     } catch (err) {
+      isVersionDegraded = true;
       examCacheMetrics.errors += 1;
-      console.error("Redis GET failed:", err);
+      console.error("Redis version GET failed:", err);
     }
 
-    if (cashedExam) {
-      try {
-        const parsedExam = JSON.parse(cashedExam);
+    if (!isVersionDegraded) {
+      existed_version_key = Number.parseInt(existed_version_key);
+      if (!existed_version_key || Number.isNaN(existed_version_key)) {
+        existed_version_key = 0;
+      }
+    }
 
-        // Validate parsed cache data
-        if (parsedExam !== null) {
-          examCacheMetrics.hits += 1;
-          return parsedExam;
+    const key = isVersionDegraded
+      ? `org:${organizationId}:degraded:exams:${page}:${limit}:${cursor ?? "NO_CURSOR"}:${userId ?? "NO_USER"}`
+      : `org:${organizationId}:v${existed_version_key}:exams:${page}:${limit}:${cursor ?? "NO_CURSOR"}:${userId ?? "NO_USER"}`;
+
+    return this.singleFlight.do(
+      key,
+      async () => {
+        // If version lookup failed, bypass Redis cache read entirely to avoid serving stale data
+        if (!isVersionDegraded) {
+          let cashedExam: string | null = null;
+          console.log("-------------------------", key, "--------------------------");
+
+          try {
+            cashedExam = await redis.get(key);
+          } catch (err) {
+            examCacheMetrics.errors += 1;
+            console.error("Redis GET failed:", err);
+          }
+
+          if (cashedExam) {
+            try {
+              const parsedExam = JSON.parse(cashedExam);
+
+              // Validate parsed cache data
+              if (parsedExam !== null) {
+                examCacheMetrics.hits += 1;
+                return parsedExam;
+              }
+
+              examCacheMetrics.misses += 1;
+            } catch (err) {
+              examCacheMetrics.misses += 1;
+              console.error("Corrupted Cashe", err);
+            }
+          } else {
+            examCacheMetrics.misses += 1;
+          }
+        } else {
+          console.log("-------------------------", key, "(DEGRADED - CACHE BYPASSED) --------------------------");
         }
 
-        examCacheMetrics.misses += 1;
-      } catch (err) {
-        examCacheMetrics.misses += 1;
-        console.error("Corrupted Cashe", err);
-      }
-    } else {
-      examCacheMetrics.misses += 1;
-    }
+        let exam = null;
+        if (!isVersionDegraded) {
+          console.log("Cashe Miss");
+        }
 
-    let exam = null;
-    console.log("Cashe Miss");
+        if (userId) {
+          if (process.env.NODE_ENV !== "production") {
+            examLoaderDevCounter.count++;
+            console.log(`[DEV_LOADER_COUNTER] DB Loader invoked (creator). Total: ${examLoaderDevCounter.count}`);
+          }
+          exam = await this.repository.getExamsByCreator(
+            organizationId,
+            userId,
+            limit,
+            skip,
+            cursor,
+          );
 
-    if (userId) {
-      exam = await this.repository.getExamsByCreator(
-        organizationId,
-        userId,
-        limit,
-        skip,
-        cursor,
-      );
+          if (!isVersionDegraded) {
+            try {
+              let randomTime = Math.floor(Math.random() * 11) + 60;
+              await redis.set(key, JSON.stringify(exam), { EX: randomTime });
+              return exam;
+            } catch (err) {
+              examCacheMetrics.errors += 1;
+              console.error("Error Occured While Creating The Key", err);
+              return exam;
+            }
+          }
+          return exam;
+        }
 
-      try {
-        let randomTime = Math.floor(Math.random() * 11) + 60;
-        await redis.set(key, JSON.stringify(exam), { EX: randomTime });
+        if (process.env.NODE_ENV !== "production") {
+          examLoaderDevCounter.count++;
+          console.log(`[DEV_LOADER_COUNTER] DB Loader invoked (all). Total: ${examLoaderDevCounter.count}`);
+        }
+        exam = await this.repository.getAllExams(
+          organizationId,
+          limit,
+          skip,
+          cursor,
+        );
+
+        if (!isVersionDegraded) {
+          try {
+            await redis.set(key, JSON.stringify(exam), { EX: 60 });
+            return exam;
+          } catch (err) {
+            examCacheMetrics.errors += 1;
+            console.error("Error Occured While Creating The Key", err);
+            return exam;
+          }
+        }
         return exam;
-      } catch (err) {
-        examCacheMetrics.errors += 1;
-        console.error("Error Occured While Creating The Key", err);
-        return exam;
-      }
-    }
-
-    exam = await this.repository.getAllExams(
-      organizationId,
-      limit,
-      skip,
-      cursor,
+      },
+      { timeoutMs: 10000 }
     );
-
-    try {
-      await redis.set(key, JSON.stringify(exam), { EX: 60 });
-      return exam;
-    } catch (err) {
-      examCacheMetrics.errors += 1;
-      console.error("Error Occured While Creating The Key", err);
-      return exam;
-    }
   }
 
   async getExamById(organizationId: string, examId: string) {
